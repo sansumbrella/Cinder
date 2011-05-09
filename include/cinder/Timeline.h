@@ -28,6 +28,7 @@
 #include "cinder/TimelineItem.h"
 #include "cinder/Easing.h"
 #include "cinder/Tween.h"
+#include "cinder/Function.h"
 
 #include <vector>
 #include <list>
@@ -89,6 +90,14 @@ class Timeline : public TimelineItem {
 	template<typename T>
 	TweenRef<T> apply( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		TweenRef<T> newTween( new Tween<T>( target, startValue, endValue, mCurrentTime, duration, easeFunction, lerpFunction ) );
+		newTween->setAutoRemove( mDefaultAutoRemove );
+		apply( newTween );
+		return newTween;
+	}
+
+	template<typename T>
+	FnTweenRef<T> applyFn( std::function<void (T)> fn, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+		FnTweenRef<T> newTween( new FnTween<T>( fn, startValue, endValue, mCurrentTime, duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		apply( newTween );
 		return newTween;

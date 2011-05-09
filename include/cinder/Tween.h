@@ -189,6 +189,55 @@ class Tween : public TweenBase {
 	LerpFn				mLerpFunction;
 };
 
+template<typename T>
+class FnTween : public Tween<T> {
+  public:
+	FnTween( std::function<void (T)> fn, T startValue, T endValue, float startTime, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+		: Tween<T>( &mValue, startValue, endValue, startTime, duration, easeFunction, lerpFunction ), mFn( fn ), mValue( startValue )
+	{
+	}
+	
+	virtual void update( float relativeTime )
+	{
+		Tween<T>::update( relativeTime );
+		if( mFn )
+			mFn( mValue );
+	}	
+	
+	std::function<void (T)>		mFn;
+	T							mValue;
+};
+
+template<typename T>
+class FnTweenRef : public TweenRef<T> {
+  public:
+	FnTweenRef( const std::shared_ptr<FnTween<T> > &sp )
+		: TweenRef<T>( sp )
+	{}
+	FnTweenRef( FnTween<T> *fnTween )
+		: TweenRef<T>( fnTween )
+	{}
+	FnTweenRef()
+		: TweenRef<T>()
+	{}
+};
+
+template<typename T>
+class ValTween : public Tween<T> {
+  public:
+	ValTween( T startValue, T endValue, float startTime, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+		: Tween<T>( &mValue, startValue, endValue, startTime, duration, easeFunction, lerpFunction ), mValue( startValue )
+	{
+	}
+	
+	virtual void update( float relativeTime )
+	{
+		Tween<T>::update( relativeTime );
+	}	
+	
+	T				mValue;
+};
+
 typedef std::shared_ptr<TweenBase>	TweenBaseRef;
 
 class TweenScope {
