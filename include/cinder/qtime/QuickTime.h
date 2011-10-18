@@ -70,8 +70,12 @@ class MovieBase {
 	int32_t		getWidth() const { return getObj()->mWidth; }
 	//! Returns the height of the movie in pixels
 	int32_t		getHeight() const { return getObj()->mHeight; }
+	//! Returns the size of the movie in pixels
+	Vec2i		getSize() const { return Vec2i( getWidth(), getHeight() ); }	
 	//! Returns the movie's aspect ratio, the ratio of its width to its height
 	float		getAspectRatio() const { return getObj()->mWidth / (float)getObj()->mHeight; }
+	//! the Area defining the Movie's bounds in pixels: [0,0]-[width,height]
+	Area		getBounds() const { return Area( 0, 0, getWidth(), getHeight() ); }
 	//! Returns the movie's pixel aspect ratio. Returns 1.0 if the movie does not contain an explicit pixel aspect ratio.
 	float		getPixelAspectRatio() const;
 	//! Returns the movie's length measured in seconds
@@ -87,7 +91,9 @@ class MovieBase {
 	bool		hasVisuals() const;
 	//! Returns whether a movie contains at least one audio track, defined as Sound, Music, or MPEG tracks
 	bool		hasAudio() const;
-	
+
+	//! Returns whether a movie has a new frame available
+	bool		checkNewFrame();
 
 	//! Returns the current time of a movie in seconds
 	float		getCurrentTime() const;
@@ -156,7 +162,7 @@ class MovieBase {
 	TimeValue			getStartTimeOfFirstSample() const;
 
  protected:
-	void	initFromPath( const std::string &path );
+	void	initFromPath( const fs::path &filePath );
 	void	initFromLoader( const class MovieLoader &loader );
 	void	initFromMemory( const void *data, size_t dataSize, const std::string &fileNameHint, const std::string &mimeTypeHint );
 	void	initFromDataSource( DataSourceRef dataSource, const std::string &mimeTypeHint );
@@ -201,7 +207,7 @@ class MovieBase {
 class MovieSurface : public MovieBase {
  public:
 	MovieSurface() : MovieBase() {}
-	MovieSurface( const std::string &path );
+	MovieSurface( const fs::path &path );
 	MovieSurface( const class MovieLoader &loader );
 	//! Constructs a MovieGl from a block of memory of size \a dataSize pointed to by \a data, which must not be disposed of during the lifetime of the movie.
 	/** \a fileNameHint and \a mimeTypeHint provide important hints to QuickTime about the contents of the file. Omit both of them at your peril. "video/quicktime" is often a good choice for \a mimeTypeHint. **/
@@ -242,7 +248,7 @@ class MovieSurface : public MovieBase {
 class MovieGl : public MovieBase {
   public:
 	MovieGl() : MovieBase() {}
-	MovieGl( const std::string &path );
+	MovieGl( const fs::path &path );
 	MovieGl( const class MovieLoader &loader );
 	//! Constructs a MovieGl from a block of memory of size \a dataSize pointed to by \a data, which must not be disposed of during the lifetime of the movie.
 	/** \a fileNameHint and \a mimeTypeHint provide important hints to QuickTime about the contents of the file. Omit both of them at your peril. "video/quicktime" is often a good choice for \a mimeTypeHint. **/

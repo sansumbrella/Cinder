@@ -88,7 +88,7 @@ MovieWriter::Format::Format( const ICMCompressionSessionOptionsRef options, uint
 }
 
 MovieWriter::Format::Format( const Format &format )
-	: mCodec( format.mCodec ), mTimeBase( format.mTimeBase ), mDefaultTime( format.mDefaultTime ), mGamma( format.mGamma ), mEnableMultiPass( format.mEnableMultiPass )
+	: mCodec( format.mCodec ), mTimeBase( format.mTimeBase ), mDefaultTime( format.mDefaultTime ), mGamma( format.mGamma ), mEnableMultiPass( format.mEnableMultiPass ), mQualityFloat( format.mQualityFloat )
 {
 	::ICMCompressionSessionOptionsCreateCopy( NULL, format.mOptions, &mOptions );
 }
@@ -115,8 +115,8 @@ void MovieWriter::Format::initDefaults()
 
 MovieWriter::Format& MovieWriter::Format::setQuality( float quality )
 {
-	quality = constrain<float>( quality, 0, 1 );
-	CodecQ compressionQuality = CodecQ(0x00000400 * quality);
+	mQualityFloat = constrain<float>( quality, 0, 1 );
+	CodecQ compressionQuality = CodecQ(0x00000400 * mQualityFloat);
 	OSStatus err = ICMCompressionSessionOptionsSetProperty( mOptions,
                                 kQTPropertyClass_ICMCompressionSessionOptions,
                                 kICMCompressionSessionOptionsPropertyID_Quality,
@@ -125,10 +125,20 @@ MovieWriter::Format& MovieWriter::Format::setQuality( float quality )
 	return *this;
 }
 
+bool MovieWriter::Format::isTemporal() const
+{
+	return ::ICMCompressionSessionOptionsGetAllowTemporalCompression( mOptions );
+}
+
 MovieWriter::Format& MovieWriter::Format::enableTemporal( bool enable )
 {
 	OSStatus err = ::ICMCompressionSessionOptionsSetAllowTemporalCompression( mOptions, enable );
 	return *this;
+}
+
+bool MovieWriter::Format::isReordering() const
+{
+	return ::ICMCompressionSessionOptionsGetAllowFrameReordering( mOptions );
 }
 
 MovieWriter::Format& MovieWriter::Format::enableReordering( bool enable )
@@ -137,10 +147,20 @@ MovieWriter::Format& MovieWriter::Format::enableReordering( bool enable )
 	return *this;
 }
 
+bool MovieWriter::Format::isFrameTimeChanges() const
+{
+	return ::ICMCompressionSessionOptionsGetAllowFrameTimeChanges( mOptions );
+}
+
 MovieWriter::Format& MovieWriter::Format::enableFrameTimeChanges( bool enable )
 {
 	OSStatus err = ::ICMCompressionSessionOptionsSetAllowFrameTimeChanges( mOptions, enable );
 	return *this;
+}
+
+int32_t MovieWriter::Format::getMaxKeyFrameRate() const
+{
+	return ::ICMCompressionSessionOptionsGetMaxKeyFrameInterval( mOptions );
 }
 
 MovieWriter::Format& MovieWriter::Format::setMaxKeyFrameRate( int32_t rate )
@@ -167,7 +187,7 @@ const MovieWriter::Format& MovieWriter::Format::operator=( const Format &format 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MovieWriter
-MovieWriter::MovieWriter( const std::string &path, int32_t width, int32_t height, const Format &format )
+MovieWriter::MovieWriter( const fs::path &path, int32_t width, int32_t height, const Format &format )
 	: mObj( std::shared_ptr<Obj>( new Obj( path, width, height, format ) ) )
 {
 }
@@ -178,7 +198,7 @@ MovieWriter::Obj::~Obj()
 		finish();
 }
 
-MovieWriter::Obj::Obj( const std::string &path, int32_t width, int32_t height, const Format &format )
+MovieWriter::Obj::Obj( const fs::path &path, int32_t width, int32_t height, const Format &format )
 	: mPath( path ), mWidth( width ), mHeight( height ), mFormat( format ), mFinished( false )
 {	
     OSErr       err = noErr;
@@ -188,7 +208,7 @@ MovieWriter::Obj::Obj( const std::string &path, int32_t width, int32_t height, c
 	startQuickTime();
 
     //Create movie file
-	CFStringRef strDestMoviePath = ::CFStringCreateWithCString( kCFAllocatorDefault, path.c_str(), kCFStringEncodingUTF8 );
+	CFStringRef strDestMoviePath = ::CFStringCreateWithCString( kCFAllocatorDefault, path.string().c_str(), kCFStringEncodingUTF8 );
 	err = ::QTNewDataReferenceFromFullPathCFString( strDestMoviePath, kQTNativeDefaultPathStyle, 0, &dataRef, &dataRefType );
 	::CFRelease( strDestMoviePath );
 	if( err )

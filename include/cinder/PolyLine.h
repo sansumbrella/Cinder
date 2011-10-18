@@ -53,12 +53,15 @@ class PolyLine {
 
 	T			getPosition( float t ) const;
 	T			getDerivative( float t ) const;
+
+	void		scale( const T &scaleFactor, T scaleCenter = T::zero() );
 	
  private:
 	std::vector<T>			mPoints;
 	bool					mClosed;
 };
 
-//typedef PolyLine<Vec2f> PolyLine2f;
+typedef PolyLine<Vec2f> PolyLine2f;
+typedef PolyLine<Vec2d> PolyLine2d;
 
 } // namespace cinder

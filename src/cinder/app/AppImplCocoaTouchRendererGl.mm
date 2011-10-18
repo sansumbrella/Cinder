@@ -45,7 +45,7 @@
 
 - (void) allocateGraphics
 {
-	context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+	context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
 	
 	if (!context || ![EAGLContext setCurrentContext:context])
 	{
@@ -69,36 +69,33 @@
 - (void) layoutSubviews
 {
 	// Allocate color buffer backing based on the current layer size
-    glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
-    [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)cinderView.layer];
+	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
+	[context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)cinderView.layer];
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
+	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
 
 	glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, 
-                             GL_DEPTH_COMPONENT16, 
-                             backingWidth, backingHeight);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backingWidth, backingHeight);
 	
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
+	if( glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE ) {
 		NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
-    }
+	}
 }
 
 - (void)makeCurrentContext
 {
 	[EAGLContext setCurrentContext:context];
-    
+
 	// This application only creates a single default framebuffer which is already bound at this point.
 	// This call is redundant, but needed if dealing with multiple framebuffers.
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
-    glViewport(0, 0, backingWidth, backingHeight);
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
+	glViewport(0, 0, backingWidth, backingHeight);
 }
 
 - (void)flushBuffer
 {
-    glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
-    [context presentRenderbuffer:GL_RENDERBUFFER];
+	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
+	[context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 - (void)setFrameSize:(CGSize)newSize
@@ -108,6 +105,7 @@
 
 - (void)defaultResize
 {
+	cinder::gl::setMatricesWindow( backingWidth, backingHeight );
 }
 
 - (BOOL)needsDrawRect

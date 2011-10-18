@@ -109,6 +109,16 @@ class ColorT
 	const ColorT<T>&	operator*=( T rhs ) { r *= rhs; g *= rhs; b *= rhs; return *this; }
 	const ColorT<T>&	operator/=( T rhs ) { r /= rhs; g /= rhs; b /= rhs; return *this; }
 
+	bool operator==( const ColorT<T>& rhs ) const
+	{
+		return ( r == rhs.r ) && ( g == rhs.g ) && ( b == rhs.b );
+	}
+
+	bool operator!=( const ColorT<T>& rhs ) const
+	{
+		return ! ( *this == rhs );
+	}
+
 	typename CHANTRAIT<T>::Accum dot( const ColorT<T> &rhs ) const
 	{
 		return r*rhs.r + g*rhs.g + b*rhs.b;
@@ -145,7 +155,7 @@ class ColorT
 		}
 	}
 
-	ColorT<T> lerp( T fact, const ColorT<T> &d ) const
+	ColorT<T> lerp( float fact, const ColorT<T> &d ) const
 	{
 		return ColorT<T>( r + ( d.r - r ) * fact, g + ( d.g - g ) * fact, b + ( d.b - b ) * fact );
 	}
@@ -192,6 +202,12 @@ class ColorAT {
 	{}
 
 	ColorAT( ColorModel cm, float c1, float c2, float c3, float aA = CHANTRAIT<T>::convert( 1.0f ) );
+
+	template<typename FromT>
+	ColorAT( const ColorT<FromT> &src ) 
+		: r( CHANTRAIT<T>::convert( src.r ) ), g( CHANTRAIT<T>::convert( src.g ) ), b( CHANTRAIT<T>::convert( src.b ) ), a( CHANTRAIT<T>::convert( 1.0f ) ) 
+	{}
+
 
 	template<typename FromT>
 	ColorAT( const ColorAT<FromT>& src )
@@ -245,6 +261,16 @@ class ColorAT {
 	const ColorAT<T>&	operator-=( T rhs ) {	r -= rhs; g -= rhs; b -= rhs; a -= rhs;	return * this; }
 	const ColorAT<T>&	operator*=( T rhs ) { r *= rhs; g *= rhs; b *= rhs; a *= rhs; return * this; }
 	const ColorAT<T>&	operator/=( T rhs ) { r /= rhs; g /= rhs; b /= rhs; a /= rhs;	return * this; }
+
+	bool operator==( const ColorAT<T>& rhs ) const
+	{
+		return ( r == rhs.r ) && ( g == rhs.g ) && ( b == rhs.b ) && ( a == rhs.a );
+	}
+
+	bool operator!=( const ColorAT<T>& rhs ) const
+	{
+	return ! ( *this == rhs );
+	}
 
 	float length() const
 	{
@@ -301,6 +327,11 @@ class ColorAT {
 
 extern ColorT<float> hsvToRGB( const Vec3f &hsv );
 extern Vec3f rgbToHSV( const ColorT<float> &c );
+
+extern std::ostream& operator<<( std::ostream &lhs, const ColorT<float> &rhs );
+extern std::ostream& operator<<( std::ostream &lhs, const ColorAT<float> &rhs );
+extern std::ostream& operator<<( std::ostream &lhs, const ColorT<uint8_t> &rhs );
+extern std::ostream& operator<<( std::ostream &lhs, const ColorAT<uint8_t> &rhs );
 
 typedef ColorT<float>		Color;
 typedef ColorT<float>		Colorf;

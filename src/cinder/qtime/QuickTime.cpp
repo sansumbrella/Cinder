@@ -63,7 +63,7 @@ namespace cinder { namespace qtime {
 static GWorldPtr sDefaultGWorld;
 
 ::Movie openMovieFromUrl( const	Url &url );
-::Movie openMovieFromPath( const std::string &path );
+::Movie openMovieFromPath( const fs::path &path );
 
 void startQuickTime()
 {
@@ -127,10 +127,10 @@ void MovieBase::initFromLoader( const MovieLoader &loader )
 }
 
 // We shouldn't call an abstract virtual from the constructor (specifically getObj()), so we have a two-phase construction, an empty constructor and this
-void MovieBase::initFromPath( const string &path )
+void MovieBase::initFromPath( const fs::path &filePath )
 {
 	startQuickTime();
-	getObj()->mMovie = openMovieFromPath( path );
+	getObj()->mMovie = openMovieFromPath( filePath );
 	init();
 }
 
@@ -447,6 +447,24 @@ void MovieBase::setRate( float rate )
 	::SetMovieRate( getObj()->mMovie, FloatToFixed( rate ) );
 }
 
+bool MovieBase::checkNewFrame()
+{
+	bool result;
+	
+	getObj()->lock();
+		if( (QTVisualContextRef)getObj()->mVisualContext ) {
+			::MoviesTask( getObj()->mMovie, 0 );	
+			::QTVisualContextTask( (QTVisualContextRef)getObj()->mVisualContext );
+			result = ::QTVisualContextIsNewImageAvailable( (QTVisualContextRef)getObj()->mVisualContext, nil );
+		}
+		else {
+			result = false;
+		}
+	getObj()->unlock();
+	
+	return result;
+}
+
 void MovieBase::updateFrame()
 {
 	getObj()->lock();
@@ -462,6 +480,7 @@ void MovieBase::updateFrame()
 			OSStatus err = ::QTVisualContextCopyImageForTime( (QTVisualContextRef)getObj()->mVisualContext, kCFAllocatorDefault, NULL, &newImageRef );
 			if( ( err == noErr ) && newImageRef )
 				getObj()->newFrame( newImageRef );
+
 			if( getObj()->mNewFrameCallback && newImageRef ) {
 				
 				/*CVAttachmentMode mode;
@@ -479,7 +498,6 @@ void MovieBase::updateFrame()
 			}
 		}
 	}
-
 	getObj()->unlock();
 }
 
@@ -631,7 +649,7 @@ MovieSurface::Obj::~Obj()
 	prepareForDestruction();
 }
 
-MovieSurface::MovieSurface( const std::string &path )
+MovieSurface::MovieSurface( const fs::path &path )
 	: MovieBase(), mObj( new Obj() )
 {
 	MovieBase::initFromPath( path );
@@ -719,7 +737,7 @@ MovieGl::MovieGl( const MovieLoader &loader )
 	allocateVisualContext();
 }
 
-MovieGl::MovieGl( const std::string &path )
+MovieGl::MovieGl( const fs::path &path )
 	: MovieBase(), mObj( new Obj() )
 {
 	MovieBase::initFromPath( path );

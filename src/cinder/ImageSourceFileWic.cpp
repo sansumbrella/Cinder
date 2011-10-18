@@ -32,12 +32,12 @@ namespace cinder {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ImageSourceFileWic
-ImageSourceFileWicRef ImageSourceFileWic::createFileWicRef( DataSourceRef dataSourceRef )
+ImageSourceFileWicRef ImageSourceFileWic::createFileWicRef( DataSourceRef dataSourceRef, ImageSource::Options options )
 {
-	return ImageSourceFileWicRef( new ImageSourceFileWic( dataSourceRef ) );
+	return ImageSourceFileWicRef( new ImageSourceFileWic( dataSourceRef, options ) );
 }
 
-ImageSourceFileWic::ImageSourceFileWic( DataSourceRef dataSourceRef )
+ImageSourceFileWic::ImageSourceFileWic( DataSourceRef dataSourceRef, ImageSource::Options options )
 	: ImageSource()
 {
 	::HRESULT hr = S_OK;
@@ -56,7 +56,7 @@ ImageSourceFileWic::ImageSourceFileWic( DataSourceRef dataSourceRef )
 	IWICBitmapDecoder *decoderP = NULL;
 	if( dataSourceRef->isFilePath() ) {
 		hr = IWICFactory->CreateDecoderFromFilename(
-				toUtf16( dataSourceRef->getFilePath() ).c_str(),                      // Image to be decoded
+				toUtf16( dataSourceRef->getFilePath().string() ).c_str(),                      // Image to be decoded
 				NULL,                            // Do not prefer a particular vendor
 				GENERIC_READ,                    // Desired read access to the file
 				WICDecodeMetadataCacheOnDemand,  // Cache metadata when needed
@@ -83,9 +83,9 @@ ImageSourceFileWic::ImageSourceFileWic( DataSourceRef dataSourceRef )
 	}
 	std::shared_ptr<IWICBitmapDecoder> decoder = msw::makeComShared( decoderP );
 
-    // Retrieve the first frame of the image from the decoder
+    // Retrieve the 'index' frame of the image from the decoder
 	IWICBitmapFrameDecode *frameP = NULL;
-	hr = decoder->GetFrame(0, &frameP);
+	hr = decoder->GetFrame( options.getIndex(), &frameP );
 	if( ! SUCCEEDED(hr) )
 		throw ImageIoExceptionFailedLoad();
 	std::shared_ptr<IWICBitmapFrameDecode> frame = msw::makeComShared( frameP );

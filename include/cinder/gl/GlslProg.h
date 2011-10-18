@@ -41,13 +41,10 @@ namespace cinder { namespace gl {
 class GlslProg {
   public: 
 	GlslProg() {}
-#if defined( CINDER_GLES )
-	GlslProg( DataSourceRef vertexShader, DataSourceRef fragmentShader = DataSourceRef() );
-	GlslProg( const char *vertexShader, const char *fragmentShader = 0 );
-#else
-	GlslProg( DataSourceRef vertexShader, DataSourceRef fragmentShader = DataSourceRef(), DataSourceRef geometryShader = DataSourceRef() );
-	GlslProg( const char *vertexShader, const char *fragmentShader = 0, const char *geometryShader = 0 );
-#endif
+	GlslProg( DataSourceRef vertexShader, DataSourceRef fragmentShader = DataSourceRef(), DataSourceRef geometryShader = DataSourceRef(), 
+        GLint geometryInputType = GL_POINTS, GLint geometryOutputType = GL_TRIANGLES, GLint geometryOutputVertices = 0);
+    
+	GlslProg( const char *vertexShader, const char *fragmentShader = 0, const char *geometryShader = 0, GLint geometryInputType = GL_POINTS, GLint geometryOutputType = GL_TRIANGLES, GLint geometryOutputVertices = 0);
 
 	void			bind() const;
 	static void		unbind();
@@ -64,7 +61,8 @@ class GlslProg {
 	void	uniform( const std::string &name, const Vec4f &data );
 	void	uniform( const std::string &name, const Color &data );
 	void	uniform( const std::string &name, const ColorA &data );
-	void	uniform( const std::string &name, const Matrix44f &data, bool transpose = false );	
+	void	uniform( const std::string &name, const Matrix33f &data, bool transpose = false );
+	void	uniform( const std::string &name, const Matrix44f &data, bool transpose = false );
 	void	uniform( const std::string &name, const float *data, int count );
 	void	uniform( const std::string &name, const Vec2f *data, int count );
 	void	uniform( const std::string &name, const Vec3f *data, int count );
