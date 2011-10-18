@@ -105,7 +105,7 @@
 
 - (void)defaultResize
 {
-	cinder::gl::setMatricesWindow( backingWidth, backingHeight );
+//	cinder::gl::setMatricesWindow( backingWidth, backingHeight );
 }
 
 - (BOOL)needsDrawRect

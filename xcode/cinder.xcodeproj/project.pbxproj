@@ -584,6 +584,8 @@
 		43ED153D1221DF6C003AEB0B /* UrlImplCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 43ED0FDD12209488003AEB0B /* UrlImplCocoa.mm */; };
 		5391FD680E957646002A13D5 /* KeyEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 5391FD670E957646002A13D5 /* KeyEvent.h */; };
 		5391FE660E95CB01002A13D5 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0867D6A5FE840307C02AAC07 /* AppKit.framework */; };
+		940823C2144E187E00666476 /* GlslProg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00D9A07B0EA57C3F00FF5AEB /* GlslProg.cpp */; };
+		940823C3144E188B00666476 /* GlslProg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00D9A07B0EA57C3F00FF5AEB /* GlslProg.cpp */; };
 		C70E19FF106AA38700E63577 /* Buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = C70E19FE106AA38700E63577 /* Buffer.h */; };
 		C70E1A03106AA39D00E63577 /* Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C70E1A01106AA39D00E63577 /* Buffer.cpp */; };
 		C727BFE5121B3AE600192073 /* Capture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007438400EA7924F005DD3E6 /* Capture.cpp */; };
@@ -1979,6 +1981,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				940823C2144E187E00666476 /* GlslProg.cpp in Sources */,
 				007050491114F93F003FCAE4 /* Camera.cpp in Sources */,
 				0070504A1114F93F003FCAE4 /* Matrix.cpp in Sources */,
 				0070504D1114F93F003FCAE4 /* Surface.cpp in Sources */,
@@ -2063,6 +2066,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				940823C3144E188B00666476 /* GlslProg.cpp in Sources */,
 				00CFD99D1135C3520091E310 /* Camera.cpp in Sources */,
 				00CFD99E1135C3520091E310 /* Matrix.cpp in Sources */,
 				00CFD99F1135C3520091E310 /* Surface.cpp in Sources */,
