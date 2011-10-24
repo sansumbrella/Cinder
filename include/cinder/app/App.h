@@ -34,6 +34,7 @@
 #include "cinder/DataSource.h"
 #include "cinder/Timer.h"
 #include "cinder/Function.h"
+#include "cinder/Timeline.h"
 #if defined( CINDER_COCOA )
 	#if defined( CINDER_COCOA_TOUCH )
 		#if defined( __OBJC__ )
@@ -309,6 +310,9 @@ class App {
 
 	//! Returns a reference to an output console, which is an alias to std::cout on the mac, and a wrapper around OutputDebugString on MSW
 	std::ostream&	console();
+	
+	//! Returns a reference to the App's Timeline
+	Timeline&		getTimeline() { return mTimeline; }
 
 	/** \return a copy of the window's contents as a Surface8u **/
 	Surface	copyWindowSurface();
@@ -374,6 +378,8 @@ class App {
 	uint32_t				mFpsLastSampleFrame;
 	double					mFpsLastSampleTime;
 	double					mFpsSampleInterval;
+
+	Timeline				mTimeline;
 
 	std::shared_ptr<Renderer>	mRenderer;
 	
@@ -463,6 +469,9 @@ inline fs::path		getSaveFilePath( const fs::path &initialPath = "", std::vector<
 	On Windows output is echoed using OutputDebugString, echoed to the Output window of the debugger or to a stream viewable with Dbgview
 	\code console() << "This line will be echoed" << std::endl; \endcode **/
 inline std::ostream&	console() { return App::get()->console(); }
+
+//! Returns a reference to the active App's Timeline
+inline Timeline&	getTimeline() { return App::get()->getTimeline(); }
 
 //! Returns a copy of the window's contents as a Surface8u
 inline Surface	copyWindowSurface() { return App::get()->copyWindowSurface(); }
