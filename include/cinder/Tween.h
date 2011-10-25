@@ -33,6 +33,7 @@
 
 #include <list>
 #include <boost/utility.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 namespace cinder {
 
@@ -94,16 +95,16 @@ class TweenBase : public TimelineItem {
 };
 
 template<typename T>
-class TweenRef : public std::shared_ptr<Tween<T> > {
+class TweenRef : public boost::intrusive_ptr<Tween<T> > {
   public:
-	TweenRef( const std::shared_ptr<Tween<T> > &sp )
-		: std::shared_ptr<Tween<T> >( sp )
+	TweenRef( const boost::intrusive_ptr<Tween<T> > &sp )
+		: boost::intrusive_ptr<Tween<T> >( sp )
 	{}
 	TweenRef( Tween<T> *tween )
-		: std::shared_ptr<Tween<T> >( tween )
+		: boost::intrusive_ptr<Tween<T> >( tween )
 	{}
 	TweenRef()
-		: std::shared_ptr<Tween<T> >()
+		: boost::intrusive_ptr<Tween<T> >()
 	{}
 };
 		
@@ -152,7 +153,7 @@ class Tween : public TweenBase {
 	TimelineItemRef loop( bool doLoop = true ) { setLoop( doLoop ); return getThisRef(); }
 	
 	//! Returns a TweenRef<T> to \a this
-	TweenRef<T> getThisRef(){ return TweenRef<T>( std::static_pointer_cast<Tween<T> >( shared_from_this() ) ); }
+	TweenRef<T> getThisRef(){ return this; }
 
   protected:
 	virtual void reverse()
@@ -162,7 +163,7 @@ class Tween : public TweenBase {
 	
 	virtual TimelineItemRef	cloneReverse() const
 	{
-		std::shared_ptr<Tween<T> > result( new Tween<T>( *this ) );
+		boost::intrusive_ptr<Tween<T> > result( new Tween<T>( *this ) );
 		std::swap( result->mStartValue, result->mEndValue );
 		result->mCopyStartValue = false;
 		return result;
@@ -211,7 +212,7 @@ class FnTween : public Tween<T> {
 template<typename T>
 class FnTweenRef : public TweenRef<T> {
   public:
-	FnTweenRef( const std::shared_ptr<FnTween<T> > &sp )
+	FnTweenRef( const boost::intrusive_ptr<FnTween<T> > &sp )
 		: TweenRef<T>( sp )
 	{}
 	FnTweenRef( FnTween<T> *fnTween )
@@ -238,9 +239,9 @@ class ValTween : public Tween<T> {
 	T				mValue;
 };
 
-typedef std::shared_ptr<TweenBase>	TweenBaseRef;
+//typedef boost::instrusive_ptr<TweenBase>	TweenBaseRef;
 
-class TweenScope {
+/*class TweenScope {
   public:
 	TweenScope() {}
 	TweenScope( const TweenScope &rhs ) {}	// do nothing for copy; these are our tweens alone
@@ -252,6 +253,6 @@ class TweenScope {
 
   private:
 	std::list<std::weak_ptr<TimelineItem> >		mItems;
-};
+};*/
 
 } //namespace cinder

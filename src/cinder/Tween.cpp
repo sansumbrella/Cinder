@@ -33,7 +33,7 @@ TweenBase::TweenBase( void *target, bool copyStartValue, float startTime, float 
 {
 }
 
-TweenScope::~TweenScope()
+/*TweenScope::~TweenScope()
 {
 	for( list<weak_ptr<TimelineItem> >::iterator itemIt = mItems.begin(); itemIt != mItems.end(); ++itemIt ) {
 		TimelineItemRef item = itemIt->lock();
@@ -51,6 +51,6 @@ TweenScope& TweenScope::operator+=( TimelineItemRef item )
 void TweenScope::add( TimelineItemRef item )
 {
 	mItems.push_back( item );
-}
+}*/
 
 } // namespace cinder

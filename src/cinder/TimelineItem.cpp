@@ -30,13 +30,13 @@
 namespace cinder {
 
 TimelineItem::TimelineItem( class Timeline *parent )
-	: mParent( parent ), mTarget( 0 ), mStartTime( 0 ), mDuration( 0 ), mInvDuration( 0 ), mHasStarted( false ),
+	: mRefCount( 0 ), mParent( parent ), mTarget( 0 ), mStartTime( 0 ), mDuration( 0 ), mInvDuration( 0 ), mHasStarted( false ),
 		mComplete( false ), mMarkedForRemoval( false ), mAutoRemove( true ), mInfinite( false ), mLoop( false ), mLastLoopIteration( -1 ), mUseAbsoluteTime( false )
 {
 }
 
 TimelineItem::TimelineItem( Timeline *parent, void *target, float startTime, float duration )
-	: mParent( parent ), mTarget( target ), mStartTime( startTime ), mDuration( duration ), mInvDuration( duration == 0 ? 0 : (1 / duration) ), mHasStarted( false ),
+	: mRefCount( 0 ), mParent( parent ), mTarget( target ), mStartTime( startTime ), mDuration( duration ), mInvDuration( duration == 0 ? 0 : (1 / duration) ), mHasStarted( false ),
 		mComplete( false ), mMarkedForRemoval( false ), mAutoRemove( true ), mInfinite( false ), mLoop( false ), mLastLoopIteration( -1 ), mUseAbsoluteTime( false )
 {
 }

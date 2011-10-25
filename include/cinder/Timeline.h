@@ -30,13 +30,14 @@
 #include "cinder/Tween.h"
 #include "cinder/Function.h"
 
+#include <boost/intrusive_ptr.hpp>
 #include <vector>
 #include <list>
 
 namespace cinder {
 
-typedef std::shared_ptr<class Cue>			CueRef;
-typedef std::shared_ptr<class Timeline>		TimelineRef;
+typedef boost::intrusive_ptr<class Cue>			CueRef;
+typedef boost::intrusive_ptr<class Timeline>		TimelineRef;
 	
 class Timeline : public TimelineItem {		
   public:
@@ -45,9 +46,9 @@ class Timeline : public TimelineItem {
 	//! Creates a new timeline, defaulted to infinite
 	static TimelineRef	create() { TimelineRef result( new Timeline() ); result->setInfinite( true ); return result; }
 
-	//! Advances time a specified amount and evaluate items
+	//! Advances time a specified amount and evaluates items
 	void	step( float timestep );
-	//! Goes to a specific time and evaluate items
+	//! Goes to a specific time and evaluates items
 	void	stepTo( float absoluteTime );
 	
 	//! Returns the timeline's most recent current time
