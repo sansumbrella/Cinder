@@ -20,15 +20,10 @@ class Circle {
 	}
 
 	void startDrag() {
-		//if( mDragTween ) // if we're heading somewhere, stop going there and start listening to the drag
-		//	mDragTween->removeSelf();
-		// mDragTween.stop();
 		mPos.stop();
 	}
 	
 	void dragRelease() {
-		// tween back home
-		// mDragTween = app::getTimeline().apply( &mPos, mHomePos, 1.0f, EaseOutBack( 3 ) );
 		// return to our home position in 1sec, easing using EaseOutBack
 		app::timeline().apply( &mPos, mHomePos, 1.0f, EaseOutBack( 3 ) );
 	}
@@ -37,7 +32,6 @@ class Circle {
 	Vec2f				mHomePos;
 	Anim<Vec2f>			mPos;
 	Anim<float>			mRadius;
-//	Anim<Vec2f>			mDragTween;
 };
 
 class DragTweenApp : public AppNative {
@@ -50,28 +44,24 @@ class DragTweenApp : public AppNative {
 	void keyDown( KeyEvent event );
 	void draw();
 	
+	bool					inOrOut;
 	vector<Circle>			mCircles;
 	Circle					*mCurrentDragCircle;
 };
 
 void DragTweenApp::setup()
 {
-/*	TimelineRef dummy = Timeline::create();
-	Anim<float> test1( 3 );
-	dummy->apply( &test1, 2.0f, 0.5f );*/
-
 	// setup the initial animation
 	const size_t numCircles = 35;
 	for( size_t c = 0; c < numCircles; ++c ) {
 		float angle = c / (float)numCircles * 4 * M_PI;
 		Vec2f pos = getWindowCenter() + ( 50 + c / (float)numCircles * 200 ) * Vec2f( cos( angle ), sin( angle ) );
 		mCircles.push_back( Circle( Color( CM_HSV, c / (float)numCircles, 1, 1 ), 0, getWindowCenter(), pos ) );
-		//getTimeline().append( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
-		timeline().appendBack( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
-		//getTimeline().append( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
-		timeline().appendBack( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
+		timeline().appendBack( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) ).delay( -0.45f );
+		timeline().appendBack( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).delay( -0.5f );
 	}
 	
+	inOrOut = true;
 	mCurrentDragCircle = 0;
 }
 
@@ -111,11 +101,17 @@ void DragTweenApp::keyDown( KeyEvent event )
 	for( size_t c = 0; c < mCircles.size(); ++c ) {
 		float angle = c / (float)mCircles.size() * 4 * M_PI;
 		Vec2f pos = getWindowCenter() + ( 50 + c / (float)mCircles.size() * 200 ) * Vec2f( cos( angle ), sin( angle ) );
-		//getTimeline().append( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
-		timeline().apply( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
-		//getTimeline().append( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
-		timeline().apply( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
-	}	
+		if( inOrOut ) {
+			timeline().appendBack( &mCircles[c].mPos, getWindowCenter(), 0.2f, EaseOutAtan( 10 ) ).delay( -0.18f );
+			timeline().appendBack( &mCircles[c].mRadius, 0.0f, 0.2f, EaseOutAtan( 10 ) ).delay( -0.18f );
+		}
+		else {
+			timeline().appendBack( &mCircles[c].mPos, pos, 0.5f, EaseOutAtan( 10 ) ).delay( -0.45f );
+			timeline().appendBack( &mCircles[c].mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).delay( -0.5f );
+		}
+	}
+	
+	inOrOut = ! inOrOut;
 }
 
 void DragTweenApp::draw()

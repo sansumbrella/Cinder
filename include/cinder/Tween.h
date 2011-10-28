@@ -142,18 +142,6 @@ class Tween : public TweenBase {
 	//! Returns whether the tween will copy its target's value upon starting
 	bool	isCopyStartValue() { return mCopyStartValue; }
 
-	// these override their equivalents in TimelineItem so that we can return a TweenRef<T> instead of TimelineItemRef
-	//! Pushes back the tween's start time by \a amt. Returns a reference to \a this
-	TweenRef<T> startTime( float newTime ) { setStartTime( newTime ); return getThisRef(); }
-	//! Pushes back the tween's start time by \a amt. Returns a reference to \a this
-	TweenRef<T> delay( float amt ) { setStartTime( mStartTime + amt ); return getThisRef(); }
-	//! Sets the tween's duration to \a newDuration. Returns a reference to \a this
-	TweenRef<T> duration( float newDuration ) { setDuration( newDuration ); return getThisRef(); }			
-	//! Sets whether the item will remove itself from the Timeline when it is complete
-	TweenRef<T> autoRemove( bool autoRmv = true ) { setAutoRemove( autoRmv ); return getThisRef(); }
-	//! Sets whether the item starts over when it is complete
-	TimelineItemRef loop( bool doLoop = true ) { setLoop( doLoop ); return getThisRef(); }
-	
 	//! Returns a TweenRef<T> to \a this
 	TweenRef<T>		getThisRef(){ return TweenRef<T>( std::static_pointer_cast<Tween<T> >( shared_from_this() ) ); }
 
@@ -300,6 +288,41 @@ class Anim : public AnimBase {
 	T				mValue;
 };
 
+class TweenOptionsBase {
+  protected:
+	TweenOptionsBase( TimelineRef timeline )
+		: mTimeline( timeline )
+	{}
+
+	void	timelineEnd( TweenBase &tweenBase, float offset );
+  
+	TimelineRef		mTimeline;
+};
+
+template<typename T>
+class TweenOptions : public TweenOptionsBase {
+  public:
+	TweenOptions<T>&	startFn( const TweenBase::StartFn &startFn ) { mTweenRef->setStartFn( startFn ); return *this; }
+	TweenOptions<T>&	updateFn( const TweenBase::UpdateFn &updateFn ) { mTweenRef->setUpdateFn( updateFn ); return *this; }
+	TweenOptions<T>&	completionFn( const TweenBase::CompletionFn &completionFn ) { mTweenRef->setCompletionFn( completionFn ); return *this; }
+	TweenOptions<T>&	easeFn( const EaseFn &easeFunc ) { mTweenRef->setEaseFn( easeFunc ); return *this; }
+	TweenOptions<T>&	delay( float delayAmt ) { mTweenRef->setStartTime( mTweenRef->getStartTime() + delayAmt ); return *this; }
+	TweenOptions<T>&	autoRemove( bool remove = true ) { mTweenRef->setAutoRemove( remove ); return *this; }
+	TweenOptions<T>&	loop( bool doLoop = true ) { mTweenRef->setLoop( doLoop ); return *this; }
+	TweenOptions<T>&	timelineEnd( float offset = 0 ) { TweenOptionsBase::timelineEnd( *mTweenRef, offset ); return *this; }
+	
+	operator TweenRef<T>() { return mTweenRef; }
+
+  protected:
+	TweenOptions( TweenRef<T> tweenRef, TimelineRef timeline )
+		: TweenOptionsBase( timeline ), mTweenRef( tweenRef )
+	{}
+	
+	
+	TweenRef<T>		mTweenRef;
+	
+	friend class Timeline;
+};
 
 //typedef boost::instrusive_ptr<TweenBase>	TweenBaseRef;
 

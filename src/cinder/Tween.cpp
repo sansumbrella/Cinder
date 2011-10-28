@@ -92,4 +92,10 @@ void AnimBase::setParentTimeline( TimelineRef parentTimeline )
 	mParentTimeline = parentTimeline;  		
 }
 
+// this is to provide a compiler firewall to use Timeline from the TweenOptions
+void TweenOptionsBase::timelineEnd( TweenBase &tweenBase, float offset )
+{
+	tweenBase.setStartTime( std::max( mTimeline->getDuration(), mTimeline->getCurrentTime() ) + offset );
+}
+
 } // namespace cinder
