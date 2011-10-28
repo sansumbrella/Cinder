@@ -23,6 +23,7 @@
 */
 
 #include "cinder/Tween.h"
+#include "cinder/Timeline.h"
 
 using namespace std;
 
@@ -52,5 +53,43 @@ void TweenScope::add( TimelineItemRef item )
 {
 	mItems.push_back( item );
 }*/
+
+AnimBase::AnimBase( const AnimBase &rhs, void *voidPtr )
+	: mVoidPtr( voidPtr )
+{
+	mParentTimeline = rhs.mParentTimeline;
+	if( mParentTimeline ) {
+		mParentTimeline->cloneAndReplaceTarget( rhs.mVoidPtr, mVoidPtr );
+	}	
+}
+
+AnimBase::~AnimBase()
+{
+	if( mParentTimeline  )
+		mParentTimeline->removeTarget( mVoidPtr );
+}
+
+void AnimBase::set( const AnimBase &rhs )
+{
+	setParentTimeline( rhs.mParentTimeline );
+	if( mParentTimeline ) {
+		mParentTimeline->cloneAndReplaceTarget( rhs.mVoidPtr, mVoidPtr );
+	}	
+}
+
+void AnimBase::stop()
+{
+	if( mParentTimeline )
+		mParentTimeline->removeTarget( mVoidPtr );
+	mParentTimeline.reset();
+}
+
+void AnimBase::setParentTimeline( TimelineRef parentTimeline )
+{
+	if( mParentTimeline && ( parentTimeline != mParentTimeline ) ) {
+		mParentTimeline->removeTarget( mVoidPtr );
+	}
+	mParentTimeline = parentTimeline;  		
+}
 
 } // namespace cinder

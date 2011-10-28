@@ -40,6 +40,11 @@ Timeline::Timeline()
 	mUseAbsoluteTime = true;
 }
 
+Timeline::~Timeline()
+{
+int a = 3;
+}
+
 void Timeline::step( float timestep )
 {
 	mCurrentTime += timestep;
@@ -182,7 +187,6 @@ void Timeline::remove( TimelineItemRef item )
 		(*iter)->mMarkedForRemoval = true;
 }
 
-//! Removes all TimelineItems whose target matches \a target
 void Timeline::removeTarget( void *target )
 {
 	for( s_iter iter = mItems.begin(); iter != mItems.end();  ) {
@@ -191,6 +195,22 @@ void Timeline::removeTarget( void *target )
 		else
 			++iter;
 	}
+	
+	calculateDuration();
+}
+
+void Timeline::cloneAndReplaceTarget( void *target, void *replacementTarget )
+{
+	list<TimelineItemRef> newItems;
+	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
+		if( (*iter)->getTarget() == target ) {
+			newItems.push_back( (*iter)->clone() );
+			newItems.back()->setTarget( replacementTarget );
+		}
+	}
+
+	for( list<TimelineItemRef>::const_iterator iter = newItems.begin(); iter != newItems.end(); ++iter )
+		mItems.push_back( *iter );
 	
 	calculateDuration();
 }
@@ -213,6 +233,11 @@ void Timeline::reverse()
 {
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter )
 		(*iter)->reverse();
+}
+
+TimelineItemRef Timeline::clone() const
+{
+	return TimelineItemRef( new Timeline( *this ) );
 }
 
 TimelineItemRef Timeline::cloneReverse() const
@@ -247,6 +272,11 @@ void Cue::loopStart()
 {
 	if( mFunction )
 		mFunction();
+}
+
+TimelineItemRef Cue::clone() const
+{
+	return TimelineItemRef( new Cue( *this ) );
 }
 
 TimelineItemRef Cue::cloneReverse() const

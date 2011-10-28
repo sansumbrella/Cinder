@@ -29,10 +29,10 @@
 
 namespace cinder
 {
-typedef boost::intrusive_ptr<class TimelineItem>	TimelineItemRef;
+typedef std::tr1::shared_ptr<class TimelineItem>	TimelineItemRef;
 
 //! Base interface for anything that can go on a Timeline
-class TimelineItem
+class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 {
   public:
 	TimelineItem( class Timeline *parent = 0 );
@@ -47,31 +47,31 @@ class TimelineItem
 	//! Set the items's start time to \a newTime
 	void			setStartTime( float newTime );
 	//! Set the items's start time to \a newTime. Returns a reference to \a this
-	TimelineItemRef startTime( float newTime ) { setStartTime( newTime ); return TimelineItemRef( this ); }
+	TimelineItemRef startTime( float newTime ) { setStartTime( newTime ); return thisRef(); }
 
 	//! Pushes back the item's start time by \a amt. Returns a reference to \a this
-	TimelineItemRef delay( float amt ) { setStartTime( mStartTime + amt ); return TimelineItemRef( this ); }
+	TimelineItemRef delay( float amt ) { setStartTime( mStartTime + amt ); return thisRef(); }
 
 	//! Returns the item's duration
 	float			getDuration() const { return mDuration; }			
 	//! Sets the item's duration to \a newDuration.
 	void			setDuration( float newDuration );
 	//! Sets the item's duration to \a newDuration. Returns a reference to \a this
-	TimelineItemRef duration( float newDuration ) { setDuration( newDuration ); return TimelineItemRef( this ); }
+	TimelineItemRef duration( float newDuration ) { setDuration( newDuration ); return thisRef(); }
 
 	//! Returns whether the item starts over when it is complete
 	bool			getLoop() const { return mLoop; }
 	//! Sets whether the item starts over when it is complete
 	void			setLoop( bool doLoop = true ) { mLoop = doLoop; }
 	//! Sets whether the item starts over when it is complete. Returns a reference to \a this
-	TimelineItemRef loop( bool doLoop = true ) { setLoop( doLoop ); return TimelineItemRef( this ); }
+	TimelineItemRef loop( bool doLoop = true ) { setLoop( doLoop ); return thisRef(); }
 
 	//! Returns whether the item ever is marked as complete
 	bool			getInfinite() const { return mLoop; }
 	//! Sets whether the item ever is marked as complete
 	void			setInfinite( bool infinite = true ) { mInfinite = infinite; }
 	//! Sets whether the item ever is marked as complete. Returns a reference to \a this
-	TimelineItemRef infinite( bool inf = true ) { setInfinite( inf ); return TimelineItemRef( this ); }
+	TimelineItemRef infinite( bool inf = true ) { setInfinite( inf ); return thisRef(); }
 
 	//! Returns the time of the item's competion, equivalent to getStartTime() + getDuration().
 	float			getEndTime() const { return mStartTime + mDuration; }
@@ -92,7 +92,7 @@ class TimelineItem
 	//! Sets whether the item will remove itself from the Timeline when it is complete
 	void	setAutoRemove( bool autoRemove = true ) { mAutoRemove = autoRemove; }
 	//! Sets whether the item will remove itself from the Timeline when it is complete
-	TimelineItemRef autoRemove( bool autoRmv = true ) { mAutoRemove = autoRmv; return TimelineItemRef( this ); }
+	TimelineItemRef autoRemove( bool autoRmv = true ) { mAutoRemove = autoRmv; return thisRef(); }
 	
 	virtual void start() = 0;
 	virtual void loopStart() {}
@@ -101,14 +101,19 @@ class TimelineItem
 	//! Call update() only at the beginning of each loop (for example Cues exhibit require this behavior)
 	virtual bool updateAtLoopStart() { return false; }
 	virtual void				reverse() = 0;
+	//! Creates a clone of the item
+	virtual TimelineItemRef		clone() const = 0;
 	//! Creates a cloned item which runs in reverse relative to a timeline of duration \a timelineDuration
 	virtual TimelineItemRef		cloneReverse() const = 0;
 	//! go to a specific time, generally called by the parent Timeline only.
 	void stepTo( float time );
 	
+	TimelineItemRef thisRef() { return shared_from_this(); }
+	
   protected:
 	//! Converts time from absolute to absolute based on item's looping attributes
 	float	loopTime( float absTime );
+	void	setTarget( void *target ) { mTarget = target; }
 
 	class Timeline	*mParent;
 	

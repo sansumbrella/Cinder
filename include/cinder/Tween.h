@@ -37,6 +37,8 @@
 
 namespace cinder {
 
+class Timeline;
+typedef std::shared_ptr<Timeline>		TimelineRef;
 
 template<typename T>
 class Tween;
@@ -95,16 +97,16 @@ class TweenBase : public TimelineItem {
 };
 
 template<typename T>
-class TweenRef : public boost::intrusive_ptr<Tween<T> > {
+class TweenRef : public std::shared_ptr<Tween<T> > {
   public:
-	TweenRef( const boost::intrusive_ptr<Tween<T> > &sp )
-		: boost::intrusive_ptr<Tween<T> >( sp )
+	TweenRef( const std::shared_ptr<Tween<T> > &sp )
+		: std::shared_ptr<Tween<T> >( sp )
 	{}
 	TweenRef( Tween<T> *tween )
-		: boost::intrusive_ptr<Tween<T> >( tween )
+		: std::shared_ptr<Tween<T> >( tween )
 	{}
 	TweenRef()
-		: boost::intrusive_ptr<Tween<T> >()
+		: std::shared_ptr<Tween<T> >()
 	{}
 };
 		
@@ -153,17 +155,24 @@ class Tween : public TweenBase {
 	TimelineItemRef loop( bool doLoop = true ) { setLoop( doLoop ); return getThisRef(); }
 	
 	//! Returns a TweenRef<T> to \a this
-	TweenRef<T> getThisRef(){ return this; }
+	TweenRef<T>		getThisRef(){ return TweenRef<T>( std::static_pointer_cast<Tween<T> >( shared_from_this() ) ); }
 
   protected:
 	virtual void reverse()
 	{
 		std::swap( mStartValue, mEndValue );
 	}
+
+	virtual TimelineItemRef	clone() const
+	{
+		std::shared_ptr<Tween<T> > result( new Tween<T>( *this ) );
+		result->mCopyStartValue = false;
+		return result;
+	}
 	
 	virtual TimelineItemRef	cloneReverse() const
 	{
-		boost::intrusive_ptr<Tween<T> > result( new Tween<T>( *this ) );
+		std::shared_ptr<Tween<T> > result( new Tween<T>( *this ) );
 		std::swap( result->mStartValue, result->mEndValue );
 		result->mCopyStartValue = false;
 		return result;
@@ -212,7 +221,7 @@ class FnTween : public Tween<T> {
 template<typename T>
 class FnTweenRef : public TweenRef<T> {
   public:
-	FnTweenRef( const boost::intrusive_ptr<FnTween<T> > &sp )
+	FnTweenRef( const std::shared_ptr<FnTween<T> > &sp )
 		: TweenRef<T>( sp )
 	{}
 	FnTweenRef( FnTween<T> *fnTween )
@@ -223,21 +232,74 @@ class FnTweenRef : public TweenRef<T> {
 	{}
 };
 
-template<typename T>
-class ValTween : public Tween<T> {
+class AnimBase {
   public:
-	ValTween( T startValue, T endValue, float startTime, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
-		: Tween<T>( &mValue, startValue, endValue, startTime, duration, easeFunction, lerpFunction ), mValue( startValue )
-	{
-	}
+  	//! removes self from Timeline
+	void 	stop();
 	
-	virtual void update( float relativeTime )
-	{
-		Tween<T>::update( relativeTime );
-	}	
+  protected:
+	AnimBase( void *voidPtr ) : mVoidPtr( voidPtr ) {}
+	AnimBase( const AnimBase &rhs, void *voidPtr );
+	~AnimBase();
 	
+	void set( const AnimBase &rhs );
+	
+  	void	setParentTimeline( TimelineRef parentTimeline );
+
+	void			*mVoidPtr;	
+	TimelineRef		mParentTimeline;
+};
+
+template<typename T>
+class Anim : public AnimBase {
+  public:
+	Anim()
+		: AnimBase( &mValue )
+	{}
+  	Anim( T value ) 
+		: AnimBase( &mValue), mValue( value )
+	{}
+  	Anim( const Anim<T> &rhs )
+		: AnimBase( rhs, &mValue ), mValue( rhs.mValue )
+  	{}
+
+#if 0
+  	Anim( const Anim<T> &&rhs )
+  	{
+		mValue = rhs.mValue;
+		mParentTimeline = rhs.mParentTimeline;
+		if( mParentTimeline ) {
+			mParentTimeline->replaceTarget( &rhs.mValue, &mValue );
+		}  	
+		rhs.mParentTimeline = 0;
+  	}
+#endif
+  	
+	operator const T&() const { return mValue; }	
+  	operator T&() { return mValue; }
+	Anim<T>& operator=( const Anim<T> &rhs ) {
+		set( rhs );
+		mValue = rhs.mValue;
+		return *this;
+  	}
+	Anim<T>& operator=( T value ) { mValue = value; return *this; }
+  	
+//  	float	getDuration() { return mValTween->getDuration(); }
+//  	float	getEndTime() {
+
+	const T&	value() const { return mValue; }
+	T&			value() { return mValue; }
+  	
+  	const T*		ptr() const { return &mValue; }
+  	T*				ptr() { return &mValue; }
+
+  protected:
+
+	friend class Timeline;
+
 	T				mValue;
 };
+
 
 //typedef boost::instrusive_ptr<TweenBase>	TweenBaseRef;
 

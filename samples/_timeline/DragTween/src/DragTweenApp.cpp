@@ -20,19 +20,24 @@ class Circle {
 	}
 
 	void startDrag() {
-		if( mDragTween ) // if we're heading somewhere, stop going there and start listening to the drag
-			mDragTween->removeSelf();
+		//if( mDragTween ) // if we're heading somewhere, stop going there and start listening to the drag
+		//	mDragTween->removeSelf();
+		// mDragTween.stop();
+		mPos.stop();
 	}
 	
 	void dragRelease() {
 		// tween back home
-		mDragTween = app::getTimeline().apply( &mPos, mHomePos, 1.0f, EaseOutBack( 3 ) );
+		// mDragTween = app::getTimeline().apply( &mPos, mHomePos, 1.0f, EaseOutBack( 3 ) );
+		// return to our home position in 1sec, easing using EaseOutBack
+		app::timeline().apply( &mPos, mHomePos, 1.0f, EaseOutBack( 3 ) );
 	}
 	
 	Color				mColor;
-	Vec2f				mPos, mHomePos;
-	float				mRadius;
-	TweenRef<Vec2f>		mDragTween;
+	Vec2f				mHomePos;
+	Anim<Vec2f>			mPos;
+	Anim<float>			mRadius;
+//	Anim<Vec2f>			mDragTween;
 };
 
 class DragTweenApp : public AppNative {
@@ -42,23 +47,29 @@ class DragTweenApp : public AppNative {
 	void mouseDown( MouseEvent event );
 	void mouseDrag( MouseEvent event );
 	void mouseUp( MouseEvent event );
+	void keyDown( KeyEvent event );
 	void draw();
 	
-	// never use a vector with tweens
-	list<Circle>			mCircles;
+	vector<Circle>			mCircles;
 	Circle					*mCurrentDragCircle;
 };
 
 void DragTweenApp::setup()
 {
+/*	TimelineRef dummy = Timeline::create();
+	Anim<float> test1( 3 );
+	dummy->apply( &test1, 2.0f, 0.5f );*/
+
 	// setup the initial animation
 	const size_t numCircles = 35;
 	for( size_t c = 0; c < numCircles; ++c ) {
 		float angle = c / (float)numCircles * 4 * M_PI;
 		Vec2f pos = getWindowCenter() + ( 50 + c / (float)numCircles * 200 ) * Vec2f( cos( angle ), sin( angle ) );
 		mCircles.push_back( Circle( Color( CM_HSV, c / (float)numCircles, 1, 1 ), 0, getWindowCenter(), pos ) );
-		getTimeline().append( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
-		getTimeline().append( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
+		//getTimeline().append( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
+		timeline().appendBack( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
+		//getTimeline().append( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
+		timeline().appendBack( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
 	}
 	
 	mCurrentDragCircle = 0;
@@ -67,9 +78,9 @@ void DragTweenApp::setup()
 void DragTweenApp::mouseDown( MouseEvent event )
 {
 	// see if the mouse is in any of the circles
-	list<Circle>::iterator circleIt = mCircles.end();
+	vector<Circle>::iterator circleIt = mCircles.end();
 	for( circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt )
-		if( circleIt->mPos.distance( event.getPos() ) <= circleIt->mRadius )
+		if( circleIt->mPos.value().distance( event.getPos() ) <= circleIt->mRadius )
 			break;
 
 	// if we hit one, tell it to startDrag()
@@ -95,13 +106,25 @@ void DragTweenApp::mouseUp( MouseEvent event )
 	mCurrentDragCircle = 0;
 }
 
+void DragTweenApp::keyDown( KeyEvent event )
+{
+	for( size_t c = 0; c < mCircles.size(); ++c ) {
+		float angle = c / (float)mCircles.size() * 4 * M_PI;
+		Vec2f pos = getWindowCenter() + ( 50 + c / (float)mCircles.size() * 200 ) * Vec2f( cos( angle ), sin( angle ) );
+		//getTimeline().append( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
+		timeline().apply( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) )->delay( -0.45f );
+		//getTimeline().append( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
+		timeline().apply( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) )->delay( -0.5f );
+	}	
+}
+
 void DragTweenApp::draw()
 {
 	// clear out the window with black
 	gl::clear( Color( 0.8f, 0.8f, 0.8f ) );
 	gl::enableAlphaBlending();
 	
-	for( list<Circle>::const_iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt )
+	for( vector<Circle>::const_iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt )
 		circleIt->draw();
 }
 

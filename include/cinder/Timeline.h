@@ -36,12 +36,13 @@
 
 namespace cinder {
 
-typedef boost::intrusive_ptr<class Cue>			CueRef;
-typedef boost::intrusive_ptr<class Timeline>		TimelineRef;
+typedef std::shared_ptr<class Cue>			CueRef;
+typedef std::shared_ptr<class Timeline>		TimelineRef;
 	
 class Timeline : public TimelineItem {		
   public:
 	Timeline();			
+~Timeline();
 
 	//! Creates a new timeline, defaulted to infinite
 	static TimelineRef	create() { TimelineRef result( new Timeline() ); result->setInfinite( true ); return result; }
@@ -56,7 +57,25 @@ class Timeline : public TimelineItem {
 	
 	//! add a cue to the Timeline add the start-time \a atTime
 	CueRef add( std::function<void ()> action, float atTime );
-	
+
+
+	//! Replaces any existing tweens on the \a target with a new tween at the timeline's current time
+	template<typename T>
+	TweenRef<T> apply( Anim<T> *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	{
+		target->setParentTimeline( thisRef() );
+		return apply( target->ptr(), endValue, duration, easeFunction, lerpFunction );
+	}
+
+	//! Creates a new tween and adds it to the end of a timeline, setting its start time to the timeline's duration or the current time, whichever is greater
+	template<typename T>
+	TweenRef<T> appendBack( Anim<T> *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	{
+		target->setParentTimeline( thisRef() );
+		return appendBack( target->ptr(), endValue, duration, easeFunction, lerpFunction );
+	}
+
+
 	//! Create a new tween and adds it to the timeline's current time
 	template<typename T>
 	TweenRef<T> add( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
@@ -106,7 +125,7 @@ class Timeline : public TimelineItem {
 
 	//! Creates a new tween and adds it to the end of a timeline, setting its start time to the timeline's duration or the current time, whichever is greater
 	template<typename T>
-	TweenRef<T> append( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	TweenRef<T> appendBack( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		TweenRef<T> newTween( new Tween<T>( target, endValue, std::max( getDuration(), mCurrentTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		insert( newTween );
@@ -115,7 +134,7 @@ class Timeline : public TimelineItem {
 	
 	//! Creates a new tween and adds it to the end of a timeline, setting its start time to the timeline's duration or the current time, whichever is greater
 	template<typename T>
-	TweenRef<T> append( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	TweenRef<T> appendBack( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		TweenRef<T> newTween( new Tween<T>( target, startValue, endValue, std::max( getDuration(), mCurrentTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		insert( newTween );
@@ -124,7 +143,7 @@ class Timeline : public TimelineItem {
 
 	//! Creates a new tween and adds it to the end of the last tween whose target matches \a target. The new tween's start time is set to the previous tween's end time or the current time if no existing tween matches the target, whichever is greater
 	template<typename T>
-	TweenRef<T> appendTarget( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	TweenRef<T> append( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		float startTime = mCurrentTime;
 		TimelineItemRef last = findLast( target );
 		if( last )
@@ -137,7 +156,7 @@ class Timeline : public TimelineItem {
 	
 	//! Creates a new tween and adds it to the end of the last tween whose target matches \a target. The new tween's start time is set to the previous tween's end time or the current time, whichever is greater
 	template<typename T>
-	TweenRef<T> appendTarget( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	TweenRef<T> append( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		float startTime = mCurrentTime;
 		TimelineItemRef last = findLast( target );
 		if( last )
@@ -171,6 +190,8 @@ class Timeline : public TimelineItem {
 	void				remove( TimelineItemRef item );
 	//! Removes all TimelineItems whose target matches \a target
 	void				removeTarget( void *target );
+	//! Clones all TimelineItems whose target matches \a target, but replacing their target with \a replacementTarget
+	void				cloneAndReplaceTarget( void *target, void *replacementTarget );
 	
 	//! Remove all tweens from the Timeline. Do not call from callback fn's.
 	void clear();
@@ -185,9 +206,16 @@ class Timeline : public TimelineItem {
 	//! Call this to notify the Timeline if the \a item's start-time or duration has changed
 	void	itemTimeChanged( TimelineItem *item );
 
+	TimelineRef	thisRef() { 
+		TimelineItemRef thisTimelineItem = TimelineItem::thisRef();
+		TimelineRef result = std::static_pointer_cast<Timeline>( thisTimelineItem );
+		return result;
+	}
+	
   protected:
 	virtual void reverse();
 	virtual TimelineItemRef cloneReverse() const;
+	virtual TimelineItemRef clone() const;
 	virtual void start() {}
 	virtual void loopStart();
 	virtual void update( float absTime );
@@ -211,6 +239,7 @@ class Cue : public TimelineItem {
   protected:
 	virtual void				reverse() { /* no-op */ }
 	virtual TimelineItemRef	cloneReverse() const;
+	virtual TimelineItemRef clone() const;
 
 	virtual void start() {} // starting is a no-op for Cues
 	virtual void loopStart();
