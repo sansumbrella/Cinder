@@ -103,9 +103,8 @@ void Timeline::appendPingPong()
 
 void Timeline::apply( TimelineItemRef item )
 {
-	TimelineItemRef existingAction = find( item->getTarget() );
-	if( existingAction )
-		remove( existingAction );
+	if( item->getTarget() )
+		removeTarget( item->getTarget() );
 	insert( item );
 }
 
@@ -178,6 +177,30 @@ TimelineItemRef Timeline::findLast( void *target )
 	}
 	
 	return (result == mItems.end() ) ? TimelineItemRef() : *result;
+}
+
+float Timeline::findEndTimeOf( void *target, bool *found )
+{
+	s_iter result = mItems.end();
+	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
+		if( (*iter)->getTarget() == target ) {
+			if( result == mItems.end() )
+				result = iter;
+			else if( (*iter)->getEndTime() > (*result)->getEndTime() )
+				result = iter;
+		}
+	}
+	
+	if( result != mItems.end() ) {
+		if( found )
+			*found = true;
+		return (*result)->getEndTime();
+	}
+	else {
+		if( found )
+			*found = false;
+		return getCurrentTime();
+	}
 }
 
 void Timeline::remove( TimelineItemRef item )

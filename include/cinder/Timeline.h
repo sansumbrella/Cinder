@@ -144,10 +144,7 @@ class Timeline : public TimelineItem {
 	//! Creates a new tween and adds it to the end of the last tween whose target matches \a target. The new tween's start time is set to the previous tween's end time or the current time if no existing tween matches the target, whichever is greater
 	template<typename T>
 	TweenRef<T> append( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
-		float startTime = mCurrentTime;
-		TimelineItemRef last = findLast( target );
-		if( last )
-			startTime = last->getEndTime();
+		float startTime = findEndTimeOf( target );
 		TweenRef<T> newTween( new Tween<T>( target, endValue, std::max( mCurrentTime, startTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		insert( newTween );
@@ -157,10 +154,7 @@ class Timeline : public TimelineItem {
 	//! Creates a new tween and adds it to the end of the last tween whose target matches \a target. The new tween's start time is set to the previous tween's end time or the current time, whichever is greater
 	template<typename T>
 	TweenRef<T> append( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
-		float startTime = mCurrentTime;
-		TimelineItemRef last = findLast( target );
-		if( last )
-			startTime = last->getEndTime();
+		float startTime = findEndTimeOf( target );
 		TweenRef<T> newTween( new Tween<T>( target, startValue, endValue, std::max( mCurrentTime, startTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		insert( newTween );
@@ -186,6 +180,8 @@ class Timeline : public TimelineItem {
 	TimelineItemRef		find( void *target );
 	//! Returns the latest-starting item in the timeline the target of which matches \a target
 	TimelineItemRef		findLast( void *target );
+	//! Returns the end of the latest-ending item in the timeline the target of which matches \a target, or the current time if it's not found. \a found can store whether a related item was found.
+	float				findEndTimeOf( void *target, bool *found = NULL );
 	//! Removes the TimelineItem \a item from the Timeline. Safe to use from callback fn's.
 	void				remove( TimelineItemRef item );
 	//! Removes all TimelineItems whose target matches \a target

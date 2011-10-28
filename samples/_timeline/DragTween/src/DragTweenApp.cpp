@@ -47,6 +47,7 @@ class DragTweenApp : public AppNative {
 	bool					inOrOut;
 	vector<Circle>			mCircles;
 	Circle					*mCurrentDragCircle;
+	Circle					*mLocoCircle;
 };
 
 void DragTweenApp::setup()
@@ -60,7 +61,9 @@ void DragTweenApp::setup()
 		timeline().appendBack( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) ).delay( -0.45f );
 		timeline().appendBack( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).delay( -0.5f );
 	}
-	
+
+	mLocoCircle = new Circle( Color( 1, 0, 0 ), 22, getWindowCenter(), getWindowCenter() );
+
 	inOrOut = true;
 	mCurrentDragCircle = 0;
 }
@@ -110,6 +113,8 @@ void DragTweenApp::keyDown( KeyEvent event )
 			timeline().appendBack( &mCircles[c].mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).delay( -0.5f );
 		}
 	}
+
+	timeline().apply( &mLocoCircle->mPos, (inOrOut)?Vec2f(0,100):Vec2f(getWindowWidth(),300), 1.0f ).timelineEnd();
 	
 	inOrOut = ! inOrOut;
 }
@@ -122,6 +127,8 @@ void DragTweenApp::draw()
 	
 	for( vector<Circle>::const_iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt )
 		circleIt->draw();
+		
+	mLocoCircle->draw();
 }
 
 

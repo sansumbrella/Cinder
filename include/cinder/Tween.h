@@ -294,6 +294,7 @@ class TweenOptionsBase {
 		: mTimeline( timeline )
 	{}
 
+	void	appendTo( TweenBase &tweenBase, void *target, float offset );
 	void	timelineEnd( TweenBase &tweenBase, float offset );
   
 	TimelineRef		mTimeline;
@@ -310,6 +311,9 @@ class TweenOptions : public TweenOptionsBase {
 	TweenOptions<T>&	autoRemove( bool remove = true ) { mTweenRef->setAutoRemove( remove ); return *this; }
 	TweenOptions<T>&	loop( bool doLoop = true ) { mTweenRef->setLoop( doLoop ); return *this; }
 	TweenOptions<T>&	timelineEnd( float offset = 0 ) { TweenOptionsBase::timelineEnd( *mTweenRef, offset ); return *this; }
+	template<typename Y>
+	TweenOptions<T>&	appendTo( Anim<Y> *endTarget, float offset = 0 ) { TweenOptionsBase::appendTo( *mTweenRef, endTarget->ptr(), offset ); return *this; }	
+	TweenOptions<T>&	appendTo( void *endTarget, float offset = 0 ) { TweenOptionsBase::appendTo( *mTweenRef, endTarget, offset ); return *this; }	
 	
 	operator TweenRef<T>() { return mTweenRef; }
 
