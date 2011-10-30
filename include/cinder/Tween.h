@@ -134,13 +134,11 @@ class Tween : public TweenBase {
 	T	getStartValue() const { return mStartValue; }
 	T	getEndValue() const { return mEndValue; }			
 	T*	getTarget() const { return reinterpret_cast<T*>( mTarget ); }
-
-	TweenRef<T>		startFn( StartFn startFunction ) { mStartFunction = startFunction; return getThisRef(); }
-	TweenRef<T>		updateFn( UpdateFn updateFunction ) { mUpdateFunction = updateFunction; return getThisRef(); }
-	TweenRef<T>		completionFn( CompletionFn completionFunction ) { mCompletionFunction = completionFunction; return getThisRef(); }	
 	
 	//! Returns whether the tween will copy its target's value upon starting
 	bool	isCopyStartValue() { return mCopyStartValue; }
+
+	void	setLerpFn( const LerpFn &lerpFn ) { mLerpFunction = lerpFn; }
 
 	//! Returns a TweenRef<T> to \a this
 	TweenRef<T>		getThisRef(){ return TweenRef<T>( std::static_pointer_cast<Tween<T> >( shared_from_this() ) ); }
@@ -314,6 +312,7 @@ class TweenOptions : public TweenOptionsBase {
 	template<typename Y>
 	TweenOptions<T>&	appendTo( Anim<Y> *endTarget, float offset = 0 ) { TweenOptionsBase::appendTo( *mTweenRef, endTarget->ptr(), offset ); return *this; }	
 	TweenOptions<T>&	appendTo( void *endTarget, float offset = 0 ) { TweenOptionsBase::appendTo( *mTweenRef, endTarget, offset ); return *this; }	
+	TweenOptions<T>&	lerpFn( const typename Tween<T>::LerpFn &lerpFn ) { mTweenRef->setLerpFn( lerpFn ); return *this; }
 	
 	operator TweenRef<T>() { return mTweenRef; }
 
