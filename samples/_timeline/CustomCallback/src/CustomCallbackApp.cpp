@@ -4,6 +4,7 @@
 // * The update callback makes the radius of the circle the distance to the nearest edge using a member function
 
 #include "cinder/app/AppBasic.h"
+#include "cinder/Timeline.h"
 #include "cinder/gl/gl.h"
 
 using namespace ci;
@@ -15,10 +16,10 @@ Color	gBackgroundColor;
 
 struct Circle {
 	void posUpdate() { // make the radius the distance to the closest edge
-		mRadius = mPos.x;
-		mRadius = std::min( mRadius, getWindowWidth() - mPos.x );
-		mRadius = std::min( mRadius, mPos.y );
-		mRadius = std::min( mRadius, getWindowHeight() - mPos.y );		
+		mRadius = mPos().x;
+		mRadius = std::min( mRadius, getWindowWidth() - mPos().x );
+		mRadius = std::min( mRadius, mPos().y );
+		mRadius = std::min( mRadius, getWindowHeight() - mPos().y );		
 	}
 
 	void draw() {
@@ -26,7 +27,7 @@ struct Circle {
 		gl::drawSolidCircle( mPos, mRadius );
 	}
 	
-	Vec2f		mPos;
+	Anim<Vec2f>	mPos;
 	float		mRadius;
 };
 
@@ -68,10 +69,10 @@ void CustomCallbackApp::setup()
 
 void CustomCallbackApp::mouseDown( MouseEvent event )
 {
-	TweenRef<Vec2f> tween = getTimeline().apply( &mCircle.mPos, Vec2f( event.getPos() ), 2.0f, EaseInOutCubic() );
-	tween->setStartFn( ColorToGreenFunctor( &gBackgroundColor ) );
-	tween->setUpdateFn( std::bind( &Circle::posUpdate, &mCircle ) );	
-	tween->setCompletionFn( setBackgroundToBlue );	
+	timeline().apply( &mCircle.mPos, Vec2f( event.getPos() ), 2.0f, EaseInOutCubic() )
+			.startFn( ColorToGreenFunctor( &gBackgroundColor ) )
+			.updateFn( std::bind( &Circle::posUpdate, &mCircle ) )
+			.completionFn( setBackgroundToBlue );
 }
 
 void CustomCallbackApp::draw()

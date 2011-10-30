@@ -1,6 +1,7 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
+#include "cinder/Timeline.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -13,7 +14,7 @@ struct Box {
 		: mColor( color ), mPos( pos ), mSize( size )
 	{}
 	
-	void draw() {
+	void draw() const {
 		gl::color( mColor );
 		gl::drawSolidRect( Rectf( mPos, mPos + mSize ) );
 	}
@@ -36,7 +37,7 @@ class CustomLerpApp : public AppBasic {
 	Box		randomBox( Vec2f center );
 	void	draw();
 	
-	Box		mBox;
+	Anim<Box>	mBox;
 };
 
 void CustomLerpApp::setup()
@@ -46,7 +47,7 @@ void CustomLerpApp::setup()
 
 void CustomLerpApp::mouseDown( MouseEvent event )
 {
-	getTimeline().apply( &mBox, randomBox( event.getPos() ), 2.0f, EaseOutCubic(), boxLerp );
+	timeline().apply( &mBox, randomBox( event.getPos() ), 2.0f, EaseOutCubic(), boxLerp );
 }
 
 Box	CustomLerpApp::randomBox( Vec2f center )
@@ -62,7 +63,7 @@ void CustomLerpApp::draw()
 	// clear out the window with black
 	gl::clear( Color( 0.7f, 0.7f, 0.7f ) );
 	
-	mBox.draw();
+	mBox().draw();
 }
 
 

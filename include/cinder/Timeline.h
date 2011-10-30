@@ -158,7 +158,7 @@ class Timeline : public TimelineItem {
 	//! Returns the default \a autoRemove value for all future TimelineItems added to the Timeline
 	bool	getDefaultAutoRemove() const { return mDefaultAutoRemove; }
 
-	//! Call this to notify the Timeline if the \a item's start-time or duration has changed
+	//! Call this to notify the Timeline if the \a item's start-time or duration has changed. Advanced use cases only.
 	void	itemTimeChanged( TimelineItem *item );
 
 	TimelineRef	thisRef() { 

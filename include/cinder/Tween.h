@@ -292,8 +292,10 @@ class Anim : public AnimBase {
 		: AnimBase( rhs, &mValue ), mValue( rhs.mValue )
   	{}
   	
+	const T&	operator()() const { return mValue; }
+	T&			operator()() { return mValue; }	
+	
 	operator const T&() const { return mValue; }	
-  	operator T&() { return mValue; }
 	Anim<T>& operator=( const Anim<T> &rhs ) {
 		set( rhs );
 		mValue = rhs.mValue;

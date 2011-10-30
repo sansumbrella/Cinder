@@ -9,6 +9,7 @@
 #include "cinder/Vector.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
+
 #include <string>
 #include <vector>
 
@@ -22,8 +23,10 @@ class AccordionItem {
 	void animTo( float newX, float newWidth, bool revealText = false );
 
   private:	
-	float			mX, mY;
-	float			mWidth, mHeight, mExpandedWidth, mTextAlpha;
+	ci::Anim<float>	mX, mWidth;
+	float			mY, mHeight;
+	float			mExpandedWidth;
+	ci::Anim<float>	mTextAlpha;
 	
 	std::string		mTitle, mSubtitle;
 	
