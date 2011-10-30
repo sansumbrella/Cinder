@@ -18,6 +18,7 @@
 
 class WordNode {
   public:
+	WordNode() {}
 	WordNode( const std::string &word, bool completeWord );
 
 	std::string		getWord() const { return mWord; }
@@ -31,7 +32,7 @@ class WordNode {
 		
 	ci::Anim<ci::Vec2f>		mPos;
 	ci::Anim<float>			mRadius;
-	ci::Anim<ci::Color>		mColor;	
+	ci::Anim<ci::ColorA>	mColor;	
 
 
 	static	void	setFont( ci::gl::TextureFontRef font );

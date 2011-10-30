@@ -47,7 +47,7 @@ void WordNode::draw() const
 	float pixelScale = std::min( squareSide / mWordPixelLength, squareSide / 72 );
 	gl::TextureFont::DrawOptions options = gl::TextureFont::DrawOptions().scale( pixelScale ).pixelSnap( false );
 
-	const Vec2f offset = (Vec2f)mPos + Vec2f( -mRadius + ( mRadius * 2 - mWordPixelLength * pixelScale ) / 2, mRadius - (mRadius * 2.0f - 48 * pixelScale ) / 2 );
+	const Vec2f offset = (Vec2f)mPos + Vec2f( -mRadius + ( mRadius * 2 - mWordPixelLength * pixelScale ) / 2, mRadius - (mRadius * 2.0f - 60 * pixelScale ) / 2 );
 
 	gl::color( Color::black() );
 	sFont->drawString( mWord, offset + Vec2f( 1, 1 ) * pixelScale, options );

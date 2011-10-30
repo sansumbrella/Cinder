@@ -20,6 +20,9 @@
 using namespace std;
 using namespace ci;
 
+#ifndef strcasecmp // Windows has strnicmp instead of strncasecmp
+	#define strcasecmp strnicmp
+#endif
 
 Dictionary::Dictionary( DataSourceRef dataSource )
 {
@@ -35,7 +38,7 @@ Dictionary::Dictionary( DataSourceRef dataSource )
 
 struct CompareStringPrefix {
 	bool operator()( string test1, string test2 ) const {
-		return strncasecmp( test1.c_str(), test2.c_str(), test1.size() ) < 0;
+		return strncasecmp( test1.c_str(), test2.c_str(), std::min( test1.size(), test2.size() ) ) < 0;
 	}
 };
 
@@ -43,15 +46,16 @@ vector<string> Dictionary::getDescendants( const string &word ) const
 {
 	vector<string> result;
 	set<char> foundLetters;
-	
+
 	// we want to figure out what letters follow 'word'
 	// so for "victor" we want 'i' (victories), 's' (victors), 'y' (victory)
 	pair<vector<string>::const_iterator, vector<string>::const_iterator> range;
 	range = std::equal_range( mWords.begin(), mWords.end(), word, CompareStringPrefix() );
 	
-	for( vector<string>::const_iterator wordIt = range.first; wordIt != range.second; ++wordIt )
+	for( vector<string>::const_iterator wordIt = range.first; wordIt != range.second; ++wordIt ) {
 		if( wordIt->size() > word.size() )
 			foundLetters.insert( (*wordIt)[word.size()] );
+	}
 	
 	for( set<char>::const_iterator letIt = foundLetters.begin(); letIt != foundLetters.end(); ++letIt )
 		result.push_back( word + *letIt );
