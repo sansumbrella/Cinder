@@ -93,12 +93,12 @@ void AnimBase::setParentTimeline( TimelineRef parentTimeline )
 }
 
 // these are to provide a compiler firewall to use Timeline from the TweenOptions
-void TweenOptionsBase::appendTo( TweenBase &tweenBase, void *endTarget, float offset )
+void TweenBase::Options::appendTo( TweenBase &tweenBase, void *endTarget, float offset )
 {
 	tweenBase.setStartTime( mTimeline->findEndTimeOf( endTarget ) + offset );	
 }
 
-void TweenOptionsBase::timelineEnd( TweenBase &tweenBase, float offset )
+void TweenBase::Options::timelineEnd( TweenBase &tweenBase, float offset )
 {
 	tweenBase.setStartTime( std::max( mTimeline->getDuration(), mTimeline->getCurrentTime() ) + offset );
 }

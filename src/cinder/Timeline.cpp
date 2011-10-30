@@ -40,11 +40,6 @@ Timeline::Timeline()
 	mUseAbsoluteTime = true;
 }
 
-Timeline::~Timeline()
-{
-int a = 3;
-}
-
 void Timeline::step( float timestep )
 {
 	mCurrentTime += timestep;

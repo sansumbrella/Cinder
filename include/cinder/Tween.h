@@ -45,6 +45,9 @@ class Tween;
 typedef std::function<float (float)> EaseFn;
 
 template<typename T>
+class Anim;
+
+template<typename T>
 T tweenLerp( const T &start, const T &end, float time )
 {
 	return start * ( 1 - time ) + end * time;
@@ -73,6 +76,17 @@ class TweenBase : public TimelineItem {
 	void			setCompletionFn( CompletionFn completionFunction ) { mCompletionFunction = completionFunction; }
 	CompletionFn	getCompletionFn() const { return mCompletionFunction; }
 	
+	class Options {
+	  protected:
+		Options( TimelineRef timeline )
+			: mTimeline( timeline )
+		{}
+
+		void	appendTo( TweenBase &tweenBase, void *target, float offset );
+		void	timelineEnd( TweenBase &tweenBase, float offset );
+	  
+		TimelineRef		mTimeline;
+	};
 	
   protected:
 	virtual void reset( bool unsetStarted )
@@ -142,6 +156,35 @@ class Tween : public TweenBase {
 
 	//! Returns a TweenRef<T> to \a this
 	TweenRef<T>		getThisRef(){ return TweenRef<T>( std::static_pointer_cast<Tween<T> >( shared_from_this() ) ); }
+
+
+	class Options : public TweenBase::Options {
+	  public:
+		Options&	startFn( const TweenBase::StartFn &startFn ) { mTweenRef->setStartFn( startFn ); return *this; }
+		Options&	updateFn( const TweenBase::UpdateFn &updateFn ) { mTweenRef->setUpdateFn( updateFn ); return *this; }
+		Options&	completionFn( const TweenBase::CompletionFn &completionFn ) { mTweenRef->setCompletionFn( completionFn ); return *this; }
+		Options&	easeFn( const EaseFn &easeFunc ) { mTweenRef->setEaseFn( easeFunc ); return *this; }
+		Options&	delay( float delayAmt ) { mTweenRef->setStartTime( mTweenRef->getStartTime() + delayAmt ); return *this; }
+		Options&	autoRemove( bool remove = true ) { mTweenRef->setAutoRemove( remove ); return *this; }
+		Options&	loop( bool doLoop = true ) { mTweenRef->setLoop( doLoop ); return *this; }
+		Options&	timelineEnd( float offset = 0 ) { TweenBase::Options::timelineEnd( *mTweenRef, offset ); return *this; }
+		template<typename Y>
+		Options&	appendTo( Anim<Y> *endTarget, float offset = 0 ) { TweenBase::Options::appendTo( *mTweenRef, endTarget->ptr(), offset ); return *this; }	
+		Options&	appendTo( void *endTarget, float offset = 0 ) { TweenBase::Options::appendTo( *mTweenRef, endTarget, offset ); return *this; }	
+		Options&	lerpFn( const typename Tween<T>::LerpFn &lerpFn ) { mTweenRef->setLerpFn( lerpFn ); return *this; }
+		
+		operator TweenRef<T>() { return mTweenRef; }
+
+	  protected:
+		Options( TweenRef<T> tweenRef, TimelineRef timeline )
+			: TweenBase::Options( timeline ), mTweenRef( tweenRef )
+		{}
+				
+		TweenRef<T>		mTweenRef;
+		
+		friend class Timeline;
+	};
+
 
   protected:
 	virtual void reverse()
@@ -248,18 +291,6 @@ class Anim : public AnimBase {
   	Anim( const Anim<T> &rhs )
 		: AnimBase( rhs, &mValue ), mValue( rhs.mValue )
   	{}
-
-#if 0
-  	Anim( const Anim<T> &&rhs )
-  	{
-		mValue = rhs.mValue;
-		mParentTimeline = rhs.mParentTimeline;
-		if( mParentTimeline ) {
-			mParentTimeline->replaceTarget( &rhs.mValue, &mValue );
-		}  	
-		rhs.mParentTimeline = 0;
-  	}
-#endif
   	
 	operator const T&() const { return mValue; }	
   	operator T&() { return mValue; }
@@ -284,47 +315,6 @@ class Anim : public AnimBase {
 	friend class Timeline;
 
 	T				mValue;
-};
-
-class TweenOptionsBase {
-  protected:
-	TweenOptionsBase( TimelineRef timeline )
-		: mTimeline( timeline )
-	{}
-
-	void	appendTo( TweenBase &tweenBase, void *target, float offset );
-	void	timelineEnd( TweenBase &tweenBase, float offset );
-  
-	TimelineRef		mTimeline;
-};
-
-template<typename T>
-class TweenOptions : public TweenOptionsBase {
-  public:
-	TweenOptions<T>&	startFn( const TweenBase::StartFn &startFn ) { mTweenRef->setStartFn( startFn ); return *this; }
-	TweenOptions<T>&	updateFn( const TweenBase::UpdateFn &updateFn ) { mTweenRef->setUpdateFn( updateFn ); return *this; }
-	TweenOptions<T>&	completionFn( const TweenBase::CompletionFn &completionFn ) { mTweenRef->setCompletionFn( completionFn ); return *this; }
-	TweenOptions<T>&	easeFn( const EaseFn &easeFunc ) { mTweenRef->setEaseFn( easeFunc ); return *this; }
-	TweenOptions<T>&	delay( float delayAmt ) { mTweenRef->setStartTime( mTweenRef->getStartTime() + delayAmt ); return *this; }
-	TweenOptions<T>&	autoRemove( bool remove = true ) { mTweenRef->setAutoRemove( remove ); return *this; }
-	TweenOptions<T>&	loop( bool doLoop = true ) { mTweenRef->setLoop( doLoop ); return *this; }
-	TweenOptions<T>&	timelineEnd( float offset = 0 ) { TweenOptionsBase::timelineEnd( *mTweenRef, offset ); return *this; }
-	template<typename Y>
-	TweenOptions<T>&	appendTo( Anim<Y> *endTarget, float offset = 0 ) { TweenOptionsBase::appendTo( *mTweenRef, endTarget->ptr(), offset ); return *this; }	
-	TweenOptions<T>&	appendTo( void *endTarget, float offset = 0 ) { TweenOptionsBase::appendTo( *mTweenRef, endTarget, offset ); return *this; }	
-	TweenOptions<T>&	lerpFn( const typename Tween<T>::LerpFn &lerpFn ) { mTweenRef->setLerpFn( lerpFn ); return *this; }
-	
-	operator TweenRef<T>() { return mTweenRef; }
-
-  protected:
-	TweenOptions( TweenRef<T> tweenRef, TimelineRef timeline )
-		: TweenOptionsBase( timeline ), mTweenRef( tweenRef )
-	{}
-	
-	
-	TweenRef<T>		mTweenRef;
-	
-	friend class Timeline;
 };
 
 //typedef boost::instrusive_ptr<TweenBase>	TweenBaseRef;

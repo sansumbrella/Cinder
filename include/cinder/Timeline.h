@@ -41,9 +41,8 @@ typedef std::shared_ptr<class Timeline>		TimelineRef;
 	
 class Timeline : public TimelineItem {		
   public:
-	Timeline();			
-~Timeline();
-
+	Timeline();
+	
 	//! Creates a new timeline, defaulted to infinite
 	static TimelineRef	create() { TimelineRef result( new Timeline() ); result->setInfinite( true ); return result; }
 
@@ -57,7 +56,7 @@ class Timeline : public TimelineItem {
 	
 	//! Replaces any existing tweens on the \a target with a new tween at the timeline's current time
 	template<typename T>
-	TweenOptions<T> apply( Anim<T> *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	typename Tween<T>::Options apply( Anim<T> *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
 	{
 		target->setParentTimeline( thisRef() );
 		return apply( target->ptr(), endValue, duration, easeFunction, lerpFunction );
@@ -65,7 +64,7 @@ class Timeline : public TimelineItem {
 
 	//! Creates a new tween and adds it to the end of a timeline, setting its start time to the timeline's duration or the current time, whichever is greater
 	template<typename T>
-	TweenOptions<T> appendTo( Anim<T> *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	typename Tween<T>::Options appendTo( Anim<T> *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
 	{
 		target->setParentTimeline( thisRef() );
 		return appendTo( target->ptr(), endValue, duration, easeFunction, lerpFunction );
@@ -73,41 +72,41 @@ class Timeline : public TimelineItem {
 
 	//! Replaces any existing tweens on the \a target with a new tween at the timeline's current time
 	template<typename T>
-	TweenOptions<T> apply( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	typename Tween<T>::Options apply( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
 	{
 		TweenRef<T> newTween( new Tween<T>( target, endValue, mCurrentTime, duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		apply( newTween );
-		return TweenOptions<T>( newTween, thisRef() );
+		return typename Tween<T>::Options( newTween, thisRef() );
 	}
 	
 	//! Replaces any existing tweens on the \a target with a new tween at the timeline's current time
 	template<typename T>
-	TweenOptions<T> apply( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	typename Tween<T>::Options apply( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		TweenRef<T> newTween( new Tween<T>( target, startValue, endValue, mCurrentTime, duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		apply( newTween );
-		return TweenOptions<T>( newTween, thisRef() );
+		return typename Tween<T>::Options( newTween, thisRef() );
 	}
 
 	//! Creates a new tween and adds it to the end of the last tween whose target matches \a target. The new tween's start time is set to the previous tween's end time or the current time if no existing tween matches the target, whichever is greater
 	template<typename T>
-	TweenOptions<T> appendTo( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	typename Tween<T>::Options appendTo( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		float startTime = findEndTimeOf( target );
 		TweenRef<T> newTween( new Tween<T>( target, endValue, std::max( mCurrentTime, startTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		insert( newTween );
-		return TweenOptions<T>( newTween, thisRef() );
+		return typename Tween<T>::Options( newTween, thisRef() );
 	}
 	
 	//! Creates a new tween and adds it to the end of the last tween whose target matches \a target. The new tween's start time is set to the previous tween's end time or the current time, whichever is greater
 	template<typename T>
-	TweenOptions<T> appendTo( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	typename Tween<T>::Options appendTo( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
 		float startTime = findEndTimeOf( target );
 		TweenRef<T> newTween( new Tween<T>( target, startValue, endValue, std::max( mCurrentTime, startTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		insert( newTween );
-		return TweenOptions<T>( newTween, thisRef() );
+		return typename Tween<T>::Options( newTween, thisRef() );
 	}
 
 	//! add a cue to the Timeline add the start-time \a atTime
