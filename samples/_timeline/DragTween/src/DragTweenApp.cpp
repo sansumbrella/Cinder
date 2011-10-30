@@ -58,8 +58,8 @@ void DragTweenApp::setup()
 		float angle = c / (float)numCircles * 4 * M_PI;
 		Vec2f pos = getWindowCenter() + ( 50 + c / (float)numCircles * 200 ) * Vec2f( cos( angle ), sin( angle ) );
 		mCircles.push_back( Circle( Color( CM_HSV, c / (float)numCircles, 1, 1 ), 0, getWindowCenter(), pos ) );
-		timeline().appendBack( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) ).delay( -0.45f );
-		timeline().appendBack( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).delay( -0.5f );
+		timeline().apply( &mCircles.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.45f );
+		timeline().apply( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.5f );
 	}
 
 	mLocoCircle = new Circle( Color( 1, 0, 0 ), 22, getWindowCenter(), getWindowCenter() );
@@ -105,16 +105,17 @@ void DragTweenApp::keyDown( KeyEvent event )
 		float angle = c / (float)mCircles.size() * 4 * M_PI;
 		Vec2f pos = getWindowCenter() + ( 50 + c / (float)mCircles.size() * 200 ) * Vec2f( cos( angle ), sin( angle ) );
 		if( inOrOut ) {
-			timeline().appendBack( &mCircles[c].mPos, getWindowCenter(), 0.2f, EaseOutAtan( 10 ) ).delay( -0.18f );
-			timeline().appendBack( &mCircles[c].mRadius, 0.0f, 0.2f, EaseOutAtan( 10 ) ).delay( -0.18f );
+			timeline().apply( &mCircles[c].mPos, getWindowCenter(), 0.2f, EaseOutAtan( 10 ) ).timelineEnd( -0.18f );
+			timeline().apply( &mCircles[c].mRadius, 0.0f, 0.2f, EaseOutAtan( 10 ) ).timelineEnd( -0.18f );
 		}
 		else {
-			timeline().appendBack( &mCircles[c].mPos, pos, 0.5f, EaseOutAtan( 10 ) ).delay( -0.45f );
-			timeline().appendBack( &mCircles[c].mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).delay( -0.5f );
+			timeline().apply( &mCircles[c].mPos, pos, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.45f );
+			timeline().apply( &mCircles[c].mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.5f );
 		}
 	}
 
-	timeline().apply( &mLocoCircle->mPos, (inOrOut)?Vec2f(0,100):Vec2f(getWindowWidth(),300), 1.0f ).timelineEnd();
+	timeline().apply( &mLocoCircle->mPos, (inOrOut)?Vec2f(0,100):Vec2f(getWindowWidth(),300), 1.0f )
+				.appendTo( &mCircles[12].mRadius );
 	
 	inOrOut = ! inOrOut;
 }
