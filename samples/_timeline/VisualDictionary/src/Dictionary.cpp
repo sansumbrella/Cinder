@@ -1,11 +1,3 @@
-//
-//  Dictionary.cpp
-//  VisualDictionary
-//
-//  Created by Andrew Bell on 10/29/11.
-//  Copyright (c) 2011. All rights reserved.
-//
-
 #include "cinder/Buffer.h"
 #include "cinder/Utilities.h"
 #include "cinder/Stream.h"
@@ -20,10 +12,6 @@
 using namespace std;
 using namespace ci;
 
-#ifndef strcasecmp // Windows has strnicmp instead of strncasecmp
-	#define strcasecmp strnicmp
-#endif
-
 Dictionary::Dictionary( DataSourceRef dataSource )
 {
 	Buffer decompressed = decompressBuffer( Buffer( dataSource ), false, true );
@@ -32,13 +20,11 @@ Dictionary::Dictionary( DataSourceRef dataSource )
 	IStreamMemRef stream = IStreamMem::create( decompressed.getData(), decompressed.getDataSize() );
 	while( ! stream->isEof() )
 		mWords.push_back( stream->readLine() );
-
-	std::cout << "Dictionary has: " << mWords.size() << " words" << std::endl;
 }
 
 struct CompareStringPrefix {
 	bool operator()( string test1, string test2 ) const {
-		return strncasecmp( test1.c_str(), test2.c_str(), std::min( test1.size(), test2.size() ) ) < 0;
+		return strncmp( test1.c_str(), test2.c_str(), std::min( test1.size(), test2.size() ) ) < 0;
 	}
 };
 
@@ -51,12 +37,15 @@ vector<string> Dictionary::getDescendants( const string &word ) const
 	// so for "victor" we want 'i' (victories), 's' (victors), 'y' (victory)
 	pair<vector<string>::const_iterator, vector<string>::const_iterator> range;
 	range = std::equal_range( mWords.begin(), mWords.end(), word, CompareStringPrefix() );
-	
+
+	// iterate all the words in our range, and add their last letter to our set of 'foundLetters'	
 	for( vector<string>::const_iterator wordIt = range.first; wordIt != range.second; ++wordIt ) {
 		if( wordIt->size() > word.size() )
 			foundLetters.insert( (*wordIt)[word.size()] );
 	}
 	
+	// now iterate all the foundLetters; each result word will be 'word' + foundLetter
+	// ex: victor + i (victories)
 	for( set<char>::const_iterator letIt = foundLetters.begin(); letIt != foundLetters.end(); ++letIt )
 		result.push_back( word + *letIt );
 	
