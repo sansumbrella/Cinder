@@ -13,6 +13,25 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
+
+struct Circle {
+  public:
+	Circle( float radius, Color color )
+		: mRadius( radius ), mColor( color )
+	{}
+	void draw( const Vec2f &pos ) {
+		gl::color( ColorA( mColor * 0.25f, 0.25f ) );
+		gl::drawSolidCircle( pos, mRadius() );
+		
+		gl::color( mColor );
+		gl::drawSolidCircle( pos, mRadius() - 1.0f );
+	}
+
+	Anim<float>	mRadius;
+	Color		mColor;
+};
+
+
 class VisualDictionaryApp : public AppBasic {
   public:
 	void prepareSettings( Settings *settings );
@@ -23,6 +42,7 @@ class VisualDictionaryApp : public AppBasic {
 	void mouseMove( MouseEvent event );	
 	void mouseDown( MouseEvent event );
 	void keyDown( KeyEvent event );
+	float getLayoutRadius(){ return getWindowHeight() * 0.415f; }
 
 	void selectNode( list<WordNode>::iterator selectedWord );
 
@@ -37,6 +57,9 @@ class VisualDictionaryApp : public AppBasic {
 	shared_ptr<Dictionary>		mDictionary;
 	list<WordNode>				mNodes, mDyingNodes;
 	list<WordNode>::iterator	mMouseOverNode;
+	
+	list<Circle>				mCircles;
+	
 	bool						mEnableSelections;
 	WordNode					mCurrentNode;
 	float						mCurrentCircleRadius;
@@ -44,17 +67,22 @@ class VisualDictionaryApp : public AppBasic {
 
 void VisualDictionaryApp::prepareSettings( Settings *settings )
 {
-	settings->setWindowSize( 1024, 1024 );
+	settings->setWindowSize( 800, 800 );
 }
 
 void VisualDictionaryApp::layoutWords( vector<string> words, Vec2f center, float radius )
 {
-	int radiusDivisor = std::max<int>( 10, words.size() ); // don't let the circles get too small
+	int radiusDivisor = 26;//std::max<int>( 10, words.size() ); // don't let the circles get too small
 	mCurrentCircleRadius = radius / radiusDivisor * M_PI;
 	for( size_t w = 0; w < words.size(); ++w ) {
-		float angle = w / (float)words.size() * 2 * M_PI;
+		int wordLength = words[w].length();
+		string s = words[w];
+		int charIndex = (int)s[wordLength-1] - 97;
+		float charPer = charIndex/26.0f;
+		float angle = charPer * 2.0f * M_PI;
+		//float angle = w / (float)words.size() * 2 * M_PI;
 		Vec2f pos = center + radius * Vec2f( cos( angle ), sin( angle ) );
-		Color col(  CM_HSV, w / (float)words.size(), 1, 1 );
+		Color col(  CM_HSV, charPer, 1, 1 );
 		mNodes.push_back( WordNode( words[w], false ) );
 		mNodes.back().mPos = center;
 		mNodes.back().mColor = ColorA( col, 0.0f );
@@ -81,7 +109,7 @@ void VisualDictionaryApp::setup()
 	for( char c = 0; c < 26; ++c )
 		initialWords.push_back( string( 1, (char)('a' + c) ) );
 
-	layoutWords( initialWords, mCenterPoint, getWindowHeight()*0.35f );
+	layoutWords( initialWords, mCenterPoint, getLayoutRadius() );
 	
 	// mark our currently highlighted node as "none"
 	mMouseOverNode = mNodes.end();
@@ -102,6 +130,9 @@ list<WordNode>::iterator VisualDictionaryApp::getNodeAtPoint( const Vec2f &point
 
 void VisualDictionaryApp::keyDown( KeyEvent event )
 {
+	if( ! mEnableSelections )
+		return;
+	
 	if( isalpha( event.getChar() ) ){
 		// see if we can find a word that ends with this letter
 		list<WordNode>::iterator foundWord = mNodes.end();
@@ -139,10 +170,8 @@ void VisualDictionaryApp::mouseMove( MouseEvent event )
 		
 		// make all the circles not moused-over small, and the mouse-over big
 		for( list<WordNode>::iterator nodeIt = mNodes.begin(); nodeIt != mNodes.end(); ++nodeIt ) {
-			if( mMouseOverNode == mNodes.end() )
-				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius, 0.25f, EaseOutAtan( 10 ) );
-			else if( mMouseOverNode == nodeIt )
-				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius * 1.35f, 0.25f, EaseOutAtan( 10 ) );
+			if( mMouseOverNode == nodeIt )
+				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius * 1.35f, 0.25f, EaseOutElastic( 200.0f, 120.0f ) );
 			else
 				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius, 0.5f, EaseOutAtan( 10 ) );
 		}
@@ -163,21 +192,28 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 	
 	mCurrentNode = *selectedNode;
 
+	for( list<Circle>::iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt ){
+		timeline().apply( &circleIt->mRadius, circleIt->mRadius + 10.0f, 1.0f, EaseOutAtan( 10 ) );
+	}
+	mCircles.push_back( Circle( 140.0f, mCurrentNode.mColor() ) );
+	
+
+	
 	mNodes.clear();
 
 
 	// move the centerpoint to the selected node's position
 	timeline().apply( &mCenterPoint, (Vec2f)mCurrentNode.mPos, 1.0f, EaseOutAtan( 10 ) );
-	timeline().apply( &mBgColor, ColorA( mCurrentNode.mColor().r * 0.5f, mCurrentNode.mColor().g * 0.5f, mCurrentNode.mColor().b * 0.5f, 1.0f ), 1.0f, EaseOutAtan( 10 ) );
+//	timeline().apply( &mBgColor, ColorA( mCurrentNode.mColor().r, mCurrentNode.mColor().g, mCurrentNode.mColor().b, 1.0f ), 1.0f, EaseOutAtan( 10 ) );
 	
 	// move the selected node to the center and make it big, transparent/white
-	timeline().apply( &mCurrentNode.mRadius, 96.0f, 1.0f, EaseOutAtan( 10 ) );
+	timeline().apply( &mCurrentNode.mRadius, 140.0f, 1.0f, EaseOutAtan( 10 ) );
 //	timeline().apply( &mCurrentNode.mPos, mCenterPoint, 0.5f, EaseOutAtan( 10 ) );
-	timeline().apply( &mCurrentNode.mColor, ColorA( 1, 1, 1, 0 ), 0.5f, EaseOutAtan( 10 ) );
+//	timeline().apply( &mCurrentNode.mColor, ColorA( 1, 1, 1, 0 ), 0.5f, EaseOutAtan( 10 ) );
 
 	// now add all the descendants of the clicked node
 	vector<string> children( mDictionary->getDescendants( mCurrentNode.getWord() ) );
-	layoutWords( children, (Vec2f)mCurrentNode.mPos, getWindowHeight()*0.35f );
+	layoutWords( children, (Vec2f)mCurrentNode.mPos, getLayoutRadius() );
 	
 	// mark our currently highlighted node as "none"
 	mMouseOverNode = mNodes.end();
@@ -197,6 +233,18 @@ void VisualDictionaryApp::draw()
 {
 	gl::clear( mBgColor ); 
 	gl::enableAlphaBlending();
+	
+	// draw the center circles
+	int count = 0;
+	if( ! mCurrentNode.getWord().empty() ){
+		int wordLength = mCurrentNode.getWord().length();
+		for( list<Circle>::iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt ){
+			if( count < wordLength-1 ){
+				circleIt->draw( getWindowCenter() );
+			}
+			count ++;
+		}
+	}
 	
 	gl::pushMatrices();
 	gl::translate( getWindowCenter() - mCenterPoint );

@@ -39,16 +39,15 @@ bool WordNode::shouldBeDeleted() const
 
 void WordNode::draw() const
 {
-	gl::color( mColor() * 0.3f );
+	gl::color( mColor() * 0.25f );
 	gl::drawSolidCircle( mPos, mRadius );
 
-	
-	gl::color( mColor );
-	gl::drawSolidCircle( mPos, mRadius - 3.0f );
+	gl::color( ColorA( mColor().r, mColor().g, mColor().b, 1.0f ) );
+	gl::drawSolidCircle( mPos, mRadius - 1.0f );
 
 	// biggest square that can fit in the circle is radius * sqrt(2) per side  x^2 = (r^2)/2
-	const float squareSide = sqrtf( mRadius * mRadius / 2.0f ) * 2;
-	float pixelScale = std::min( squareSide / mWordPixelLength, squareSide / 72 );
+	const float squareSide = sqrtf( ( mRadius * mRadius ) / 2.0f );
+	float pixelScale = std::min( squareSide / mWordPixelLength, squareSide / 72 ) * 2.25f;
 	gl::TextureFont::DrawOptions options = gl::TextureFont::DrawOptions().scale( pixelScale ).pixelSnap( false );
 
 	const Vec2f offset = (Vec2f)mPos + Vec2f( -mRadius + ( mRadius * 2 - mWordPixelLength * pixelScale ) / 2, mRadius - (mRadius * 2.0f - 60 * pixelScale ) / 2 );
