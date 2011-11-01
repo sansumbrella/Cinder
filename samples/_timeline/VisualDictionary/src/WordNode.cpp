@@ -17,7 +17,7 @@ using namespace ci;
 gl::TextureFontRef	WordNode::sFont;
 
 WordNode::WordNode( const string &word, bool completeWord )
-	: mWord( word ), mCompleteWord( completeWord ), mShouldBeDeleted( false ), mIsSelected( false )
+	: mWord( word ), mCompleteWord( completeWord ), mShouldBeDeleted( false )
 {
 	mWordPixelLength = sFont->measureString( mWord ).x;
 }
@@ -37,43 +37,42 @@ bool WordNode::shouldBeDeleted() const
 	return mShouldBeDeleted;
 }
 
-void WordNode::setIsSelected()
-{
-	mIsSelected = true;
-}
-
-bool WordNode::isSelected() const
-{
-	return mIsSelected;
-}
-
 void WordNode::draw() const
 {
-	gl::color( mColor() * 0.25f );
-	gl::drawSolidCircle( mPos(), mRadius() );
-	gl::drawSolidCircle( mPos() + Vec2f( 0.5f, 0.5f ), mRadius );
-	gl::drawSolidCircle( mPos() + Vec2f( 1.0f, 1.0f ), mRadius + 1 );
+	gl::color( ColorA( 0, 0, 0, 0.25f ) );
 	
-//	gl::drawSolidCircle( mPos() + Vec2f( 1.0f, 1.0f ), mRadius + 0.5f );
-//	gl::drawSolidCircle( mPos() + Vec2f( 2.0f, 2.0f ), mRadius + 1.25f );
+	Vec2f pos;
+	float r;
+	
+	pos	= mPos();
+	r	= mRadius();
+	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+	
+	pos += Vec2f( 0.5f, 0.5f );
+	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+	
+	r	+= 1.0f;
+	pos += Vec2f( 0.5f, 0.5f );
+	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+	
 	
 	gl::color( ColorA( mColor().r, mColor().g, mColor().b, 1.0f ) );
-	gl::drawSolidCircle( mPos, mRadius );
+	pos	= mPos();
+	r	= mRadius();
+	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 
 	// biggest square that can fit in the circle is radius * sqrt(2) per side  x^2 = (r^2)/2
 	const float squareSide = sqrtf( ( mRadius * mRadius ) / 2.0f );
 	float pixelScale = std::min( squareSide / mWordPixelLength, squareSide / 72 ) * 2.25f;
-	pixelScale = std::min( pixelScale, 0.725f );
 
 	gl::TextureFont::DrawOptions options = gl::TextureFont::DrawOptions().scale( pixelScale ).pixelSnap( false );
 
 	const Vec2f offset = (Vec2f)mPos + Vec2f( -mRadius + ( mRadius * 2 - mWordPixelLength * pixelScale ) / 2, mRadius - (mRadius * 2.0f - 60 * pixelScale ) / 2 );
 
-	if( mIsSelected ){
-		gl::color( ColorA( Color::black(), 0.5f ) );
-		sFont->drawString( mWord, offset + Vec2f( pixelScale, pixelScale ) * 2.0f, options );
-	}
-	gl::color( mTextColor() );
+	gl::color( ColorA( Color::black(), 0.5f ) );
+	sFont->drawString( mWord, offset + Vec2f( pixelScale, pixelScale ) * 2.0f, options );
+
+	gl::color( ColorA( Color::white(), 1.0f ) );
 	sFont->drawString( mWord, offset, options );
 }
 
