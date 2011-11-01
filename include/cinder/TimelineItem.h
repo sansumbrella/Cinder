@@ -25,11 +25,10 @@
 #pragma once
 
 #include "cinder/Cinder.h"
-#include <boost/intrusive_ptr.hpp>
 
 namespace cinder
 {
-typedef std::tr1::shared_ptr<class TimelineItem>	TimelineItemRef;
+typedef std::shared_ptr<class TimelineItem>	TimelineItemRef;
 
 //! Base interface for anything that can go on a Timeline
 class TimelineItem : public std::enable_shared_from_this<TimelineItem>
@@ -116,8 +115,7 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	void	setTarget( void *target ) { mTarget = target; }
 
 	class Timeline	*mParent;
-	
-	int		mRefCount;
+
 	void	*mTarget;
 	float	mStartTime;
 	bool	mHasStarted, mComplete, mMarkedForRemoval;
@@ -128,14 +126,9 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	int32_t	mLastLoopIteration;
 	
 	friend class Timeline;
-	friend	void intrusive_ptr_add_ref( TimelineItem *item );
-	friend	void intrusive_ptr_release( TimelineItem *item );
   private:
 	float	mDuration, mInvDuration;
 };
-
-inline void intrusive_ptr_add_ref( TimelineItem *item ) { ++item->mRefCount; }
-inline void intrusive_ptr_release( TimelineItem *item ) { --item->mRefCount; if( item->mRefCount == 0 ) delete item; }
 
 } // namespace cinder
 

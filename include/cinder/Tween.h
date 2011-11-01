@@ -33,7 +33,6 @@
 
 #include <list>
 #include <boost/utility.hpp>
-#include <boost/intrusive_ptr.hpp>
 
 namespace cinder {
 

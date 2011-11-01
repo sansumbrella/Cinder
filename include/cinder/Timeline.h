@@ -30,7 +30,6 @@
 #include "cinder/Tween.h"
 #include "cinder/Function.h"
 
-#include <boost/intrusive_ptr.hpp>
 #include <vector>
 #include <list>
 
