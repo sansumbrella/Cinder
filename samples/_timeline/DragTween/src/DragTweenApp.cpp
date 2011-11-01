@@ -95,7 +95,7 @@ void DragTweenApp::mouseUp( MouseEvent event )
 void DragTweenApp::draw()
 {
 	// clear out the window with black
-	gl::clear( Color( 0.8f, 0.8f, 0.8f ) );
+	gl::clear( Color( 0.1f, 0.1f, 0.1f ) );
 	gl::enableAlphaBlending();
 	
 	for( vector<Circle>::const_iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt )

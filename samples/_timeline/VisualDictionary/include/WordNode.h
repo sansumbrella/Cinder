@@ -32,7 +32,7 @@ class WordNode {
 		
 	ci::Anim<ci::Vec2f>		mPos;
 	ci::Anim<float>			mRadius;
-	ci::Anim<ci::ColorA>	mColor;	
+	ci::Anim<ci::ColorA>	mColor;
 
 
 	static	void	setFont( ci::gl::TextureFontRef font );
