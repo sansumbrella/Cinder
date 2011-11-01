@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <list>
+#include <boost/unordered_map.hpp>
 
 namespace cinder {
 
@@ -180,7 +181,8 @@ class Timeline : public TimelineItem {
 
 	bool						mDefaultAutoRemove;
 	float						mCurrentTime;
-	std::list<TimelineItemRef>	mItems;
+	
+	boost::unordered_multimap<void*,TimelineItemRef>		mItems;
 };
 
 class Cue : public TimelineItem {
