@@ -41,13 +41,10 @@ class DragTweenApp : public AppNative {
 	void mouseDown( MouseEvent event );
 	void mouseDrag( MouseEvent event );
 	void mouseUp( MouseEvent event );
-	void keyDown( KeyEvent event );
 	void draw();
 	
-	bool					inOrOut;
 	vector<Circle>			mCircles;
 	Circle					*mCurrentDragCircle;
-	Circle					*mLocoCircle;
 };
 
 void DragTweenApp::setup()
@@ -62,9 +59,6 @@ void DragTweenApp::setup()
 		timeline().apply( &mCircles.back().mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.5f );
 	}
 
-	mLocoCircle = new Circle( Color( 1, 0, 0 ), 22, getWindowCenter(), getWindowCenter() );
-
-	inOrOut = true;
 	mCurrentDragCircle = 0;
 }
 
@@ -98,28 +92,6 @@ void DragTweenApp::mouseUp( MouseEvent event )
 		
 	mCurrentDragCircle = 0;
 }
-
-void DragTweenApp::keyDown( KeyEvent event )
-{
-	for( size_t c = 0; c < mCircles.size(); ++c ) {
-		float angle = c / (float)mCircles.size() * 4 * M_PI;
-		Vec2f pos = getWindowCenter() + ( 50 + c / (float)mCircles.size() * 200 ) * Vec2f( cos( angle ), sin( angle ) );
-		if( inOrOut ) {
-			timeline().apply( &mCircles[c].mPos, getWindowCenter(), 0.2f, EaseOutAtan( 10 ) ).timelineEnd( -0.18f );
-			timeline().apply( &mCircles[c].mRadius, 0.0f, 0.2f, EaseOutAtan( 10 ) ).timelineEnd( -0.18f );
-		}
-		else {
-			timeline().apply( &mCircles[c].mPos, pos, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.45f );
-			timeline().apply( &mCircles[c].mRadius, 30.0f, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.5f );
-		}
-	}
-
-	timeline().apply( &mLocoCircle->mPos, (inOrOut)?Vec2f(0,100):Vec2f(getWindowWidth(),300), 1.0f )
-				.appendTo( &mCircles[12].mRadius );
-	
-	inOrOut = ! inOrOut;
-}
-
 void DragTweenApp::draw()
 {
 	// clear out the window with black
@@ -128,8 +100,6 @@ void DragTweenApp::draw()
 	
 	for( vector<Circle>::const_iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt )
 		circleIt->draw();
-		
-	mLocoCircle->draw();
 }
 
 
