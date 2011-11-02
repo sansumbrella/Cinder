@@ -31,14 +31,14 @@ struct Circle {
 		r	= mRadius();
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
-		p  += Vec2f( 1.0f, 1.0f );
+		p  += Vec2f( 0.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
 		r  += 1.0f;
-		p  += Vec2f( 1.0f, 1.0f );
+		p  += Vec2f( 0.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
-		p  += Vec2f( 1.0f, 1.0f );
+		p  += Vec2f( 0.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
 		gl::color( mColor );
@@ -196,7 +196,7 @@ void VisualDictionaryApp::mouseMove( MouseEvent event )
 		// make all the circles not moused-over small, and the mouse-over big
 		for( list<WordNode>::iterator nodeIt = mNodes.begin(); nodeIt != mNodes.end(); ++nodeIt ) {
 			if( mMouseOverNode == nodeIt ){
-				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius * 1.35f, 0.25f, EaseOutElastic( 200.0f, 120.0f ) );
+				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius * 1.35f, 0.25f, EaseOutElastic( 2.0f, 1.2f ) );
 			} else {
 				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius, 0.5f, EaseOutAtan( 10 ) );
 			}

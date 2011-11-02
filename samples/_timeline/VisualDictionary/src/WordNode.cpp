@@ -62,14 +62,17 @@ void WordNode::draw() const
 	r	= mRadius();
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
-	pos += Vec2f( 0.5f, 0.5f );
+	pos += Vec2f( 0.0f, 1.0f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
 	r	+= 1.0f;
-	pos += Vec2f( 0.5f, 0.5f );
+	pos += Vec2f( 0.0f, 1.0f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
-
+	pos += Vec2f( 0.0f, 1.0f );
+	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+	
+	
 	// draw color circle
 	gl::color( ColorA( mColor().r, mColor().g, mColor().b, 1.0f ) );
 	pos	= mPos();
