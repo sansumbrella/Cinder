@@ -25,6 +25,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		E1035B3B1460AB8400AD808C /* circle.png in Resources */ = {isa = PBXBuildFile; fileRef = E1035B3A1460AB8400AD808C /* circle.png */; };
 		E1035B3E1460B45100AD808C /* smallCircle.png in Resources */ = {isa = PBXBuildFile; fileRef = E1035B3D1460B45100AD808C /* smallCircle.png */; };
+		E1035B6D146203A300AD808C /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = E1035B6C146203A300AD808C /* background.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		8D1107320486CEB800E47090 /* VisualDictionary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisualDictionary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1035B3A1460AB8400AD808C /* circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = circle.png; path = ../resources/circle.png; sourceTree = "<group>"; };
 		E1035B3D1460B45100AD808C /* smallCircle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = smallCircle.png; path = ../resources/smallCircle.png; sourceTree = "<group>"; };
+		E1035B6C146203A300AD808C /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = background.png; path = ../resources/background.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +149,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E1035B6C146203A300AD808C /* background.png */,
 				E1035B3D1460B45100AD808C /* smallCircle.png */,
 				E1035B3A1460AB8400AD808C /* circle.png */,
 				436F5246145C82F200B8185A /* EnglishDictionary.gz */,
@@ -221,6 +224,7 @@
 				436F5247145C82F200B8185A /* EnglishDictionary.gz in Resources */,
 				E1035B3B1460AB8400AD808C /* circle.png in Resources */,
 				E1035B3E1460B45100AD808C /* smallCircle.png in Resources */,
+				E1035B6D146203A300AD808C /* background.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

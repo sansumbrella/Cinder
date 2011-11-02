@@ -51,35 +51,26 @@ bool WordNode::isSelected() const
 
 void WordNode::draw() const
 {
-	gl::color( ColorA( 0, 0, 0, 0.25f ) );
-	
-	Vec2f pos;
-	float r;
-	
-	
 	// draw shadows
-	pos	= mPos();
-	r	= mRadius();
-
-	pos += Vec2f( 1.0f, 1.0f );
-	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
-	
-	r	+= 1.0f;
-	pos += Vec2f( 1.0f, 1.0f );
-	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+	gl::color( ColorA( 0, 0, 0, mColor().a * 0.5f ) );
+	Vec2f p	= mPos();
+	p += Vec2f( 1.0f, 1.0f );
+	gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
+	p += Vec2f( 1.0f, 1.0f );
+	gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
 
 	
 	// draw color circle
-	gl::color( ColorA( mColor().r, mColor().g, mColor().b, 1.0f ) );
-	pos	= mPos();
-	r	= mRadius();
-	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+	gl::color( mColor );
+	p = mPos();
+	gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
 
 	
 	// draw string
 	// biggest square that can fit in the circle is radius * sqrt(2) per side  x^2 = (r^2)/2
 	const float squareSide = sqrtf( ( mRadius * mRadius ) / 2.0f );
 	
+	// this is ugly. 
 	if( mIsSelected ){
 		float pixelScale = std::min( squareSide / mWordPixelLengthBig, squareSide / 150 ) * 2.0f;
 		gl::TextureFont::DrawOptions options = gl::TextureFont::DrawOptions().scale( pixelScale ).pixelSnap( false );
