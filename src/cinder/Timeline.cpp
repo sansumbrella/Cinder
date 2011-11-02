@@ -33,6 +33,7 @@ namespace cinder {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Timeline
 typedef boost::unordered_multimap<void*,TimelineItemRef>::iterator s_iter;
+typedef boost::unordered_multimap<void*,TimelineItemRef>::const_iterator s_const_iter;
 
 Timeline::Timeline()
 	: TimelineItem( 0, 0, 0, 0 ), mDefaultAutoRemove( true ), mCurrentTime( 0 )
@@ -93,7 +94,7 @@ void Timeline::appendPingPong()
 		mItems.insert( make_pair( (*appIt)->mTarget, *appIt ) );
 	}
 	
-	calculateDuration();
+	setDurationDirty();
 }
 
 void Timeline::apply( TimelineItemRef item )
@@ -103,20 +104,19 @@ void Timeline::apply( TimelineItemRef item )
 	insert( item );
 }
 
-
 void Timeline::add( TimelineItemRef item )
 {
 	item->mParent = this;
 	item->mStartTime = mCurrentTime;
 	mItems.insert( make_pair( item->mTarget, item ) );
-	calculateDuration();
+	setDurationDirty();
 }
 
 void Timeline::insert( TimelineItemRef item )
 {
 	item->mParent = this;
 	mItems.insert( make_pair( item->mTarget, item ) );
-	calculateDuration();
+	setDurationDirty();
 }
 
 // remove all items which have been marked for removal
@@ -133,18 +133,18 @@ void Timeline::eraseMarked()
 	}
 	
 	if( needRecalc )
-		calculateDuration();
+		setDurationDirty();
 }	
 
 
-void Timeline::calculateDuration()
+float Timeline::calcDuration() const
 {
 	float duration = 0;
-	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
+	for( s_const_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
 		duration = std::max( iter->second->getEndTime(), duration );
 	}
 	
-	setDuration( duration );
+	return duration;
 }
 
 TimelineItemRef Timeline::find( void *target )
@@ -213,7 +213,7 @@ void Timeline::removeTarget( void *target )
 	pair<s_iter,s_iter> range = mItems.equal_range( target );
 	mItems.erase( range.first, range.second );
 	
-	calculateDuration();
+	setDurationDirty();
 }
 
 void Timeline::cloneAndReplaceTarget( void *target, void *replacementTarget )
@@ -221,17 +221,19 @@ void Timeline::cloneAndReplaceTarget( void *target, void *replacementTarget )
 	if( target == 0 )
 		return;
 
-	list<TimelineItemRef> newItems;
 	pair<s_iter,s_iter> range = mItems.equal_range( target );
+
+	vector<TimelineItemRef> newItems;
+	newItems.reserve( std::distance( range.first, range.second ) );
 	for( s_iter iter = range.first; iter != range.second; ++iter ) {
 		newItems.push_back( iter->second->clone() );
 		newItems.back()->setTarget( replacementTarget );
 	}
 
-	for( list<TimelineItemRef>::const_iterator iter = newItems.begin(); iter != newItems.end(); ++iter )
-		mItems.insert( make_pair( (*iter)->mTarget, *iter ) );
-	
-	calculateDuration();
+	for( vector<TimelineItemRef>::iterator newItemIt = newItems.begin(); newItemIt != newItems.end(); ++newItemIt )
+		mItems.insert( make_pair( replacementTarget, *newItemIt ) );
+
+	setDurationDirty();
 }
 
 void Timeline::reset( bool unsetStarted )
@@ -277,7 +279,7 @@ void Timeline::update( float absTime )
 
 void Timeline::itemTimeChanged( TimelineItem *item )
 {
-	calculateDuration();
+	setDurationDirty();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

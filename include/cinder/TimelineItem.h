@@ -47,7 +47,7 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	void			setStartTime( float newTime );
 
 	//! Returns the item's duration
-	float			getDuration() const { return mDuration; }			
+	float			getDuration() const { updateDuration(); return mDuration; }
 	//! Sets the item's duration to \a newDuration.
 	void			setDuration( float newDuration );
 
@@ -85,8 +85,9 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	virtual void update( float relativeTime ) = 0;
 	virtual void complete() = 0;
 	//! Call update() only at the beginning of each loop (for example Cues exhibit require this behavior)
-	virtual bool updateAtLoopStart() { return false; }
-	virtual void				reverse() = 0;
+	virtual bool 	updateAtLoopStart() { return false; }
+	virtual float	calcDuration() const { return mDuration; }
+	virtual void	reverse() = 0;
 	//! Creates a clone of the item
 	virtual TimelineItemRef		clone() const = 0;
 	//! Creates a cloned item which runs in reverse relative to a timeline of duration \a timelineDuration
@@ -97,6 +98,8 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	TimelineItemRef thisRef() { return shared_from_this(); }
 	
   protected:
+	void	setDurationDirty() { mDirtyDuration = true; }
+	void	updateDuration() const;
 	//! Converts time from absolute to absolute based on item's looping attributes
 	float	loopTime( float absTime );
 	void	setTarget( void *target ) { mTarget = target; }
@@ -114,7 +117,8 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	
 	friend class Timeline;
   private:
-	float	mDuration, mInvDuration;
+	mutable float	mDuration, mInvDuration;
+	mutable bool	mDirtyDuration; // marked if the virtual calcDuration() needs to be calculated
 };
 
 } // namespace cinder
