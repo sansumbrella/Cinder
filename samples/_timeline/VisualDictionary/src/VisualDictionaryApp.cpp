@@ -22,31 +22,31 @@ struct Circle {
 		: mRadius( radius ), mColor( color )
 	{}
 	void draw( const Vec2f &pos ) {
-		gl::color( ColorA( mColor * 0.25f, 0.25f ) );
+		gl::color( ColorA( 0, 0, 0, 0.25f ) );
 		
 		Vec2f p;
 		float r;
 		
 		p	= pos;
 		r	= mRadius();
-		gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
-		p  += Vec2f( 0.5f, 0.5f );
-		gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+		p  += Vec2f( 1.0f, 1.0f );
+		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
 		r  += 1.0f;
-		p  += Vec2f( 0.5f, 0.5f );
-		gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+		p  += Vec2f( 1.0f, 1.0f );
+		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
 
 		gl::color( mColor );
 		p	= pos;
 		r	= mRadius();
-		gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
+		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 	}
 
 	Anim<float>	mRadius;
-	Color		mColor;
+	Anim<Color>	mColor;
 };
 
 
@@ -104,7 +104,6 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 		mNodes.push_back( WordNode( words[w], false ) );
 		mNodes.back().mPos = getWindowCenter();
 		mNodes.back().mColor = ColorA( col, 0.0f );
-		mNodes.back().mTextColor = ColorA( 0, 0, 0, 0.5f );
 		
 		timeline().apply( &mNodes.back().mRadius, mCurrentCircleRadius, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.5f );
 		timeline().apply( &mNodes.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.475f );
@@ -194,10 +193,8 @@ void VisualDictionaryApp::mouseMove( MouseEvent event )
 		for( list<WordNode>::iterator nodeIt = mNodes.begin(); nodeIt != mNodes.end(); ++nodeIt ) {
 			if( mMouseOverNode == nodeIt ){
 				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius * 1.35f, 0.25f, EaseOutElastic( 200.0f, 120.0f ) );
-				timeline().apply( &nodeIt->mTextColor, ColorA( 1, 1, 1, 1 ), 0.2f, EaseOutAtan( 10 ) );
 			} else {
 				timeline().apply( &nodeIt->mRadius, mCurrentCircleRadius, 0.5f, EaseOutAtan( 10 ) );
-				timeline().apply( &nodeIt->mTextColor, ColorA( 0, 0, 0, 0.5f ), 0.2f, EaseOutAtan( 10 ) );
 			}
 		}
 	}
@@ -210,7 +207,7 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 		if( nodeIt != selectedNode ) {
 			// copy this node to dying nodes and erase it from the current
 			mDyingNodes.push_back( *nodeIt );
-			timeline().apply( &mDyingNodes.back().mRadius, 0.0f, 0.5f, EaseInAtan( 10 ) )
+			timeline().apply( &mDyingNodes.back().mRadius, 0.0f, 0.5f, EaseInQuint() )
 				.completionFn( bind( &WordNode::setShouldBeDeleted, &(mDyingNodes.back()) ) ); // when you're done, mark yourself for deletion
 		}
 	}
@@ -218,19 +215,21 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 	mCurrentNode = *selectedNode;
 
 	
-	// draw the bg circles
+	// draw the bg circles and animate their color and radius
 	for( list<Circle>::reverse_iterator circleIt = mCircles.rbegin(); circleIt != mCircles.rend(); ++circleIt ){
-		timeline().apply( &circleIt->mRadius, circleIt->mRadius + 10.0f, 0.75f, EaseOutBack() ).timelineEnd( -0.725f );
+		timeline().apply( &circleIt->mRadius, circleIt->mRadius + 10.0f, 0.75f, EaseInElastic( 2, 1 ) ).timelineEnd( -0.7f );
+		Color c = circleIt->mColor;
+		timeline().apply( &circleIt->mColor, Color( 1, 1, 1 ), 0.25f, EaseOutAtan( 10 ) );
+		timeline().apply( &circleIt->mColor, c, 0.35f, EaseOutAtan( 10 ) ).appendTo( &circleIt->mColor );
 	}
 	mCircles.push_back( Circle( 140.0f, mCurrentNode.mColor() ) );
 	
 
 	mNodes.clear();
 
-	// move the selected node to the center and make it big, transparent/white
+	// move the selected node to the center and make it big
 	timeline().apply( &mCurrentNode.mRadius, 140.0f, 0.5f, EaseOutAtan( 10 ) );
 	timeline().apply( &mCurrentNode.mPos, getWindowCenter(), 0.5f, EaseOutAtan( 10 ) );
-	timeline().apply( &mCurrentNode.mTextColor, ColorA( 1, 1, 1, 1 ), 0.5f, EaseOutAtan( 10 ) );
 	
 	
 	// now add all the descendants of the clicked node
