@@ -32,7 +32,7 @@ namespace cinder {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Timeline
-typedef std::list<TimelineItemRef>::iterator s_iter;
+typedef boost::unordered_multimap<void*,TimelineItemRef>::iterator s_iter;
 
 Timeline::Timeline()
 	: TimelineItem( 0, 0, 0, 0 ), mDefaultAutoRemove( true ), mCurrentTime( 0 )
@@ -57,9 +57,9 @@ void Timeline::stepTo( float absoluteTime )
 	// Deleted items are never removed immediately, but are marked for deletion.
 	s_iter endItem = mItems.end();
 	for( s_iter iter = mItems.begin(); iter != endItem; ++iter ) {
-		(*iter)->stepTo( mCurrentTime );
-		if( (*iter)->isComplete() && (*iter)->getAutoRemove() )
-			(*iter)->mMarkedForRemoval = true;
+		iter->second->stepTo( mCurrentTime );
+		if( iter->second->isComplete() && iter->second->getAutoRemove() )
+			iter->second->mMarkedForRemoval = true;
 	}
 	
 	eraseMarked();	
@@ -84,13 +84,13 @@ void Timeline::appendPingPong()
 	
 	float duration = mDuration;
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
-		TimelineItemRef cloned = (*iter)->cloneReverse();
+		TimelineItemRef cloned = iter->second->cloneReverse();
 		cloned->mStartTime = duration + ( duration - ( cloned->mStartTime + cloned->mDuration ) );
 		toAppend.push_back( cloned );
 	}
 	
 	for( vector<TimelineItemRef>::const_iterator appIt = toAppend.begin(); appIt != toAppend.end(); ++appIt ) {
-		mItems.push_back( *appIt );
+		mItems.insert( make_pair( (*appIt)->mTarget, *appIt ) );
 	}
 	
 	calculateDuration();
@@ -108,14 +108,14 @@ void Timeline::add( TimelineItemRef item )
 {
 	item->mParent = this;
 	item->mStartTime = mCurrentTime;
-	mItems.push_back( item );
+	mItems.insert( make_pair( item->mTarget, item ) );
 	calculateDuration();
 }
 
 void Timeline::insert( TimelineItemRef item )
 {
 	item->mParent = this;
-	mItems.push_back( item );
+	mItems.insert( make_pair( item->mTarget, item ) );
 	calculateDuration();
 }
 
@@ -124,8 +124,8 @@ void Timeline::eraseMarked()
 {
 	bool needRecalc = false;
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ) {
-		if( (*iter)->mMarkedForRemoval ) {
-			iter = mItems.erase( iter );
+		if( iter->second->mMarkedForRemoval ) {
+			mItems.erase( iter++ );
 			needRecalc = true;
 		}
 		else
@@ -141,7 +141,7 @@ void Timeline::calculateDuration()
 {
 	float duration = 0;
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
-		duration = std::max( (*iter)->getEndTime(), duration );
+		duration = std::max( iter->second->getEndTime(), duration );
 	}
 	
 	setDuration( duration );
@@ -151,8 +151,8 @@ TimelineItemRef Timeline::find( void *target )
 {
 	s_iter iter = mItems.begin();
 	while( iter != mItems.end() ) {
-		if( (*iter)->getTarget() == target )
-			return *iter;
+		if( iter->second->getTarget() == target )
+			return iter->second;
 		++iter;
 	}
 	
@@ -163,25 +163,25 @@ TimelineItemRef Timeline::findLast( void *target )
 {
 	s_iter result = mItems.end();
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
-		if( (*iter)->getTarget() == target ) {
+		if( iter->second->getTarget() == target ) {
 			if( result == mItems.end() )
 				result = iter;
-			else if( (*iter)->getStartTime() > (*result)->getStartTime() )
+			else if( iter->second->getStartTime() > result->second->getStartTime() )
 				result = iter;
 		}
 	}
 	
-	return (result == mItems.end() ) ? TimelineItemRef() : *result;
+	return (result == mItems.end() ) ? TimelineItemRef() : result->second;
 }
 
 float Timeline::findEndTimeOf( void *target, bool *found )
 {
 	s_iter result = mItems.end();
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
-		if( (*iter)->getTarget() == target ) {
+		if( iter->second->getTarget() == target ) {
 			if( result == mItems.end() )
 				result = iter;
-			else if( (*iter)->getEndTime() > (*result)->getEndTime() )
+			else if( iter->second->getEndTime() > result->second->getEndTime() )
 				result = iter;
 		}
 	}
@@ -189,7 +189,7 @@ float Timeline::findEndTimeOf( void *target, bool *found )
 	if( result != mItems.end() ) {
 		if( found )
 			*found = true;
-		return (*result)->getEndTime();
+		return result->second->getEndTime();
 	}
 	else {
 		if( found )
@@ -200,35 +200,36 @@ float Timeline::findEndTimeOf( void *target, bool *found )
 
 void Timeline::remove( TimelineItemRef item )
 {
-	s_iter iter = std::find( mItems.begin(), mItems.end(), item );
-	if( iter != mItems.end() )
-		(*iter)->mMarkedForRemoval = true;
+	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
+		if( iter->second == item ) {
+			mItems.erase( iter );
+			break;
+		}
+	}
 }
 
 void Timeline::removeTarget( void *target )
 {
-	for( s_iter iter = mItems.begin(); iter != mItems.end();  ) {
-		if( (*iter)->getTarget() == target )
-			iter = mItems.erase( iter );
-		else
-			++iter;
-	}
+	pair<s_iter,s_iter> range = mItems.equal_range( target );
+	mItems.erase( range.first, range.second );
 	
 	calculateDuration();
 }
 
 void Timeline::cloneAndReplaceTarget( void *target, void *replacementTarget )
 {
+	if( target == 0 )
+		return;
+
 	list<TimelineItemRef> newItems;
-	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter ) {
-		if( (*iter)->getTarget() == target ) {
-			newItems.push_back( (*iter)->clone() );
-			newItems.back()->setTarget( replacementTarget );
-		}
+	pair<s_iter,s_iter> range = mItems.equal_range( target );
+	for( s_iter iter = range.first; iter != range.second; ++iter ) {
+		newItems.push_back( iter->second->clone() );
+		newItems.back()->setTarget( replacementTarget );
 	}
 
 	for( list<TimelineItemRef>::const_iterator iter = newItems.begin(); iter != newItems.end(); ++iter )
-		mItems.push_back( *iter );
+		mItems.insert( make_pair( (*iter)->mTarget, *iter ) );
 	
 	calculateDuration();
 }
@@ -238,7 +239,7 @@ void Timeline::reset( bool unsetStarted )
 	TimelineItem::reset( unsetStarted );
 	
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter )
-		(*iter)->reset( unsetStarted );
+		iter->second->reset( unsetStarted );
 }
 
 
@@ -250,7 +251,7 @@ void Timeline::loopStart()
 void Timeline::reverse()
 {
 	for( s_iter iter = mItems.begin(); iter != mItems.end(); ++iter )
-		(*iter)->reverse();
+		iter->second->reverse();
 }
 
 TimelineItemRef Timeline::clone() const
@@ -262,8 +263,8 @@ TimelineItemRef Timeline::cloneReverse() const
 {
 	Timeline *result = new Timeline( *this );
 	for( s_iter iter = result->mItems.begin(); iter != result->mItems.end(); ++iter ) {
-		(*iter)->reverse();
-		(*iter)->mStartTime = mDuration + ( mDuration - ( (*iter)->mStartTime + (*iter)->mDuration ) );		
+		iter->second->reverse();
+		iter->second->mStartTime = mDuration + ( mDuration - ( iter->second->mStartTime + iter->second->mDuration ) );		
 	}
 	return TimelineItemRef( result );
 }

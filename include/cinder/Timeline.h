@@ -30,9 +30,9 @@
 #include "cinder/Tween.h"
 #include "cinder/Function.h"
 
-#include <boost/intrusive_ptr.hpp>
 #include <vector>
 #include <list>
+#include <boost/unordered_map.hpp>
 
 namespace cinder {
 
@@ -41,8 +41,6 @@ typedef std::shared_ptr<class Timeline>		TimelineRef;
 	
 class Timeline : public TimelineItem {		
   public:
-	Timeline();
-	
 	//! Creates a new timeline, defaulted to infinite
 	static TimelineRef	create() { TimelineRef result( new Timeline() ); result->setInfinite( true ); return result; }
 
@@ -168,6 +166,8 @@ class Timeline : public TimelineItem {
 	}
 	
   protected:
+  	Timeline();
+  
 	virtual void reverse();
 	virtual TimelineItemRef cloneReverse() const;
 	virtual TimelineItemRef clone() const;
@@ -181,7 +181,8 @@ class Timeline : public TimelineItem {
 
 	bool						mDefaultAutoRemove;
 	float						mCurrentTime;
-	std::list<TimelineItemRef>	mItems;
+	
+	boost::unordered_multimap<void*,TimelineItemRef>		mItems;
 };
 
 class Cue : public TimelineItem {

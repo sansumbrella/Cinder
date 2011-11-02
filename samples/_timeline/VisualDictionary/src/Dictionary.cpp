@@ -23,9 +23,13 @@ Dictionary::Dictionary( DataSourceRef dataSource )
 }
 
 struct CompareStringPrefix {
+	CompareStringPrefix( int compareLength ) : mCompareLength( compareLength ){}
+	
 	bool operator()( string test1, string test2 ) const {
-		return strncmp( test1.c_str(), test2.c_str(), std::min( test1.size(), test2.size() ) ) < 0;
+		return strncmp( test1.c_str(), test2.c_str(), mCompareLength ) < 0;
 	}
+	
+	int mCompareLength;
 };
 
 vector<string> Dictionary::getDescendants( const string &word ) const
@@ -36,7 +40,7 @@ vector<string> Dictionary::getDescendants( const string &word ) const
 	// we want to figure out what letters follow 'word'
 	// so for "victor" we want 'i' (victories), 's' (victors), 'y' (victory)
 	pair<vector<string>::const_iterator, vector<string>::const_iterator> range;
-	range = std::equal_range( mWords.begin(), mWords.end(), word, CompareStringPrefix() );
+	range = std::equal_range( mWords.begin(), mWords.end(), word, CompareStringPrefix( word.size() ) );
 
 	// iterate all the words in our range, and add their last letter to our set of 'foundLetters'	
 	for( vector<string>::const_iterator wordIt = range.first; wordIt != range.second; ++wordIt ) {
