@@ -25,10 +25,7 @@ class WordNode {
 	
 	bool	shouldBeDeleted() const;
 	void	setShouldBeDeleted();
-	
-	bool	isSelected() const;
-	void	setIsSelected();
-	
+
 	bool	isPointInside( const ci::Vec2f &pt ) const;
 	
 	void	draw() const;
@@ -36,16 +33,14 @@ class WordNode {
 	ci::Anim<ci::Vec2f>		mPos;
 	ci::Anim<float>			mRadius;
 	ci::Anim<ci::ColorA>	mColor;
-	ci::Anim<ci::ColorA>	mTextColor;
 
 
 	static	void	setFont( ci::gl::TextureFontRef font );
   protected:
 	bool			mShouldBeDeleted;
-	bool			mIsSelected;
 	std::string		mWord;
 	bool			mCompleteWord;
 	float			mWordPixelLength;
-	
+
 	static ci::gl::TextureFontRef	sFont;
 };
