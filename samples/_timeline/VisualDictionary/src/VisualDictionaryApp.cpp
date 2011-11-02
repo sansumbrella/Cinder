@@ -19,7 +19,7 @@ using namespace std;
 struct Circle {
   public:
 	Circle( float radius, Color color )
-		: mRadius( radius ), mColor( color )
+		: mRadius( radius ), mRadiusDest( radius ), mColor( color )
 	{}
 	void draw( const Vec2f &pos ) {
 		gl::color( ColorA( 0, 0, 0, 0.25f ) );
@@ -38,7 +38,9 @@ struct Circle {
 		p  += Vec2f( 1.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
-
+		p  += Vec2f( 1.0f, 1.0f );
+		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
+		
 		gl::color( mColor );
 		p	= pos;
 		r	= mRadius();
@@ -47,6 +49,7 @@ struct Circle {
 
 	Anim<float>	mRadius;
 	Anim<Color>	mColor;
+	float		mRadiusDest;
 };
 
 
@@ -93,11 +96,11 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 	int radiusDivisor = 26;//std::max<int>( 10, words.size() ); // don't let the circles get too small
 	mCurrentCircleRadius = radius / radiusDivisor * M_PI;
 	for( size_t w = 0; w < words.size(); ++w ) {
-		int wordLength = words[w].length();
-		string s = words[w];
-		int charIndex = (int)s[wordLength-1] - 97;
-		float charPer = charIndex/26.0f;
-		float angle = charPer * 2.0f * M_PI;
+		int wordLength	= words[w].length();
+		string s		= words[w];
+		int charIndex	= (int)s[wordLength-1] - 97;
+		float charPer	= charIndex/26.0f;
+		float angle		= charPer * 2.0f * M_PI;
 		//float angle = w / (float)words.size() * 2 * M_PI;
 		Vec2f pos = getWindowCenter() + radius * Vec2f( cos( angle ), sin( angle ) );
 		Color col(  CM_HSV, charPer, 0.875f, 1 );
@@ -105,9 +108,9 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 		mNodes.back().mPos = getWindowCenter();
 		mNodes.back().mColor = ColorA( col, 0.0f );
 		
-		timeline().apply( &mNodes.back().mRadius, mCurrentCircleRadius, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.5f );
-		timeline().apply( &mNodes.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.475f );
-		timeline().apply( &mNodes.back().mColor, ColorA( col, 1.0f ), 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.475f );
+		timeline().apply( &mNodes.back().mRadius, mCurrentCircleRadius, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.4875f );
+		timeline().apply( &mNodes.back().mPos, pos, 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.4875f );
+		timeline().apply( &mNodes.back().mColor, ColorA( col, 1.0f ), 0.5f, EaseOutAtan( 10 ) ).timelineEnd( -0.4875f );
 	}
 }
 
@@ -123,7 +126,8 @@ void VisualDictionaryApp::setup()
 	mDictionary = shared_ptr<Dictionary>( new Dictionary( loadResource( "EnglishDictionary.gz" ) ) );
 
 	// give the WordNodes their font
-	WordNode::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 96 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
+	WordNode::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 34 ), gl::TextureFont::Format().enableMipmapping( true ) ),
+					   gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 150 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
 
 	// make the first 26 nodes, one for each letter
 	vector<string> initialWords;
@@ -213,11 +217,12 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 	}
 	
 	mCurrentNode = *selectedNode;
-
+	mCurrentNode.setSelected();
 	
 	// draw the bg circles and animate their color and radius
 	for( list<Circle>::reverse_iterator circleIt = mCircles.rbegin(); circleIt != mCircles.rend(); ++circleIt ){
-		timeline().apply( &circleIt->mRadius, circleIt->mRadius + 10.0f, 0.75f, EaseInElastic( 2, 1 ) ).timelineEnd( -0.7f );
+		circleIt->mRadiusDest += 10.0f;
+		timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest, 0.5f, EaseInElastic( 2, 1 ) ).timelineEnd( -0.475f );
 		Color c = circleIt->mColor;
 		timeline().apply( &circleIt->mColor, Color( 1, 1, 1 ), 0.25f, EaseOutAtan( 10 ) );
 		timeline().apply( &circleIt->mColor, c, 0.35f, EaseOutAtan( 10 ) ).appendTo( &circleIt->mColor );
@@ -241,7 +246,7 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 	
 	// once everything is done animating, then we can allow selections, but for now, disable them
 	mEnableSelections = false;
-	timeline().add( bind( &VisualDictionaryApp::enableSelections, this ), timeline().getEndTime() );
+	timeline().add( bind( &VisualDictionaryApp::enableSelections, this ), timeline().getEndTime() - 2.0f );
 }
 
 void VisualDictionaryApp::update()
@@ -252,7 +257,7 @@ void VisualDictionaryApp::update()
 
 void VisualDictionaryApp::draw()
 {
-	gl::clear( Color( 0.1f, 0.1f, 0.2f ) ); 
+	gl::clear( Color( 0.1f, 0.1f, 0.15f ) ); 
 	gl::enableAlphaBlending();
 	
 	

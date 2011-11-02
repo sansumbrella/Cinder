@@ -14,12 +14,14 @@
 using namespace std;
 using namespace ci;
 
-gl::TextureFontRef	WordNode::sFont;
+gl::TextureFontRef	WordNode::sFontSmall;
+gl::TextureFontRef	WordNode::sFontBig;
 
 WordNode::WordNode( const string &word, bool completeWord )
-	: mWord( word ), mCompleteWord( completeWord ), mShouldBeDeleted( false )
+	: mWord( word ), mCompleteWord( completeWord ), mShouldBeDeleted( false ), mIsSelected( false )
 {
-	mWordPixelLength = sFont->measureString( mWord ).x;
+	mWordPixelLengthSmall	= sFontSmall->measureString( mWord ).x;
+	mWordPixelLengthBig		= sFontBig->measureString( mWord ).x;
 }
 
 bool WordNode::isPointInside( const Vec2f &pt ) const
@@ -37,6 +39,16 @@ bool WordNode::shouldBeDeleted() const
 	return mShouldBeDeleted;
 }
 
+void WordNode::setSelected()
+{
+	mIsSelected = true;
+}
+
+bool WordNode::isSelected() const
+{
+	return mIsSelected;
+}
+
 void WordNode::draw() const
 {
 	gl::color( ColorA( 0, 0, 0, 0.25f ) );
@@ -44,6 +56,8 @@ void WordNode::draw() const
 	Vec2f pos;
 	float r;
 	
+	
+	// draw shadows
 	pos	= mPos();
 	r	= mRadius();
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
@@ -55,28 +69,46 @@ void WordNode::draw() const
 	pos += Vec2f( 0.5f, 0.5f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
-	
+
+	// draw color circle
 	gl::color( ColorA( mColor().r, mColor().g, mColor().b, 1.0f ) );
 	pos	= mPos();
 	r	= mRadius();
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 
+	
+	// draw string
 	// biggest square that can fit in the circle is radius * sqrt(2) per side  x^2 = (r^2)/2
 	const float squareSide = sqrtf( ( mRadius * mRadius ) / 2.0f );
-	float pixelScale = std::min( squareSide / mWordPixelLength, squareSide / 72 ) * 2.25f;
+	
+	if( mIsSelected ){
+		float pixelScale = std::min( squareSide / mWordPixelLengthBig, squareSide / 150 ) * 2.0f;
+		gl::TextureFont::DrawOptions options = gl::TextureFont::DrawOptions().scale( pixelScale ).pixelSnap( false );
+		
+		const Vec2f offset = (Vec2f)mPos + Vec2f( -mRadius + ( mRadius * 2 - mWordPixelLengthBig * pixelScale ) / 2, mRadius - (mRadius * 2.0f - 60 * pixelScale ) / 2 );
+		
+		gl::color( ColorA( Color::black(), 0.5f ) );
+		sFontBig->drawString( mWord, offset + Vec2f( pixelScale, pixelScale ) * 1.5f, options );
+		
+		gl::color( ColorA( Color::white(), 1.0f ) );
+		sFontBig->drawString( mWord, offset, options );
+		
+	} else {
+		float pixelScale = std::min( squareSide / mWordPixelLengthSmall, squareSide / 72 ) * 2.25f;
+		gl::TextureFont::DrawOptions options = gl::TextureFont::DrawOptions().scale( pixelScale ).pixelSnap( false );
 
-	gl::TextureFont::DrawOptions options = gl::TextureFont::DrawOptions().scale( pixelScale ).pixelSnap( false );
+		const Vec2f offset = (Vec2f)mPos + Vec2f( -mRadius + ( mRadius * 2 - mWordPixelLengthSmall * pixelScale ) / 2, mRadius - (mRadius * 2.0f - 20 * pixelScale ) / 2 );
 
-	const Vec2f offset = (Vec2f)mPos + Vec2f( -mRadius + ( mRadius * 2 - mWordPixelLength * pixelScale ) / 2, mRadius - (mRadius * 2.0f - 60 * pixelScale ) / 2 );
+		gl::color( ColorA( Color::black(), 0.5f ) );
+		sFontSmall->drawString( mWord, offset + Vec2f( pixelScale, pixelScale ) * 1.5f, options );
 
-	gl::color( ColorA( Color::black(), 0.5f ) );
-	sFont->drawString( mWord, offset + Vec2f( pixelScale, pixelScale ) * 2.0f, options );
-
-	gl::color( ColorA( Color::white(), 1.0f ) );
-	sFont->drawString( mWord, offset, options );
+		gl::color( ColorA( ( mColor() + Color::white() ) * 0.65f, 1.0f ) );
+		sFontSmall->drawString( mWord, offset, options );
+	}
 }
 
-void WordNode::setFont( gl::TextureFontRef font )
+void WordNode::setFont( gl::TextureFontRef fontSmall, gl::TextureFontRef fontBig )
 {
-	sFont = font;
+	sFontSmall = fontSmall;
+	sFontBig   = fontBig;
 }
