@@ -17,8 +17,8 @@ using namespace ci;
 gl::TextureFontRef	WordNode::sFontSmall;
 gl::TextureFontRef	WordNode::sFontBig;
 
-WordNode::WordNode( const string &word, bool completeWord )
-	: mWord( word ), mCompleteWord( completeWord ), mShouldBeDeleted( false ), mIsSelected( false )
+WordNode::WordNode( const string &word )
+	: mWord( word ), mShouldBeDeleted( false ), mIsSelected( false )
 {
 	mWordPixelLengthSmall	= sFontSmall->measureString( mWord ).x;
 	mWordPixelLengthBig		= sFontBig->measureString( mWord ).x;
@@ -62,14 +62,14 @@ void WordNode::draw() const
 	r	= mRadius();
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
-	pos += Vec2f( 0.0f, 1.0f );
+	pos += Vec2f( 1.0f, 1.0f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
 	r	+= 1.0f;
-	pos += Vec2f( 0.0f, 1.0f );
+	pos += Vec2f( 1.0f, 1.0f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
-	pos += Vec2f( 0.0f, 1.0f );
+	pos += Vec2f( 1.0f, 1.0f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
 	

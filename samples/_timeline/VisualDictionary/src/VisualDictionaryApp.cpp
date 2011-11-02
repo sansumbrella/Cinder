@@ -31,14 +31,14 @@ struct Circle {
 		r	= mRadius();
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
-		p  += Vec2f( 0.0f, 1.0f );
+		p  += Vec2f( 1.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
 		r  += 1.0f;
-		p  += Vec2f( 0.0f, 1.0f );
+		p  += Vec2f( 1.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
-		p  += Vec2f( 0.0f, 1.0f );
+		p  += Vec2f( 1.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
 		gl::color( mColor );
@@ -104,7 +104,7 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 		//float angle = w / (float)words.size() * 2 * M_PI;
 		Vec2f pos = getWindowCenter() + radius * Vec2f( cos( angle ), sin( angle ) );
 		Color col(  CM_HSV, charPer, 0.875f, 1 );
-		mNodes.push_back( WordNode( words[w], false ) );
+		mNodes.push_back( WordNode( words[w] ) );
 		mNodes.back().mPos = getWindowCenter();
 		mNodes.back().mColor = ColorA( col, 0.0f );
 		
@@ -251,6 +251,23 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 
 void VisualDictionaryApp::update()
 {
+	// if the currentNode word is a real word, animate the bg circles
+	if( mDictionary->isCompleteWord( mCurrentNode.getWord() ) ){
+		int index = 0;
+		for( list<Circle>::reverse_iterator circleIt = mCircles.rbegin(); circleIt != mCircles.rend(); ++circleIt ){
+			if( getElapsedFrames()%50 == index * 2 ){
+				timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest + Rand::randFloat( -50.0f, 50.0f ), 1.0f, EaseOutBack() );
+				Color c = circleIt->mColor;
+				timeline().apply( &circleIt->mColor, c, 0.35f, EaseOutAtan( 10 ) );
+			}
+			index ++;
+		}
+		
+//		if( getElapsedFrames()%50 == 0 ){
+//			timeline().apply( &mCurrentNode.mRadius, mCurrentNode.mRadiusDest + Rand::randFloat( -50.0f, 50.0f ), 1.0f, EaseOutBack() );
+//		}
+	}
+	
 	// erase any nodes which have been marked as ready to be deleted
 	mDyingNodes.remove_if( bind( &WordNode::shouldBeDeleted, _1 ) );
 }

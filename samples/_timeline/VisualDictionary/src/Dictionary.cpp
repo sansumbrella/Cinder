@@ -16,12 +16,13 @@ Dictionary::Dictionary( DataSourceRef dataSource )
 {
 	Buffer decompressed = decompressBuffer( Buffer( dataSource ), false, true );
 	
-	// read out all the words, which are separated by lines
+	// read out all the words, which are separated by lines and are already alphabetized
 	IStreamMemRef stream = IStreamMem::create( decompressed.getData(), decompressed.getDataSize() );
 	while( ! stream->isEof() )
 		mWords.push_back( stream->readLine() );
 }
 
+// Functor used to determine whether the prefix of length 'compareLength' of two words are the same
 struct CompareStringPrefix {
 	CompareStringPrefix( int compareLength ) : mCompareLength( compareLength ){}
 	
@@ -54,4 +55,10 @@ vector<string> Dictionary::getDescendants( const string &word ) const
 		result.push_back( word + *letIt );
 	
 	return result;
+}
+
+bool Dictionary::isCompleteWord( const std::string &word ) const
+{
+	vector<string>::const_iterator lower = std::lower_bound( mWords.begin(), mWords.end(), word );
+	return ( lower != mWords.end() ) && *lower == word;
 }
