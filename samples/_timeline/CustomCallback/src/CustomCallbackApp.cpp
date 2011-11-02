@@ -72,7 +72,7 @@ void CustomCallbackApp::mouseDown( MouseEvent event )
 	timeline().apply( &mCircle.mPos, Vec2f( event.getPos() ), 2.0f, EaseInOutCubic() )
 			.startFn( ColorToGreenFunctor( &gBackgroundColor ) )
 			.updateFn( std::bind( &Circle::posUpdate, &mCircle ) )
-			.completionFn( setBackgroundToBlue );
+			.finishFn( setBackgroundToBlue );
 }
 
 void CustomCallbackApp::draw()
