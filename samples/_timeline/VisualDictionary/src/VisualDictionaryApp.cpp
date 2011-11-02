@@ -101,7 +101,7 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 		//float angle = w / (float)words.size() * 2 * M_PI;
 		Vec2f pos = getWindowCenter() + radius * Vec2f( cos( angle ), sin( angle ) );
 		Color col(  CM_HSV, charPer, 0.875f, 1 );
-		mNodes.push_back( WordNode( words[w], false ) );
+		mNodes.push_back( WordNode( words[w] ) );
 		mNodes.back().mPos = getWindowCenter();
 		mNodes.back().mColor = ColorA( col, 0.0f );
 		

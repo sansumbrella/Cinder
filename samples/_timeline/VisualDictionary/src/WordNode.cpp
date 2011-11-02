@@ -16,8 +16,8 @@ using namespace ci;
 
 gl::TextureFontRef	WordNode::sFont;
 
-WordNode::WordNode( const string &word, bool completeWord )
-	: mWord( word ), mCompleteWord( completeWord ), mShouldBeDeleted( false )
+WordNode::WordNode( const string &word )
+	: mWord( word ), mShouldBeDeleted( false )
 {
 	mWordPixelLength = sFont->measureString( mWord ).x;
 }

@@ -19,9 +19,9 @@
 class WordNode {
   public:
 	WordNode() {}
-	WordNode( const std::string &word, bool completeWord );
+	WordNode( const std::string &word );
 
-	std::string		getWord() const { return mWord; }
+	const std::string&	getWord() const { return mWord; }
 	
 	bool	shouldBeDeleted() const;
 	void	setShouldBeDeleted();
@@ -29,7 +29,8 @@ class WordNode {
 	bool	isPointInside( const ci::Vec2f &pt ) const;
 	
 	void	draw() const;
-		
+
+	// Timelined properties		
 	ci::Anim<ci::Vec2f>		mPos;
 	ci::Anim<float>			mRadius;
 	ci::Anim<ci::ColorA>	mColor;
@@ -39,7 +40,6 @@ class WordNode {
   protected:
 	bool			mShouldBeDeleted;
 	std::string		mWord;
-	bool			mCompleteWord;
 	float			mWordPixelLength;
 
 	static ci::gl::TextureFontRef	sFont;
