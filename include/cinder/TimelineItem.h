@@ -45,32 +45,21 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	float			getStartTime() const { return mStartTime; }
 	//! Set the items's start time to \a newTime
 	void			setStartTime( float newTime );
-	//! Set the items's start time to \a newTime. Returns a reference to \a this
-	TimelineItemRef startTime( float newTime ) { setStartTime( newTime ); return thisRef(); }
-
-	//! Pushes back the item's start time by \a amt. Returns a reference to \a this
-	TimelineItemRef delay( float amt ) { setStartTime( mStartTime + amt ); return thisRef(); }
 
 	//! Returns the item's duration
-	float			getDuration() const { return mDuration; }			
+	float			getDuration() const { updateDuration(); return mDuration; }
 	//! Sets the item's duration to \a newDuration.
 	void			setDuration( float newDuration );
-	//! Sets the item's duration to \a newDuration. Returns a reference to \a this
-	TimelineItemRef duration( float newDuration ) { setDuration( newDuration ); return thisRef(); }
 
 	//! Returns whether the item starts over when it is complete
 	bool			getLoop() const { return mLoop; }
 	//! Sets whether the item starts over when it is complete
 	void			setLoop( bool doLoop = true ) { mLoop = doLoop; }
-	//! Sets whether the item starts over when it is complete. Returns a reference to \a this
-	TimelineItemRef loop( bool doLoop = true ) { setLoop( doLoop ); return thisRef(); }
 
 	//! Returns whether the item ever is marked as complete
 	bool			getInfinite() const { return mLoop; }
 	//! Sets whether the item ever is marked as complete
 	void			setInfinite( bool infinite = true ) { mInfinite = infinite; }
-	//! Sets whether the item ever is marked as complete. Returns a reference to \a this
-	TimelineItemRef infinite( bool inf = true ) { setInfinite( inf ); return thisRef(); }
 
 	//! Returns the time of the item's competion, equivalent to getStartTime() + getDuration().
 	float			getEndTime() const { return mStartTime + mDuration; }
@@ -90,16 +79,15 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	bool	getAutoRemove() const { return mAutoRemove; }
 	//! Sets whether the item will remove itself from the Timeline when it is complete
 	void	setAutoRemove( bool autoRemove = true ) { mAutoRemove = autoRemove; }
-	//! Sets whether the item will remove itself from the Timeline when it is complete
-	TimelineItemRef autoRemove( bool autoRmv = true ) { mAutoRemove = autoRmv; return thisRef(); }
 	
 	virtual void start() = 0;
 	virtual void loopStart() {}
 	virtual void update( float relativeTime ) = 0;
 	virtual void complete() = 0;
 	//! Call update() only at the beginning of each loop (for example Cues exhibit require this behavior)
-	virtual bool updateAtLoopStart() { return false; }
-	virtual void				reverse() = 0;
+	virtual bool 	updateAtLoopStart() { return false; }
+	virtual float	calcDuration() const { return mDuration; }
+	virtual void	reverse() = 0;
 	//! Creates a clone of the item
 	virtual TimelineItemRef		clone() const = 0;
 	//! Creates a cloned item which runs in reverse relative to a timeline of duration \a timelineDuration
@@ -110,6 +98,8 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	TimelineItemRef thisRef() { return shared_from_this(); }
 	
   protected:
+	void	setDurationDirty() { mDirtyDuration = true; }
+	void	updateDuration() const;
 	//! Converts time from absolute to absolute based on item's looping attributes
 	float	loopTime( float absTime );
 	void	setTarget( void *target ) { mTarget = target; }
@@ -127,7 +117,8 @@ class TimelineItem : public std::enable_shared_from_this<TimelineItem>
 	
 	friend class Timeline;
   private:
-	float	mDuration, mInvDuration;
+	mutable float	mDuration, mInvDuration;
+	mutable bool	mDirtyDuration; // marked if the virtual calcDuration() needs to be calculated
 };
 
 } // namespace cinder

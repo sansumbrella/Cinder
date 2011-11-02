@@ -212,7 +212,7 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 			// copy this node to dying nodes and erase it from the current
 			mDyingNodes.push_back( *nodeIt );
 			timeline().apply( &mDyingNodes.back().mRadius, 0.0f, 0.5f, EaseInQuint() )
-				.completionFn( bind( &WordNode::setShouldBeDeleted, &(mDyingNodes.back()) ) ); // when you're done, mark yourself for deletion
+				.finishFn( bind( &WordNode::setShouldBeDeleted, &(mDyingNodes.back()) ) ); // when you're done, mark yourself for deletion
 		}
 	}
 	

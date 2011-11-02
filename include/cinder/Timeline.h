@@ -177,7 +177,7 @@ class Timeline : public TimelineItem {
 	virtual void complete() {}
 
 	void						eraseMarked();
-	void						calculateDuration();
+	virtual float				calcDuration() const;
 
 	bool						mDefaultAutoRemove;
 	float						mCurrentTime;

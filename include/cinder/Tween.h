@@ -56,7 +56,7 @@ T tweenLerp( const T &start, const T &end, float time )
 class TweenBase : public TimelineItem {
   public:
 	typedef std::function<void ()>		StartFn;
-	typedef std::function<void ()>		CompletionFn;
+	typedef std::function<void ()>		FinishFn;
 	typedef std::function<void ()>		UpdateFn;
 
 	TweenBase( void *target, bool copyStartValue, float startTime, float duration, EaseFn easeFunction = easeNone );
@@ -72,8 +72,8 @@ class TweenBase : public TimelineItem {
 	void			setUpdateFn( UpdateFn updateFunction ) { mUpdateFunction = updateFunction; }									
 	UpdateFn		getUpdateFn() const { return mUpdateFunction; }
 																																					
-	void			setCompletionFn( CompletionFn completionFunction ) { mCompletionFunction = completionFunction; }
-	CompletionFn	getCompletionFn() const { return mCompletionFunction; }
+	void			setFinishFn( FinishFn finishFn ) { mFinishFunction = finishFn; }
+	FinishFn		getFinishFn() const { return mFinishFunction; }
 	
 	class Options {
 	  protected:
@@ -95,14 +95,14 @@ class TweenBase : public TimelineItem {
 
 	virtual void complete()
 	{
-		if( mCompletionFunction )
-			mCompletionFunction();
+		if( mFinishFunction )
+			mFinishFunction();
 	}
 
   
-	StartFn				mStartFunction;
-	UpdateFn			mUpdateFunction;	
-	CompletionFn		mCompletionFunction;
+	StartFn			mStartFunction;
+	UpdateFn		mUpdateFunction;	
+	FinishFn		mFinishFunction;
   
 	EaseFn		mEaseFunction;
 	float		mDuration;
@@ -161,7 +161,7 @@ class Tween : public TweenBase {
 	  public:
 		Options&	startFn( const TweenBase::StartFn &startFn ) { mTweenRef->setStartFn( startFn ); return *this; }
 		Options&	updateFn( const TweenBase::UpdateFn &updateFn ) { mTweenRef->setUpdateFn( updateFn ); return *this; }
-		Options&	completionFn( const TweenBase::CompletionFn &completionFn ) { mTweenRef->setCompletionFn( completionFn ); return *this; }
+		Options&	finishFn( const TweenBase::FinishFn &finishFn ) { mTweenRef->setFinishFn( finishFn ); return *this; }
 		Options&	easeFn( const EaseFn &easeFunc ) { mTweenRef->setEaseFn( easeFunc ); return *this; }
 		Options&	delay( float delayAmt ) { mTweenRef->setStartTime( mTweenRef->getStartTime() + delayAmt ); return *this; }
 		Options&	autoRemove( bool remove = true ) { mTweenRef->setAutoRemove( remove ); return *this; }

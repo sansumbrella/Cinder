@@ -30,13 +30,13 @@
 namespace cinder {
 
 TimelineItem::TimelineItem( class Timeline *parent )
-	: mParent( parent ), mTarget( 0 ), mStartTime( 0 ), mDuration( 0 ), mInvDuration( 0 ), mHasStarted( false ),
+	: mParent( parent ), mTarget( 0 ), mStartTime( 0 ), mDirtyDuration( false ), mDuration( 0 ), mInvDuration( 0 ), mHasStarted( false ),
 		mComplete( false ), mMarkedForRemoval( false ), mAutoRemove( true ), mInfinite( false ), mLoop( false ), mLastLoopIteration( -1 ), mUseAbsoluteTime( false )
 {
 }
 
 TimelineItem::TimelineItem( Timeline *parent, void *target, float startTime, float duration )
-	: mParent( parent ), mTarget( target ), mStartTime( startTime ), mDuration( duration ), mInvDuration( duration == 0 ? 0 : (1 / duration) ), mHasStarted( false ),
+	: mParent( parent ), mTarget( target ), mStartTime( startTime ), mDirtyDuration( false ), mDuration( duration ), mInvDuration( duration == 0 ? 0 : (1 / duration) ), mHasStarted( false ),
 		mComplete( false ), mMarkedForRemoval( false ), mAutoRemove( true ), mInfinite( false ), mLoop( false ), mLastLoopIteration( -1 ), mUseAbsoluteTime( false )
 {
 }
@@ -52,6 +52,8 @@ void TimelineItem::stepTo( float newTime )
 		return;
 	
 	float absTime = newTime - mStartTime;
+
+	updateDuration();
 	
 	if( newTime >= mStartTime ) {
 		float relTime;
@@ -93,6 +95,15 @@ void TimelineItem::setStartTime( float time )
 	mStartTime = time;
 	if( mParent )
 		mParent->itemTimeChanged( this );
+}
+
+void TimelineItem::updateDuration() const
+{
+	if( mDirtyDuration ) {
+		mDuration = calcDuration();
+		mInvDuration = ( mDuration == 0 ) ? 1.0f : ( 1.0f / mDuration );
+		mDirtyDuration = false;
+	}
 }
 
 void TimelineItem::setDuration( float duration )
