@@ -22,25 +22,19 @@ struct Circle {
 		: mRadius( radius ), mRadiusDest( radius ), mColor( color )
 	{}
 	void draw( const Vec2f &pos ) {
-		gl::color( ColorA( 0, 0, 0, 0.25f ) );
+		gl::color( ColorA( 0, 0, 0, 0.5f ) );
 		
-		Vec2f p;
-		float r;
-		
-		p	= pos;
-		r	= mRadius();
-		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
-		
+		Vec2f p = pos;
+		float r = mRadius();
+		// shadow 1
 		p  += Vec2f( 1.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
-		
+		// shadow 2
 		r  += 1.0f;
 		p  += Vec2f( 1.0f, 1.0f );
 		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
-		
-		p  += Vec2f( 1.0f, 1.0f );
-		gl::drawSolidRect( Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
-		
+
+		// color foreground
 		gl::color( mColor );
 		p	= pos;
 		r	= mRadius();
@@ -254,10 +248,16 @@ void VisualDictionaryApp::update()
 	// if the currentNode word is a real word, animate the bg circles
 	if( mDictionary->isCompleteWord( mCurrentNode.getWord() ) ){
 		int index = 0;
+		int numCircles = mCircles.size();
 		for( list<Circle>::reverse_iterator circleIt = mCircles.rbegin(); circleIt != mCircles.rend(); ++circleIt ){
-			if( getElapsedFrames()%50 == index * 2 ){
-				timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest + Rand::randFloat( -50.0f, 50.0f ), 1.0f, EaseOutBack() );
-				Color c = circleIt->mColor;
+			if( getElapsedFrames()%( numCircles * 10 ) == index * 10 ){
+//				timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest + Rand::randFloat( -50.0f, 50.0f ), 1.0f, EaseOutBack() );
+				
+				timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest + 25.0f, 0.25f, EaseOutCubic() );
+				timeline().appendTo( &circleIt->mRadius, circleIt->mRadiusDest, 0.25f, EaseInCubic() );
+				
+				Color c = circleIt->mColor();
+				circleIt->mColor = Color( 0, 0, 0 );
 				timeline().apply( &circleIt->mColor, c, 0.35f, EaseOutAtan( 10 ) );
 			}
 			index ++;

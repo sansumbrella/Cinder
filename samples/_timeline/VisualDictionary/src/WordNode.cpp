@@ -60,18 +60,14 @@ void WordNode::draw() const
 	// draw shadows
 	pos	= mPos();
 	r	= mRadius();
-	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
-	
+
 	pos += Vec2f( 1.0f, 1.0f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
 	
 	r	+= 1.0f;
 	pos += Vec2f( 1.0f, 1.0f );
 	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
-	
-	pos += Vec2f( 1.0f, 1.0f );
-	gl::drawSolidRect( Rectf( pos.x - r, pos.y - r, pos.x + r, pos.y + r ) );
-	
+
 	
 	// draw color circle
 	gl::color( ColorA( mColor().r, mColor().g, mColor().b, 1.0f ) );
