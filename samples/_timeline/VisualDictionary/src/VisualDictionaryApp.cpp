@@ -131,6 +131,7 @@ void VisualDictionaryApp::setup()
 
 void VisualDictionaryApp::initialize()
 {
+	mNodes.clear();
 	// make the first 26 nodes, one for each letter
 	vector<string> initialWords;
 	for( char c = 0; c < 26; ++c )
@@ -175,7 +176,6 @@ void VisualDictionaryApp::keyDown( KeyEvent event )
 			selectNode( foundWord );
 	} else {
 		if( event.getCode() == KeyEvent::KEY_BACKSPACE ){
-			mNodes.clear();
 			initialize();
 		}
 	}
@@ -184,8 +184,12 @@ void VisualDictionaryApp::keyDown( KeyEvent event )
 void VisualDictionaryApp::mouseDown( MouseEvent event )
 {
 	list<WordNode>::iterator clickedNode = getNodeAtPoint( event.getPos() );
-	if( clickedNode != mNodes.end() )
+	if( clickedNode != mNodes.end() ){
 		selectNode( clickedNode );
+	} else {
+		if( ( event.getPos() - getWindowCenter() ).length() < 180.0f )
+			initialize();
+	}
 }
 
 
