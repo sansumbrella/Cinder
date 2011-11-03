@@ -26,6 +26,7 @@
 		E1035B3B1460AB8400AD808C /* circle.png in Resources */ = {isa = PBXBuildFile; fileRef = E1035B3A1460AB8400AD808C /* circle.png */; };
 		E1035B3E1460B45100AD808C /* smallCircle.png in Resources */ = {isa = PBXBuildFile; fileRef = E1035B3D1460B45100AD808C /* smallCircle.png */; };
 		E1035B6D146203A300AD808C /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = E1035B6C146203A300AD808C /* background.png */; };
+		E1035B71146220D600AD808C /* CenterState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1035B70146220D600AD808C /* CenterState.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,8 @@
 		E1035B3A1460AB8400AD808C /* circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = circle.png; path = ../resources/circle.png; sourceTree = "<group>"; };
 		E1035B3D1460B45100AD808C /* smallCircle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = smallCircle.png; path = ../resources/smallCircle.png; sourceTree = "<group>"; };
 		E1035B6C146203A300AD808C /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = background.png; path = ../resources/background.png; sourceTree = "<group>"; };
+		E1035B6F146220C500AD808C /* CenterState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CenterState.h; path = ../include/CenterState.h; sourceTree = "<group>"; };
+		E1035B70146220D600AD808C /* CenterState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CenterState.cpp; path = ../src/CenterState.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +88,7 @@
 				00BAE6590E7ED9C10018A608 /* VisualDictionaryApp.cpp */,
 				432CB049145BBF800049BA42 /* WordNode.cpp */,
 				436F5244145C7C7700B8185A /* Dictionary.cpp */,
+				E1035B70146220D600AD808C /* CenterState.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -142,6 +146,7 @@
 				32CA4F630368D1EE00C91783 /* VisualDictionary_Prefix.pch */,
 				432CB04C145BBF990049BA42 /* WordNode.h */,
 				436F5243145C7BBF00B8185A /* Dictionary.h */,
+				E1035B6F146220C500AD808C /* CenterState.h */,
 			);
 			name = Headers;
 			sourceTree = "<group>";
@@ -238,6 +243,7 @@
 				00BAE65A0E7ED9C10018A608 /* VisualDictionaryApp.cpp in Sources */,
 				432CB04A145BBF800049BA42 /* WordNode.cpp in Sources */,
 				436F5245145C7C7700B8185A /* Dictionary.cpp in Sources */,
+				E1035B71146220D600AD808C /* CenterState.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

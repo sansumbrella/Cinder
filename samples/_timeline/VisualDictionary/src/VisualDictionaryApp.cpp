@@ -10,36 +10,37 @@
 
 #include "WordNode.h"
 #include "Dictionary.h"
+#include "CenterState.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
 
 
-struct Circle {
-  public:
-	Circle( float radius, Color color )
-		: mRadius( radius ), mRadiusDest( radius ), mColor( color )
-	{}
-	void draw( const Vec2f &pos ) {
-		gl::color( ColorA( 0, 0, 0, 0.5f ) );
-		
-		Vec2f p = pos;
-		p += Vec2f( 1.0f, 1.0f );
-		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
-		p += Vec2f( 1.0f, 1.0f );
-		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
-
-		// color foreground
-		gl::color( mColor );
-		p	= pos;
-		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
-	}
-
-	Anim<float>	mRadius;
-	Anim<Color>	mColor;
-	float		mRadiusDest;
-};
+//struct Circle {
+//  public:
+//	Circle( float radius, Color color )
+//		: mRadius( radius ), mRadiusDest( radius ), mColor( color )
+//	{}
+//	void draw( const Vec2f &pos ) {
+//		gl::color( ColorA( 0, 0, 0, 0.5f ) );
+//		
+//		Vec2f p = pos;
+//		p += Vec2f( 1.0f, 1.0f );
+//		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
+//		p += Vec2f( 1.0f, 1.0f );
+//		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
+//
+//		// color foreground
+//		gl::color( mColor );
+//		p	= pos;
+//		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
+//	}
+//
+//	Anim<float>	mRadius;
+//	Anim<Color>	mColor;
+//	float		mRadiusDest;
+//};
 
 
 class VisualDictionaryApp : public AppBasic {
@@ -65,7 +66,7 @@ class VisualDictionaryApp : public AppBasic {
 	list<WordNode>				mNodes, mDyingNodes;
 	list<WordNode>::iterator	mMouseOverNode;
 	
-	list<Circle>				mCircles;
+	CenterState					mCenterState;
 
 	gl::Texture					mBgTex;
 	gl::Texture					mCircleTex;
@@ -95,10 +96,11 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 		Vec2f pos = getWindowCenter() + radius * Vec2f( cos( angle ), sin( angle ) );
 		Color col(  CM_HSV, charPer, 0.875f, 1 );
 		mNodes.push_back( WordNode( words[w] ) );
-		mNodes.back().mPos = getWindowCenter() + radius * 0.75f * Vec2f( cos( angle ), sin( angle ) );
+		mNodes.back().mPos = getWindowCenter() + radius * 0.5f * Vec2f( cos( angle ), sin( angle ) );
 		mNodes.back().mColor = ColorA( col, 0.0f );
+		mNodes.back().mRadiusDest = mCurrentCircleRadius;
 		
-		timeline().apply( &mNodes.back().mRadius, mCurrentCircleRadius, 0.4f, EaseOutAtan( 10 ) ).timelineEnd( -0.39f );
+		timeline().apply( &mNodes.back().mRadius, mNodes.back().mRadiusDest, 0.4f, EaseOutAtan( 10 ) ).timelineEnd( -0.39f );
 		timeline().apply( &mNodes.back().mPos, pos, 0.4f, EaseOutAtan( 10 ) ).timelineEnd( -0.39f );
 		timeline().apply( &mNodes.back().mColor, ColorA( col, 1.0f ), 0.4f, EaseOutAtan( 10 ) ).timelineEnd( -0.39f );
 	}
@@ -106,6 +108,8 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 
 void VisualDictionaryApp::setup()
 {
+	mCenterState = CenterState( 140.0f );
+	
 	// load textures
 	mBgTex = gl::Texture( loadImage( loadResource( "background.png" ) ) );
 	gl::Texture::Format fmt;
@@ -117,9 +121,11 @@ void VisualDictionaryApp::setup()
 	mDictionary = shared_ptr<Dictionary>( new Dictionary( loadResource( "EnglishDictionary.gz" ) ) );
 
 	// give the WordNodes their font
-	WordNode::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 34 ), gl::TextureFont::Format().enableMipmapping( true ) ),
-					   gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 150 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
+	WordNode::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 34 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
 
+	// give CenterState its font
+	CenterState::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 150 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
+	
 	// make the first 26 nodes, one for each letter
 	vector<string> initialWords;
 	for( char c = 0; c < 26; ++c )
@@ -209,20 +215,17 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 	
 	mCurrentNode = *selectedNode;
 	mCurrentNode.setSelected();
-	
-	// draw the bg circles and animate their color and radius
-	for( list<Circle>::reverse_iterator circleIt = mCircles.rbegin(); circleIt != mCircles.rend(); ++circleIt ){
-		circleIt->mRadiusDest += 10.0f;
-		timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest, 0.5f, EaseInElastic( 2, 1 ) ).timelineEnd( -0.475f );
-	}
-	mCircles.push_back( Circle( 140.0f, mCurrentNode.mColor() ) );
-
 	mNodes.clear();
-
-	// move the selected node to the center and make it big
-	timeline().apply( &mCurrentNode.mRadius, 140.0f, 0.5f, EaseOutAtan( 10 ) );
-	timeline().apply( &mCurrentNode.mPos, getWindowCenter(), 0.5f, EaseOutAtan( 10 ) );
 	
+	
+	Color c = Color( mCurrentNode.mColor().r, mCurrentNode.mColor().g, mCurrentNode.mColor().b );
+	mCenterState.addCircle( mCurrentNode.getWord(), c );
+
+	// move the selected node towards the center
+	Vec2f dirToCenter = ( mCurrentNode.mPos() - getWindowCenter() ) * 0.5f;
+	timeline().apply( &mCurrentNode.mPos, getWindowCenter() + dirToCenter, 0.3f, EaseInQuint() );
+	timeline().apply( &mCurrentNode.mColor, ColorA( 0, 0, 0, 0 ), 0.3f, EaseInQuint() );
+
 	// now add all the descendants of the clicked node
 	vector<string> children( mDictionary->getDescendants( mCurrentNode.getWord() ) );
 	layoutWords( children, getLayoutRadius() );
@@ -237,17 +240,8 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 
 void VisualDictionaryApp::update()
 {
-	// if the currentNode word is a real word, animate the bg circles
 	if( mDictionary->isCompleteWord( mCurrentNode.getWord() ) ){
-		int index = 0;
-		int numCircles = mCircles.size();
-		for( list<Circle>::reverse_iterator circleIt = mCircles.rbegin(); circleIt != mCircles.rend(); ++circleIt ){
-			if( getElapsedFrames()%( numCircles * 6 ) == index * 4 ){
-				timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest + 5.0f, 0.2f, EaseInOutQuad() );
-				timeline().appendTo( &circleIt->mRadius, circleIt->mRadiusDest, 0.2f, EaseInOutQuad() );
-			}
-			index ++;
-		}
+		mCenterState.update( mCurrentNode );
 	}
 	
 	// erase any nodes which have been marked as ready to be deleted
@@ -259,25 +253,16 @@ void VisualDictionaryApp::draw()
 	gl::clear( Color( 0, 0, 0 ) );
 	gl::enableAlphaBlending();
 	
+	// draw background image
 	gl::color( Color::white() );
 	mBgTex.enableAndBind();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	
-	// draw the center circles
 	mCircleTex.bind();
-	int count = 0;
-	if( ! mCurrentNode.getWord().empty() ){
-		int wordLength = mCurrentNode.getWord().length();
-		for( list<Circle>::iterator circleIt = mCircles.begin(); circleIt != mCircles.end(); ++circleIt ){
-			if( count < wordLength-1 ){
-				circleIt->draw( getWindowCenter() );
-			}
-			count ++;
-		}
-	}
-
 	
+	// draw the center circles
+	mCenterState.draw( getWindowCenter() );
 	
 	// draw the dying nodes
 	mSmallCircleTex.bind();
@@ -294,13 +279,11 @@ void VisualDictionaryApp::draw()
 	if( mMouseOverNode != mNodes.end() )
 		mMouseOverNode->draw();
 	
-	mCircleTex.bind();
-	
-	// if there is a currentNode (previously selected), draw it	
+	// if there is a currentNode (previously selected), draw it
 	if( ! mCurrentNode.getWord().empty() )
 		mCurrentNode.draw();
 	
-	mCircleTex.disable();
+	mSmallCircleTex.disable();
 }
 
 

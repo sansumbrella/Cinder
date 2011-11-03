@@ -36,15 +36,16 @@ class WordNode {
 	// Timelined properties		
 	ci::Anim<ci::Vec2f>		mPos;
 	ci::Anim<float>			mRadius;
+	float					mRadiusDest;
 	ci::Anim<ci::ColorA>	mColor;
 
 
-	static	void	setFont( ci::gl::TextureFontRef fontSmall, ci::gl::TextureFontRef fontBig );
+	static	void	setFont( ci::gl::TextureFontRef font );
   protected:
 	bool			mIsSelected;
 	bool			mShouldBeDeleted;
 	std::string		mWord;
-	float			mWordPixelLengthSmall, mWordPixelLengthBig;
+	float			mWordPixelLength;
 
-	static ci::gl::TextureFontRef	sFontSmall, sFontBig;
+	static ci::gl::TextureFontRef	sFont;
 };
