@@ -48,8 +48,8 @@ void CenterState::update( const WordNode &currentNode )
 	int index = 1;
 	for( list<Circle>::reverse_iterator circleIt = mCircles.rbegin(); circleIt != mCircles.rend(); ++circleIt ){
 		if( mCounter%( numCircles * 6 ) == index * 4 ){
-			app::timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest + 5.0f, 0.2f, EaseInOutQuad() );
-			app::timeline().appendTo( &circleIt->mRadius, circleIt->mRadiusDest, 0.2f, EaseInOutQuad() );
+			app::timeline().apply( &circleIt->mRadius, circleIt->mRadiusDest + 30.0f, 0.25f, EaseInOutQuad() );
+			app::timeline().appendTo( &circleIt->mRadius, circleIt->mRadiusDest, 0.25f, EaseInOutQuad() );
 		}
 		index ++;
 	}

@@ -24,18 +24,20 @@ public:
 	: mRadius( 0.0f ), mRadiusDest( radius ), mColor( color )
 	{}
 	void draw( const ci::Vec2f &pos ) {
-		ci::gl::color( ci::ColorA( 0, 0, 0, 0.5f ) );
+		ci::gl::color( ci::ColorA( 0, 0, 0, 0.25f ) );
+		float r = mRadius + 2.0f;
 		
 		ci::Vec2f p = pos;
-		p += ci::Vec2f( 1.0f, 1.0f );
-		ci::gl::drawSolidRect( ci::Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
-		p += ci::Vec2f( 1.0f, 1.0f );
-		ci::gl::drawSolidRect( ci::Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
+		p += ci::Vec2f( 0.5f, 0.5f );
+		ci::gl::drawSolidRect( ci::Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
+		p += ci::Vec2f( 0.5f, 0.5f );
+		ci::gl::drawSolidRect( ci::Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 		
 		// color foreground
 		ci::gl::color( mColor );
 		p	= pos;
-		ci::gl::drawSolidRect( ci::Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
+		r	= mRadius;
+		ci::gl::drawSolidRect( ci::Rectf( p.x - r, p.y - r, p.x + r, p.y + r ) );
 	}
 	
 	ci::Anim<float>		mRadius;
@@ -49,6 +51,7 @@ public:
 	CenterState(){}
 	CenterState( float radius );
 	
+	void	setWord( const std::string &word ){ mWord = word; };
 	const std::string&	getWord() const { return mWord; }
 
 	void	addCircle(  const std::string &word, const ci::Color &color );

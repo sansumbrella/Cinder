@@ -48,7 +48,7 @@ class VisualDictionaryApp : public AppBasic {
 	void prepareSettings( Settings *settings );
 	void layoutWords( vector<string> words, float radius );	
 	void setup();
-
+	void initialize();
 	void enableSelections() { mEnableSelections = true; }
 	void mouseMove( MouseEvent event );	
 	void mouseDown( MouseEvent event );
@@ -126,12 +126,20 @@ void VisualDictionaryApp::setup()
 	// give CenterState its font
 	CenterState::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 150 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
 	
+	initialize();
+}
+
+void VisualDictionaryApp::initialize()
+{
 	// make the first 26 nodes, one for each letter
 	vector<string> initialWords;
 	for( char c = 0; c < 26; ++c )
 		initialWords.push_back( string( 1, (char)('a' + c) ) );
-
+	
 	layoutWords( initialWords, getLayoutRadius() );
+	
+	mCenterState.mCircles.clear();
+	mCenterState.setWord( "" );
 	
 	// mark our currently highlighted node as "none"
 	mMouseOverNode = mNodes.end();
@@ -167,7 +175,8 @@ void VisualDictionaryApp::keyDown( KeyEvent event )
 			selectNode( foundWord );
 	} else {
 		if( event.getCode() == KeyEvent::KEY_BACKSPACE ){
-			
+			mNodes.clear();
+			initialize();
 		}
 	}
 }
