@@ -230,14 +230,15 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 	mCurrentNode.setSelected();
 	mNodes.clear();
 	
-	
 	Color c = Color( mCurrentNode.mColor().r, mCurrentNode.mColor().g, mCurrentNode.mColor().b );
-	mCenterState.addCircle( mCurrentNode.getWord(), c );
+	Vec2f dirToCenter = ( mCurrentNode.mPos() - getWindowCenter() ) * 0.5f;
+	
+	timeline().add( bind( &CenterState::addCircle, &mCenterState, mCurrentNode.getWord(), c, dirToCenter * 0.2f ), timeline().getCurrentTime() + 0.25f );
 
 	// move the selected node towards the center
-	Vec2f dirToCenter = ( mCurrentNode.mPos() - getWindowCenter() ) * 0.5f;
+	
 	timeline().apply( &mCurrentNode.mPos, getWindowCenter() + dirToCenter, 0.3f, EaseInQuint() );
-	timeline().apply( &mCurrentNode.mColor, ColorA( 0, 0, 0, 0 ), 0.3f, EaseInQuint() );
+	timeline().apply( &mCurrentNode.mColor, ColorA( mCurrentNode.mColor().r, mCurrentNode.mColor().g, mCurrentNode.mColor().b, 0.0f ), 0.3f, EaseInAtan( 10 ) );
 
 	// now add all the descendants of the clicked node
 	vector<string> children( mDictionary->getDescendants( mCurrentNode.getWord() ) );
@@ -275,7 +276,7 @@ void VisualDictionaryApp::draw()
 	mCircleTex.bind();
 	
 	// draw the center circles
-	mCenterState.draw( getWindowCenter() );
+	mCenterState.draw();
 	
 	// draw the dying nodes
 	mSmallCircleTex.bind();
