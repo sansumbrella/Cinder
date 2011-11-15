@@ -50,8 +50,8 @@ Buffer::Buffer( std::shared_ptr<DataSource> dataSource )
 	mObj = std::shared_ptr<Obj>( new Obj( data, otherBuffer.getDataSize(), true ) );
 }
 
-Buffer::Buffer( void * aData, size_t aSize ) 
-	: mObj( new Obj( aData, aSize, false ) )
+Buffer::Buffer( void * aData, size_t aSize, bool ownsData ) 
+	: mObj( new Obj( aData, aSize, ownsData ) )
 {	
 }
 

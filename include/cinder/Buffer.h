@@ -42,7 +42,7 @@ class Buffer {
 
  public:
 	Buffer() {}
-	Buffer( void * aBuffer, size_t aSize );
+	Buffer( void * aBuffer, size_t aSize, bool ownsData = false );
 	Buffer( size_t size );
 	//! Creates a Buffer from a DataSource
 	explicit Buffer( std::shared_ptr<class DataSource> dataSource );
