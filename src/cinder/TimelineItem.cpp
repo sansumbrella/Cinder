@@ -24,9 +24,8 @@
 
 #include "cinder/TimelineItem.h"
 #include "cinder/Timeline.h"
-
 #include "cinder/CinderMath.h"
-
+	
 namespace cinder {
 
 TimelineItem::TimelineItem( class Timeline *parent )
@@ -36,7 +35,7 @@ TimelineItem::TimelineItem( class Timeline *parent )
 }
 
 TimelineItem::TimelineItem( Timeline *parent, void *target, float startTime, float duration )
-	: mParent( parent ), mTarget( target ), mStartTime( startTime ), mDirtyDuration( false ), mDuration( duration ), mInvDuration( duration == 0 ? 0 : (1 / duration) ), mHasStarted( false ),
+	: mParent( parent ), mTarget( target ), mStartTime( startTime ), mDirtyDuration( false ), mDuration( std::max( duration, 0.0f ) ), mInvDuration( duration <= 0 ? 0 : (1 / duration) ), mHasStarted( false ),
 		mComplete( false ), mMarkedForRemoval( false ), mAutoRemove( true ), mInfinite( false ), mLoop( false ), mLastLoopIteration( -1 ), mUseAbsoluteTime( false )
 {
 }
@@ -70,7 +69,11 @@ void TimelineItem::stepTo( float newTime )
 		}
 		
 		float time = ( mUseAbsoluteTime ) ? absTime : relTime;
-		
+
+		// accommodate a tween with a duration <= 0
+		if( ( ! mUseAbsoluteTime ) && ( mInvDuration <= 0 ) )
+			time = 1.0f;
+
 		if( mLoop ) {
 			int32_t loopIteration = static_cast<int32_t>( ( newTime - mStartTime ) * mInvDuration );
 			if( loopIteration != mLastLoopIteration ) {
@@ -100,7 +103,7 @@ void TimelineItem::setStartTime( float time )
 void TimelineItem::updateDuration() const
 {
 	if( mDirtyDuration ) {
-		mDuration = calcDuration();
+		mDuration = std::max( calcDuration(), 0.0f );
 		mInvDuration = ( mDuration == 0 ) ? 1.0f : ( 1.0f / mDuration );
 		mDirtyDuration = false;
 	}
