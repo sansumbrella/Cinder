@@ -63,7 +63,7 @@ class Buffer {
 	//TODO: copy from region of another buffer
 	
 	//! Writes a Buffer to a DataTarget
-	void	write( std::shared_ptr<class DataTarget> dataTarget );
+	void write( std::shared_ptr<class DataTarget> dataTarget );
 	
   private:
 	std::shared_ptr<Obj>		mObj;
