@@ -23,6 +23,11 @@
 #pragma once
 
 #include <boost/cstdint.hpp>
+#include <boost/version.hpp>
+
+#if BOOST_VERSION < 104800
+	#error "Cinder requires Boost version 1.48 or later"
+#endif
 
 namespace cinder {
 using boost::int8_t;
