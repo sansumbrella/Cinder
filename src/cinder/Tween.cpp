@@ -65,7 +65,7 @@ AnimBase::AnimBase( const AnimBase &rhs, void *voidPtr )
 
 AnimBase::~AnimBase()
 {
-	if( mParentTimeline  )
+	if( mParentTimeline )
 		mParentTimeline->removeTarget( mVoidPtr );
 }
 
@@ -74,6 +74,15 @@ void AnimBase::set( const AnimBase &rhs )
 	setParentTimeline( rhs.mParentTimeline );
 	if( mParentTimeline ) {
 		mParentTimeline->cloneAndReplaceTarget( rhs.mVoidPtr, mVoidPtr );
+	}	
+}
+
+// Implements move semantics
+void AnimBase::setReplace( const AnimBase &rhs )
+{
+	setParentTimeline( rhs.mParentTimeline );
+	if( mParentTimeline ) {
+		mParentTimeline->replaceTarget( rhs.mVoidPtr, mVoidPtr );
 	}	
 }
 
@@ -86,7 +95,7 @@ void AnimBase::stop()
 
 void AnimBase::setParentTimeline( TimelineRef parentTimeline )
 {
-	if( mParentTimeline && ( parentTimeline != mParentTimeline ) ) {
+	if( mParentTimeline && ( parentTimeline != mParentTimeline ) && ( mVoidPtr != 0 ) ) {
 		mParentTimeline->removeTarget( mVoidPtr );
 	}
 	mParentTimeline = parentTimeline;  		

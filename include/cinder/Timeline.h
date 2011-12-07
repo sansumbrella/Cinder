@@ -32,7 +32,14 @@
 
 #include <vector>
 #include <list>
-#include <boost/unordered_map.hpp>
+#if defined( _MSC_VER ) && ( _MSC_VER >= 1600 )
+	#include <unordered_map>
+#else
+	#include <boost/unordered_map.hpp>
+	namespace std {
+		using boost::unordered_multimap;
+	}
+#endif
 
 namespace cinder {
 
@@ -145,6 +152,8 @@ class Timeline : public TimelineItem {
 	void				removeTarget( void *target );
 	//! Clones all TimelineItems whose target matches \a target, but replacing their target with \a replacementTarget
 	void				cloneAndReplaceTarget( void *target, void *replacementTarget );
+	//! Replaces the target of all TimelineItems whose target matches \a target, with \a replacementTarget
+	void				replaceTarget( void *target, void *replacementTarget );
 	
 	//! Remove all tweens from the Timeline. Do not call from callback fn's.
 	void clear();
@@ -182,7 +191,7 @@ class Timeline : public TimelineItem {
 	bool						mDefaultAutoRemove;
 	float						mCurrentTime;
 	
-	boost::unordered_multimap<void*,TimelineItemRef>		mItems;
+	std::unordered_multimap<void*,TimelineItemRef>		mItems;
 };
 
 class Cue : public TimelineItem {

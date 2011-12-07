@@ -33,6 +33,7 @@
 
 #include <list>
 #include <boost/utility.hpp>
+#include <boost/move/move.hpp>
 
 namespace cinder {
 
@@ -270,7 +271,8 @@ class AnimBase {
 	AnimBase( const AnimBase &rhs, void *voidPtr );
 	~AnimBase();
 	
-	void set( const AnimBase &rhs );
+	void 	set( const AnimBase &rhs );
+	void 	setReplace( const AnimBase &rhs );
 	
   	void	setParentTimeline( TimelineRef parentTimeline );
 
@@ -280,6 +282,7 @@ class AnimBase {
 
 template<typename T>
 class Anim : public AnimBase {
+  BOOST_COPYABLE_AND_MOVABLE( Anim<T> )
   public:
 	Anim()
 		: AnimBase( &mValue )
@@ -287,7 +290,7 @@ class Anim : public AnimBase {
   	Anim( T value ) 
 		: AnimBase( &mValue), mValue( value )
 	{}
-  	Anim( const Anim<T> &rhs )
+  	Anim( const Anim<T> &rhs ) // normal copy constructor
 		: AnimBase( rhs, &mValue ), mValue( rhs.mValue )
   	{}
   	
@@ -295,11 +298,32 @@ class Anim : public AnimBase {
 	T&			operator()() { return mValue; }	
 	
 	operator const T&() const { return mValue; }	
-	Anim<T>& operator=( const Anim<T> &rhs ) {
-		set( rhs );
-		mValue = rhs.mValue;
+	Anim<T>& operator=( BOOST_COPY_ASSIGN_REF(const Anim) rhs ) { // copy assignment
+		if( this != &rhs ) {
+			mVoidPtr = 0;
+			set( rhs );
+			mValue = rhs.mValue;
+		}
 		return *this;
   	}
+
+	Anim( BOOST_RV_REF(Anim) rhs ) { // Move constructor
+		setReplace( rhs );
+		rhs.mParentTimeline.reset();
+		mValue = rhs.mValue;
+	}
+
+	Anim<T>& operator=( BOOST_RV_REF(Anim) rhs ) { // Move assignment
+		if( this != &rhs ) {
+			mVoidPtr = 0;
+			setReplace( rhs );
+			rhs.mParentTimeline.reset(); // blow away rhs's tweens due to move semantics
+			mValue = rhs.mValue;
+		}
+		
+		return *this;
+	}
+
 	Anim<T>& operator=( T value ) { mValue = value; return *this; }
   	
 //  	float	getDuration() { return mValTween->getDuration(); }

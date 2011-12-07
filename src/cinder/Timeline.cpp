@@ -32,8 +32,8 @@ namespace cinder {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Timeline
-typedef boost::unordered_multimap<void*,TimelineItemRef>::iterator s_iter;
-typedef boost::unordered_multimap<void*,TimelineItemRef>::const_iterator s_const_iter;
+typedef std::unordered_multimap<void*,TimelineItemRef>::iterator s_iter;
+typedef std::unordered_multimap<void*,TimelineItemRef>::const_iterator s_const_iter;
 
 Timeline::Timeline()
 	: TimelineItem( 0, 0, 0, 0 ), mDefaultAutoRemove( true ), mCurrentTime( 0 )
@@ -210,6 +210,9 @@ void Timeline::remove( TimelineItemRef item )
 
 void Timeline::removeTarget( void *target )
 {
+	if( target == 0 )
+		return;
+		
 	pair<s_iter,s_iter> range = mItems.equal_range( target );
 	mItems.erase( range.first, range.second );
 	
@@ -232,6 +235,18 @@ void Timeline::cloneAndReplaceTarget( void *target, void *replacementTarget )
 
 	for( vector<TimelineItemRef>::iterator newItemIt = newItems.begin(); newItemIt != newItems.end(); ++newItemIt )
 		mItems.insert( make_pair( replacementTarget, *newItemIt ) );
+
+	setDurationDirty();
+}
+
+void Timeline::replaceTarget( void *target, void *replacementTarget )
+{
+	if( target == 0 )
+		return;
+
+	pair<s_iter,s_iter> range = mItems.equal_range( target );
+	for( s_iter iter = range.first; iter != range.second; ++iter )
+		iter->second->setTarget( replacementTarget );
 
 	setDurationDirty();
 }
