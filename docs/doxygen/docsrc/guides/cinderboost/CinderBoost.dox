@@ -35,10 +35,11 @@ cp stage/lib/*.a ../lib/macosx\n
 \em Note: If you need 64-bit support, change the <tt>address-model=32</tt> to <tt>address-model=32_64</tt>.\n
 \n
 <b>Windows</b>:\n
+From the Visual Studio Command Prompt:
 <tt>
 cd cinder\\boost\n
-bjam --toolset=msvc --with-date_time --with-filesystem --with-thread runtime-link=static link=static variant=release stage\n
-bjam --toolset=msvc --with-date_time --with-filesystem --with-thread runtime-link=static link=static variant=debug stage\n
+bootstrap\n
+b2 stage\n
 copy stage\\lib\\*.lib ..\\lib\\msw\n
 </tt>
 \em Note: If you need to build in Visual C++ 9.0, change the <tt>--toolset=msvc</tt> to <tt>--toolset=msvc-9.0</tt>.\n
