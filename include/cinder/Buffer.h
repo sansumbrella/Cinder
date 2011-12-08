@@ -42,7 +42,7 @@ class Buffer {
 
  public:
 	Buffer() {}
-	Buffer( void * aBuffer, size_t aSize );
+	Buffer( void * aBuffer, size_t aSize, bool ownsData = false );
 	Buffer( size_t size );
 	//! Creates a Buffer from a DataSource
 	explicit Buffer( std::shared_ptr<class DataSource> dataSource );
@@ -63,7 +63,7 @@ class Buffer {
 	//TODO: copy from region of another buffer
 	
 	//! Writes a Buffer to a DataTarget
-	void	write( std::shared_ptr<class DataTarget> dataTarget );
+	void write( std::shared_ptr<class DataTarget> dataTarget );
 	
   private:
 	std::shared_ptr<Obj>		mObj;
