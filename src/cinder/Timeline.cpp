@@ -214,6 +214,7 @@ void Timeline::removeTarget( void *target )
 		return;
 		
 	pair<s_iter,s_iter> range = mItems.equal_range( target );
+size_t ct = std::distance( range.first, range.second );
 	mItems.erase( range.first, range.second );
 	
 	setDurationDirty();

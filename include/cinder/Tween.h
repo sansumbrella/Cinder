@@ -280,7 +280,7 @@ class AnimBase {
 	TimelineRef		mParentTimeline;
 };
 
-template<typename T>
+/*template<typename T>
 class Anim : public AnimBase {
   BOOST_COPYABLE_AND_MOVABLE( Anim<T> )
   public:
@@ -298,7 +298,7 @@ class Anim : public AnimBase {
 	T&			operator()() { return mValue; }	
 	
 	operator const T&() const { return mValue; }	
-	Anim<T>& operator=( BOOST_COPY_ASSIGN_REF(const Anim) rhs ) { // copy assignment
+	Anim<T>& operator=( BOOST_COPY_ASSIGN_REF(Anim) rhs ) { // copy assignment
 		if( this != &rhs ) {
 			mVoidPtr = 0;
 			set( rhs );
@@ -328,6 +328,48 @@ class Anim : public AnimBase {
   	
 //  	float	getDuration() { return mValTween->getDuration(); }
 //  	float	getEndTime() {
+
+	const T&	value() const { return mValue; }
+	T&			value() { return mValue; }
+  	
+  	const T*		ptr() const { return &mValue; }
+  	T*				ptr() { return &mValue; }
+
+  protected:
+
+	friend class Timeline;
+
+	T				mValue;
+};*/
+
+
+template<typename T>
+class Anim : public AnimBase {
+  public:
+	Anim()
+		: AnimBase( &mValue )
+	{}
+  	Anim( T value ) 
+		: AnimBase( &mValue), mValue( value )
+	{}
+  	Anim( const Anim<T> &rhs ) // normal copy constructor
+		: AnimBase( rhs, &mValue ), mValue( rhs.mValue )
+  	{}
+  	
+	const T&	operator()() const { return mValue; }
+	T&			operator()() { return mValue; }	
+	
+	operator const T&() const { return mValue; }	
+	Anim<T>& operator=( const Anim &rhs ) { // copy assignment
+		if( this != &rhs ) {
+			mVoidPtr = 0;
+			set( rhs );
+			mValue = rhs.mValue;
+		}
+		return *this;
+  	}
+
+	Anim<T>& operator=( T value ) { mValue = value; return *this; }
 
 	const T&	value() const { return mValue; }
 	T&			value() { return mValue; }

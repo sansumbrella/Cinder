@@ -40,6 +40,7 @@
 		using boost::unordered_multimap;
 	}
 #endif
+	#include <map>
 
 namespace cinder {
 
