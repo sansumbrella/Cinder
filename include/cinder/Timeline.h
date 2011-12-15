@@ -32,15 +32,7 @@
 
 #include <vector>
 #include <list>
-#if defined( _MSC_VER ) && ( _MSC_VER >= 1600 )
-	#include <unordered_map>
-#else
-	#include <boost/unordered_map.hpp>
-	namespace std {
-		using boost::unordered_multimap;
-	}
-#endif
-	#include <map>
+#include <map>
 
 namespace cinder {
 
@@ -192,7 +184,7 @@ class Timeline : public TimelineItem {
 	bool						mDefaultAutoRemove;
 	float						mCurrentTime;
 	
-	std::unordered_multimap<void*,TimelineItemRef>		mItems;
+	std::multimap<void*,TimelineItemRef>		mItems;
 };
 
 class Cue : public TimelineItem {

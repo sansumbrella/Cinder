@@ -32,8 +32,8 @@ namespace cinder {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Timeline
-typedef std::unordered_multimap<void*,TimelineItemRef>::iterator s_iter;
-typedef std::unordered_multimap<void*,TimelineItemRef>::const_iterator s_const_iter;
+typedef std::multimap<void*,TimelineItemRef>::iterator s_iter;
+typedef std::multimap<void*,TimelineItemRef>::const_iterator s_const_iter;
 
 Timeline::Timeline()
 	: TimelineItem( 0, 0, 0, 0 ), mDefaultAutoRemove( true ), mCurrentTime( 0 )
