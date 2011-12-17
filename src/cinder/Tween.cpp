@@ -95,7 +95,7 @@ void AnimBase::stop()
 
 void AnimBase::setParentTimeline( TimelineRef parentTimeline )
 {
-	if( mParentTimeline && ( parentTimeline != mParentTimeline ) && ( mVoidPtr != 0 ) ) {
+	if( mParentTimeline && ( parentTimeline != mParentTimeline ) ) {
 		mParentTimeline->removeTarget( mVoidPtr );
 	}
 	mParentTimeline = parentTimeline;  		

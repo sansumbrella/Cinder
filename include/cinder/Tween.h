@@ -24,16 +24,14 @@
 
 #pragma once
 
-#include "TimelineItem.h"
-
 #include "cinder/Cinder.h"
+#include "cinder/TimelineItem.h"
 #include "cinder/CinderMath.h"
 #include "cinder/Easing.h"
 #include "cinder/Function.h"
 
 #include <list>
 #include <boost/utility.hpp>
-#include <boost/move/move.hpp>
 
 namespace cinder {
 
@@ -282,7 +280,6 @@ class AnimBase {
 
 template<typename T>
 class Anim : public AnimBase {
-  BOOST_COPYABLE_AND_MOVABLE( Anim<T> )
   public:
 	Anim()
 		: AnimBase( &mValue )
@@ -298,36 +295,33 @@ class Anim : public AnimBase {
 	T&			operator()() { return mValue; }	
 	
 	operator const T&() const { return mValue; }	
-	Anim<T>& operator=( BOOST_COPY_ASSIGN_REF(const Anim) rhs ) { // copy assignment
+	Anim<T>& operator=( const Anim &rhs ) { // copy assignment
 		if( this != &rhs ) {
-			mVoidPtr = 0;
 			set( rhs );
 			mValue = rhs.mValue;
 		}
 		return *this;
   	}
 
-	Anim( BOOST_RV_REF(Anim) rhs ) { // Move constructor
+#if defined( CINDER_RVALUE_REFERENCES )
+	Anim( Anim &&rhs ) // move constructor
+		: AnimBase( &mValue )
+	{ // Move constructor
 		setReplace( rhs );
 		rhs.mParentTimeline.reset();
 		mValue = rhs.mValue;
 	}
-
-	Anim<T>& operator=( BOOST_RV_REF(Anim) rhs ) { // Move assignment
+	Anim<T>& operator=( Anim &&rhs ) { // move assignment
 		if( this != &rhs ) {
-			mVoidPtr = 0;
 			setReplace( rhs );
 			rhs.mParentTimeline.reset(); // blow away rhs's tweens due to move semantics
 			mValue = rhs.mValue;
 		}
-		
 		return *this;
 	}
+#endif
 
 	Anim<T>& operator=( T value ) { mValue = value; return *this; }
-  	
-//  	float	getDuration() { return mValTween->getDuration(); }
-//  	float	getEndTime() {
 
 	const T&	value() const { return mValue; }
 	T&			value() { return mValue; }

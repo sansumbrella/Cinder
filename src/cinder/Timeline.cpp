@@ -32,8 +32,8 @@ namespace cinder {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Timeline
-typedef std::unordered_multimap<void*,TimelineItemRef>::iterator s_iter;
-typedef std::unordered_multimap<void*,TimelineItemRef>::const_iterator s_const_iter;
+typedef std::multimap<void*,TimelineItemRef>::iterator s_iter;
+typedef std::multimap<void*,TimelineItemRef>::const_iterator s_const_iter;
 
 Timeline::Timeline()
 	: TimelineItem( 0, 0, 0, 0 ), mDefaultAutoRemove( true ), mCurrentTime( 0 )
@@ -214,6 +214,7 @@ void Timeline::removeTarget( void *target )
 		return;
 		
 	pair<s_iter,s_iter> range = mItems.equal_range( target );
+size_t ct = std::distance( range.first, range.second );
 	mItems.erase( range.first, range.second );
 	
 	setDurationDirty();
