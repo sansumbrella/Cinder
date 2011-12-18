@@ -306,9 +306,9 @@ class Anim : public AnimBase {
 #if defined( CINDER_RVALUE_REFERENCES )
 	Anim( Anim &&rhs ) // move constructor
 		: AnimBase( &mValue )
-	{ // Move constructor
+	{
 		setReplace( rhs );
-		rhs.mParentTimeline.reset();
+		rhs.mParentTimeline.reset(); // blow away rhs's tweens due to move semantics
 		mValue = rhs.mValue;
 	}
 	Anim<T>& operator=( Anim &&rhs ) { // move assignment

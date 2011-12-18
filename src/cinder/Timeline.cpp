@@ -214,7 +214,6 @@ void Timeline::removeTarget( void *target )
 		return;
 		
 	pair<s_iter,s_iter> range = mItems.equal_range( target );
-size_t ct = std::distance( range.first, range.second );
 	mItems.erase( range.first, range.second );
 	
 	setDurationDirty();
@@ -246,10 +245,13 @@ void Timeline::replaceTarget( void *target, void *replacementTarget )
 		return;
 
 	pair<s_iter,s_iter> range = mItems.equal_range( target );
-	for( s_iter iter = range.first; iter != range.second; ++iter )
-		iter->second->setTarget( replacementTarget );
-
-	setDurationDirty();
+	for( s_iter iter = range.first; iter != range.second; ) {
+		s_iter oldIter = iter;
+		++iter;
+		oldIter->second->setTarget( replacementTarget );
+		mItems.insert( make_pair( replacementTarget, oldIter->second ) );
+		mItems.erase( oldIter );
+	}
 }
 
 void Timeline::reset( bool unsetStarted )
