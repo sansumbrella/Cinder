@@ -8,6 +8,7 @@
 #include <list>
 #include <algorithm>
 
+#include "Resources.h"
 #include "WordNode.h"
 #include "Dictionary.h"
 #include "CenterState.h"
@@ -15,33 +16,6 @@
 using namespace ci;
 using namespace ci::app;
 using namespace std;
-
-
-//struct Circle {
-//  public:
-//	Circle( float radius, Color color )
-//		: mRadius( radius ), mRadiusDest( radius ), mColor( color )
-//	{}
-//	void draw( const Vec2f &pos ) {
-//		gl::color( ColorA( 0, 0, 0, 0.5f ) );
-//		
-//		Vec2f p = pos;
-//		p += Vec2f( 1.0f, 1.0f );
-//		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
-//		p += Vec2f( 1.0f, 1.0f );
-//		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
-//
-//		// color foreground
-//		gl::color( mColor );
-//		p	= pos;
-//		gl::drawSolidRect( Rectf( p.x - mRadius, p.y - mRadius, p.x + mRadius, p.y + mRadius ) );
-//	}
-//
-//	Anim<float>	mRadius;
-//	Anim<Color>	mColor;
-//	float		mRadiusDest;
-//};
-
 
 class VisualDictionaryApp : public AppBasic {
   public:
@@ -99,6 +73,7 @@ void VisualDictionaryApp::layoutWords( vector<string> words, float radius )
 		mNodes.back().mPos = getWindowCenter() + radius * 0.5f * Vec2f( cos( angle ), sin( angle ) );
 		mNodes.back().mColor = ColorA( col, 0.0f );
 		mNodes.back().mRadiusDest = mCurrentCircleRadius;
+		mNodes.back().mRadius = 0;
 		
 		timeline().apply( &mNodes.back().mRadius, mNodes.back().mRadiusDest, 0.4f, EaseOutAtan( 10 ) ).timelineEnd( -0.39f );
 		timeline().apply( &mNodes.back().mPos, pos, 0.4f, EaseOutAtan( 10 ) ).timelineEnd( -0.39f );
@@ -111,20 +86,20 @@ void VisualDictionaryApp::setup()
 	mCenterState = CenterState( 140.0f );
 	
 	// load textures
-	mBgTex = gl::Texture( loadImage( loadResource( "background.png" ) ) );
+	mBgTex = gl::Texture( loadImage( loadResource( RES_BACKGROUND_IMAGE ) ) );
 	gl::Texture::Format fmt;
 	fmt.enableMipmapping();
-	mCircleTex = gl::Texture( loadImage( loadResource( "circle.png" ) ), fmt );
-	mSmallCircleTex = gl::Texture( loadImage( loadResource( "smallCircle.png" ) ), fmt );
+	mCircleTex = gl::Texture( loadImage( loadResource( RES_CIRCLE_IMAGE ) ), fmt );
+	mSmallCircleTex = gl::Texture( loadImage( loadResource( RES_SMALL_CIRCLE_IMAGE ) ), fmt );
 	
 	// load the dictionary
-	mDictionary = shared_ptr<Dictionary>( new Dictionary( loadResource( "EnglishDictionary.gz" ) ) );
+	mDictionary = shared_ptr<Dictionary>( new Dictionary( loadResource( RES_DICTIONARY ) ) );
 
 	// give the WordNodes their font
-	WordNode::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 34 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
+	WordNode::setFont( gl::TextureFont::create( Font( loadResource( RES_FONT ), 34 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
 
 	// give CenterState its font
-	CenterState::setFont( gl::TextureFont::create( Font( loadResource( "Ubuntu-M.ttf" ), 150 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
+	CenterState::setFont( gl::TextureFont::create( Font( loadResource( RES_FONT ), 150 ), gl::TextureFont::Format().enableMipmapping( true ) ) );
 	
 	initialize();
 }
