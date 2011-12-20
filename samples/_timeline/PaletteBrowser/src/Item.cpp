@@ -78,7 +78,7 @@ void Item::setColors()
 		while( iter.pixel() ) {
 			int index = iter.x();
 			Color col( iter.r()/255.0f, iter.g()/255.0f, iter.b()/255.0f );
-			Vec2f pos = Vec2f( index%4, floor(index/4) ) * 5.0f - Vec2f( 12.0f, 8.0f );
+			Vec2f pos = Vec2f( index%4, floor(index/4.0f) ) * 5.0f - Vec2f( 12.0f, 8.0f );
 			Rectf rect( -2.0f, -2.0f, 2.0f, 2.0f );
 			Swatch swatch( col, mTitleStart + pos + Vec2f( -10.0f, 10.0f ), rect );
 			mSwatches.push_back( swatch );

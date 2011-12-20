@@ -118,8 +118,8 @@ void PaletteBrowserApp::createItem( const std::string &line, int lineNumber )
 {
 	string title			= line.substr( 0, line.find_last_of( ':' ) );
 	string desc				= line.substr( line.find_last_of( ':' ) +1 );
-	string imageFilename	= title + ".jpg";
-	string paletteFilename	= title + ".png";
+	string imageFilename	= toString( lineNumber + 1 ) + ".jpg";
+	string paletteFilename	= toString( lineNumber + 1 ) + ".png";
 	gl::Texture image		= gl::Texture( loadImage( loadAsset( fs::path("images") / imageFilename ) ) );
 	Surface palette			= Surface( loadImage( loadAsset( fs::path("palettes") / paletteFilename ) ) );
 	
