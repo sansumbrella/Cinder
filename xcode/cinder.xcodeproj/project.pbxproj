@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 45;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -218,6 +218,7 @@
 		007050571114F93F003FCAE4 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00D23A530EAEB4C00002BF91 /* Color.cpp */; };
 		007050581114F93F003FCAE4 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 009EEF190EB79C89003AB86B /* Rect.cpp */; };
 		007050691114F93F003FCAE4 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00F3BD1C0EBF88AA00382AC1 /* Utilities.cpp */; };
+		0070506D1114F93F003FCAE4 /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00C150100ED6710500549EF3 /* Material.cpp */; };
 		007050781114F93F003FCAE4 /* CinderCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 009987190F79D0750042F211 /* CinderCocoa.mm */; };
 		007050791114F93F003FCAE4 /* PolyLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 009EE4710F7A9FAC00F17CB1 /* PolyLine.cpp */; };
 		0070507A1114F93F003FCAE4 /* BandedMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 009EE56A0F803F5600F17CB1 /* BandedMatrix.cpp */; };
@@ -508,6 +509,7 @@
 		00CFD9A51135C3520091E310 /* Color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00D23A530EAEB4C00002BF91 /* Color.cpp */; };
 		00CFD9A61135C3520091E310 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 009EEF190EB79C89003AB86B /* Rect.cpp */; };
 		00CFD9B61135C3520091E310 /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00F3BD1C0EBF88AA00382AC1 /* Utilities.cpp */; };
+		00CFD9B81135C3520091E310 /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00C150100ED6710500549EF3 /* Material.cpp */; };
 		00CFD9B91135C3520091E310 /* CinderCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 009987190F79D0750042F211 /* CinderCocoa.mm */; };
 		00CFD9BA1135C3520091E310 /* PolyLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 009EE4710F7A9FAC00F17CB1 /* PolyLine.cpp */; };
 		00CFD9BB1135C3520091E310 /* BandedMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 009EE56A0F803F5600F17CB1 /* BandedMatrix.cpp */; };
@@ -545,6 +547,10 @@
 		00CFDA521135CB020091E310 /* gl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00CE73970E92DBF80059E09B /* gl.cpp */; };
 		00CFDB651135EBC30091E310 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00E45D0A0E94792600B47EC2 /* Texture.cpp */; };
 		00CFDB661135EBC40091E310 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00E45D0A0E94792600B47EC2 /* Texture.cpp */; };
+		00CFDD5E113636AE0091E310 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00C150A40ED8F88100549EF3 /* Light.cpp */; };
+		00CFDD5F113636AE0091E310 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00C150A40ED8F88100549EF3 /* Light.cpp */; };
+		00CFDD60113636BD0091E310 /* TileRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00FCDC1B10D434AC006140C7 /* TileRender.cpp */; };
+		00CFDD61113636BD0091E310 /* TileRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00FCDC1B10D434AC006140C7 /* TileRender.cpp */; };
 		00CFDD8811363AF50091E310 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002419D30E8035E1004D34EB /* App.cpp */; };
 		00CFDD8911363AF60091E310 /* App.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 002419D30E8035E1004D34EB /* App.cpp */; };
 		00CFE37D113B85F60091E310 /* Path2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFE37B113B85F60091E310 /* Path2d.h */; };
@@ -586,6 +592,8 @@
 		4354C47D1357BBF200120EE3 /* TextureFont.h in Headers */ = {isa = PBXBuildFile; fileRef = 4354C47B1357BBED00120EE3 /* TextureFont.h */; };
 		4354C47E1357BBF300120EE3 /* TextureFont.h in Headers */ = {isa = PBXBuildFile; fileRef = 4354C47B1357BBED00120EE3 /* TextureFont.h */; };
 		4354C4801357BC1100120EE3 /* TextureFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4354C47F1357BC1100120EE3 /* TextureFont.cpp */; };
+		4354C4811357BC1100120EE3 /* TextureFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4354C47F1357BC1100120EE3 /* TextureFont.cpp */; };
+		4354C4821357BC1100120EE3 /* TextureFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4354C47F1357BC1100120EE3 /* TextureFont.cpp */; };
 		43C432401450A8DA0095B260 /* CinderMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43C4323F1450A8DA0095B260 /* CinderMath.cpp */; };
 		43C432411450A8DA0095B260 /* CinderMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43C4323F1450A8DA0095B260 /* CinderMath.cpp */; };
 		43C432421450A8DA0095B260 /* CinderMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43C4323F1450A8DA0095B260 /* CinderMath.cpp */; };
@@ -605,8 +613,6 @@
 		43ED153D1221DF6C003AEB0B /* UrlImplCocoa.mm in Sources */ = {isa = PBXBuildFile; fileRef = 43ED0FDD12209488003AEB0B /* UrlImplCocoa.mm */; };
 		5391FD680E957646002A13D5 /* KeyEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 5391FD670E957646002A13D5 /* KeyEvent.h */; };
 		5391FE660E95CB01002A13D5 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0867D6A5FE840307C02AAC07 /* AppKit.framework */; };
-		9443E06A149AA517008087FC /* GlslProg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00D9A07B0EA57C3F00FF5AEB /* GlslProg.cpp */; };
-		9443E0E1149DC396008087FC /* GlslProg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00D9A07B0EA57C3F00FF5AEB /* GlslProg.cpp */; };
 		C70E19FF106AA38700E63577 /* Buffer.h in Headers */ = {isa = PBXBuildFile; fileRef = C70E19FE106AA38700E63577 /* Buffer.h */; };
 		C70E1A03106AA39D00E63577 /* Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C70E1A01106AA39D00E63577 /* Buffer.cpp */; };
 		C727BFE5121B3AE600192073 /* Capture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007438400EA7924F005DD3E6 /* Capture.cpp */; };
@@ -1998,11 +2004,8 @@
 /* Begin PBXProject section */
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
-			attributes = {
-				LastUpgradeCheck = 0420;
-			};
 			buildConfigurationList = 1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "cinder" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 3.1";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -2028,7 +2031,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9443E06A149AA517008087FC /* GlslProg.cpp in Sources */,
 				007050491114F93F003FCAE4 /* Camera.cpp in Sources */,
 				0070504A1114F93F003FCAE4 /* Matrix.cpp in Sources */,
 				0070504D1114F93F003FCAE4 /* Surface.cpp in Sources */,
@@ -2040,6 +2042,7 @@
 				007050571114F93F003FCAE4 /* Color.cpp in Sources */,
 				007050581114F93F003FCAE4 /* Rect.cpp in Sources */,
 				007050691114F93F003FCAE4 /* Utilities.cpp in Sources */,
+				0070506D1114F93F003FCAE4 /* Material.cpp in Sources */,
 				007050781114F93F003FCAE4 /* CinderCocoa.mm in Sources */,
 				007050791114F93F003FCAE4 /* PolyLine.cpp in Sources */,
 				0070507A1114F93F003FCAE4 /* BandedMatrix.cpp in Sources */,
@@ -2068,6 +2071,8 @@
 				007050AD1114F93F003FCAE4 /* Trim.cpp in Sources */,
 				00CFDA511135CB010091E310 /* gl.cpp in Sources */,
 				00CFDB651135EBC30091E310 /* Texture.cpp in Sources */,
+				00CFDD5E113636AE0091E310 /* Light.cpp in Sources */,
+				00CFDD60113636BD0091E310 /* TileRender.cpp in Sources */,
 				00CFDD8811363AF50091E310 /* App.cpp in Sources */,
 				000F468F114FE1CE00421982 /* Renderer.cpp in Sources */,
 				0005630B11513B9400ECFD91 /* AppImplCocoaTouchRendererQuartz.mm in Sources */,
@@ -2106,6 +2111,7 @@
 				00A1141C1355369A00081873 /* priorityq.c in Sources */,
 				00A1141E1355369A00081873 /* sweep.c in Sources */,
 				00A114201355369A00081873 /* tess.c in Sources */,
+				4354C4811357BC1100120EE3 /* TextureFont.cpp in Sources */,
 				43C432411450A8DA0095B260 /* CinderMath.cpp in Sources */,
 				00A121EC1362778200081873 /* Timeline.cpp in Sources */,
 				00A121ED1362778200081873 /* TimelineItem.cpp in Sources */,
@@ -2117,7 +2123,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9443E0E1149DC396008087FC /* GlslProg.cpp in Sources */,
 				00CFD99D1135C3520091E310 /* Camera.cpp in Sources */,
 				00CFD99E1135C3520091E310 /* Matrix.cpp in Sources */,
 				00CFD99F1135C3520091E310 /* Surface.cpp in Sources */,
@@ -2129,6 +2134,7 @@
 				00CFD9A51135C3520091E310 /* Color.cpp in Sources */,
 				00CFD9A61135C3520091E310 /* Rect.cpp in Sources */,
 				00CFD9B61135C3520091E310 /* Utilities.cpp in Sources */,
+				00CFD9B81135C3520091E310 /* Material.cpp in Sources */,
 				00CFD9B91135C3520091E310 /* CinderCocoa.mm in Sources */,
 				00CFD9BA1135C3520091E310 /* PolyLine.cpp in Sources */,
 				00CFD9BB1135C3520091E310 /* BandedMatrix.cpp in Sources */,
@@ -2157,6 +2163,8 @@
 				00CFD9D41135C3520091E310 /* Trim.cpp in Sources */,
 				00CFDA521135CB020091E310 /* gl.cpp in Sources */,
 				00CFDB661135EBC40091E310 /* Texture.cpp in Sources */,
+				00CFDD5F113636AE0091E310 /* Light.cpp in Sources */,
+				00CFDD61113636BD0091E310 /* TileRender.cpp in Sources */,
 				00CFDD8911363AF60091E310 /* App.cpp in Sources */,
 				000F4690114FE1CF00421982 /* Renderer.cpp in Sources */,
 				0005630C11513B9400ECFD91 /* AppImplCocoaTouchRendererQuartz.mm in Sources */,
@@ -2193,6 +2201,7 @@
 				00A1142B1355369A00081873 /* priorityq.c in Sources */,
 				00A1142D1355369A00081873 /* sweep.c in Sources */,
 				00A1142F1355369A00081873 /* tess.c in Sources */,
+				4354C4821357BC1100120EE3 /* TextureFont.cpp in Sources */,
 				43C432421450A8DA0095B260 /* CinderMath.cpp in Sources */,
 				00A121E91362778200081873 /* Timeline.cpp in Sources */,
 				00A121EA1362778200081873 /* TimelineItem.cpp in Sources */,
@@ -2322,6 +2331,7 @@
 				CHECKED_STL = "-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2383,6 +2393,7 @@
 				CHECKED_STL = "-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2445,6 +2456,7 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2454,7 +2466,6 @@
 				INSTALL_PATH = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CPLUSPLUSFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					../lib/macosx/libboost_thread.a,
 					../lib/macosx/libboost_date_time.a,
@@ -2491,7 +2502,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
-				OTHER_CPLUSPLUSFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					../lib/macosx/libboost_thread.a,
 					../lib/macosx/libboost_date_time.a,
@@ -2512,11 +2522,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OBJC_CALL_CXX_CDTORS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -2526,6 +2535,7 @@
 				);
 				OBJROOT = build/;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				PREBINDING = NO;
 				SYMROOT = ../lib;
 				USER_HEADER_SEARCH_PATHS = ../include;
 			};
@@ -2535,11 +2545,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OBJC_CALL_CXX_CDTORS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -2549,6 +2558,7 @@
 				);
 				OBJROOT = build/;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
+				PREBINDING = NO;
 				SYMROOT = ../lib;
 				USER_HEADER_SEARCH_PATHS = ../include;
 			};

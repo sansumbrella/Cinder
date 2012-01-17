@@ -1,3 +1,8 @@
+/*
+ * Code Copyright 2011 Robert Hodgin ( http://roberthodgin.com ) and Andrew Bell ( http://drawnline.net )
+ * Used with permission for the Cinder Project ( http://libcinder.org )
+ */
+
 #pragma once
 
 #include "cinder/DataSource.h"

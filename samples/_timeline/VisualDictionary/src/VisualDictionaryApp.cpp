@@ -1,3 +1,8 @@
+/*
+ * Code Copyright 2011 Robert Hodgin ( http://roberthodgin.com ) and Andrew Bell ( http://drawnline.net )
+ * Used with permission for the Cinder Project ( http://libcinder.org )
+ */
+
 #include "cinder/app/AppBasic.h"
 #include "cinder/Rand.h"
 #include "cinder/ImageIo.h"
@@ -224,7 +229,8 @@ void VisualDictionaryApp::selectNode( list<WordNode>::iterator selectedNode )
 	
 	// once everything is done animating, then we can allow selections, but for now, disable them
 	mEnableSelections = false;
-	timeline().add( bind( &VisualDictionaryApp::enableSelections, this ), timeline().getEndTime() - 2.0f );
+	std::function<void()> cueAction = bind( &VisualDictionaryApp::enableSelections, this );
+	timeline().add( cueAction, timeline().getEndTime() - 2.0f );
 }
 
 void VisualDictionaryApp::update()

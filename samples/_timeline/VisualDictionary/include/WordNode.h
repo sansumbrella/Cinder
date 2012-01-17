@@ -1,10 +1,7 @@
-//
-//  WordNode.h
-//  VisualDictionary
-//
-//  Created by Andrew Bell on 10/28/11.
-//  Copyright (c) 2011. All rights reserved.
-//
+/*
+ * Code Copyright 2011 Robert Hodgin ( http://roberthodgin.com ) and Andrew Bell ( http://drawnline.net )
+ * Used with permission for the Cinder Project ( http://libcinder.org )
+ */
 
 #pragma once
 

@@ -1,3 +1,8 @@
+/*
+ * Code Copyright 2011 Robert Hodgin ( http://roberthodgin.com )
+ * Used with permission for the Cinder Project ( http://libcinder.org )
+ */
+
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"

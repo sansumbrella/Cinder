@@ -1,10 +1,7 @@
-//
-//  CenterState.cpp
-//  VisualDictionary
-//
-//  Created by Robert Hodgin on 11/2/11.
-//  Copyright (c) 2011. All rights reserved.
-//
+/*
+ * Code Copyright 2011 Robert Hodgin ( http://roberthodgin.com ) and Andrew Bell ( http://drawnline.net )
+ * Used with permission for the Cinder Project ( http://libcinder.org )
+ */
 
 #include "cinder/app/AppBasic.h"
 #include "CenterState.h"

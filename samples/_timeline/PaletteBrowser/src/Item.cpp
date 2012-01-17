@@ -1,10 +1,7 @@
-//
-//  Item.cpp
-//  PaletteBrowser
-//
-//  Created by Robert Hodgin on 11/7/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
-//
+/*
+ * Code Copyright 2011 Robert Hodgin ( http://roberthodgin.com )
+ * Used with permission for the Cinder Project ( http://libcinder.org )
+ */
 
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
