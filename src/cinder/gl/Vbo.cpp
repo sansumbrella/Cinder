@@ -159,7 +159,7 @@ VboMesh::VboMesh( const TriMesh &triMesh, Layout layout )
 			}
 			if( copyColorRGBA ) {
 				*(reinterpret_cast<ColorA*>(ptr)) = triMesh.getColorsRGBA()[v];
-				ptr += sizeof( Color );
+				ptr += sizeof( ColorA );
 			}
 			if( copyTexCoord2D ) {
 				*(reinterpret_cast<Vec2f*>(ptr)) = triMesh.getTexCoords()[v];
@@ -222,7 +222,7 @@ VboMesh::VboMesh( const TriMesh2d &triMesh, Layout layout )
 			}
 			if( copyColorRGBA ) {
 				*(reinterpret_cast<ColorA*>(ptr)) = triMesh.getColorsRGBA()[v];
-				ptr += sizeof( Color );
+				ptr += sizeof( ColorA );
 			}
 			if( copyTexCoord2D ) {
 				*(reinterpret_cast<Vec2f*>(ptr)) = triMesh.getTexCoords()[v];
@@ -292,9 +292,12 @@ void VboMesh::initializeBuffers( bool staticDataPlanar )
 
 	if( hasStaticBuffer && staticDataPlanar ) { // Planar static buffer
 		size_t offset = 0;
+		bool doSetup = false;
 	
-		if( ! mObj->mBuffers[STATIC_BUFFER] )
+		if( ! mObj->mBuffers[STATIC_BUFFER] ) {
 			mObj->mBuffers[STATIC_BUFFER] = Vbo( GL_ARRAY_BUFFER );
+			doSetup = true;
+		}
 
 		if( mObj->mLayout.hasStaticPositions() ) {
 			mObj->mPositionOffset = offset;
@@ -335,7 +338,8 @@ void VboMesh::initializeBuffers( bool staticDataPlanar )
 		mObj->mStaticStride = 0;
 		
 		// setup the buffer to be the summed size
-		mObj->mBuffers[STATIC_BUFFER].bufferData( offset, NULL, GL_STATIC_DRAW );
+		if( doSetup )
+			mObj->mBuffers[STATIC_BUFFER].bufferData( offset, NULL, GL_STATIC_DRAW );
 	}
 	else if( hasStaticBuffer && ( ! staticDataPlanar ) ) { // Interleaved static buffer
 		size_t offset = 0;
@@ -620,15 +624,34 @@ void VboMesh::bufferNormals( const std::vector<Vec3f> &normals )
 
 void VboMesh::bufferTexCoords2d( size_t unit, const std::vector<Vec2f> &texCoords )
 {
-	if( mObj->mLayout.hasDynamicTexCoords2d() ) {
+	if( mObj->mLayout.hasDynamicTexCoords2d(unit) ) {
 		if( mObj->mDynamicStride == 0 )
 			getDynamicVbo().bufferSubData( mObj->mTexCoordOffset[unit], sizeof(Vec2f) * texCoords.size(), &(texCoords[0]) );
 		else
 			throw;
 	}
-	else if( mObj->mLayout.hasStaticTexCoords2d() ) {
+	else if( mObj->mLayout.hasStaticTexCoords2d(unit) ) {
 		if( mObj->mStaticStride == 0 ) { // planar data
 			getStaticVbo().bufferSubData( mObj->mTexCoordOffset[unit], sizeof(Vec2f) * texCoords.size(), &(texCoords[0]) );
+		}
+		else
+			throw;
+	}
+	else
+		throw;
+}
+
+void VboMesh::bufferTexCoords3d( size_t unit, const std::vector<Vec3f> &texCoords )
+{
+	if( mObj->mLayout.hasDynamicTexCoords3d(unit) ) {
+		if( mObj->mDynamicStride == 0 )
+			getDynamicVbo().bufferSubData( mObj->mTexCoordOffset[unit], sizeof(Vec3f) * texCoords.size(), &(texCoords[0]) );
+		else
+			throw;
+	}
+	else if( mObj->mLayout.hasStaticTexCoords3d(unit) ) {
+		if( mObj->mStaticStride == 0 ) { // planar data
+			getStaticVbo().bufferSubData( mObj->mTexCoordOffset[unit], sizeof(Vec3f) * texCoords.size(), &(texCoords[0]) );
 		}
 		else
 			throw;

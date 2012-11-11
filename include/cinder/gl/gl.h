@@ -34,6 +34,7 @@
 	#define CINDER_GLES2
 #endif
 
+#include "cinder/Exception.h"
 #include "cinder/Quaternion.h"
 #include "cinder/Matrix.h"
 #include "cinder/Vector.h"
@@ -132,9 +133,9 @@ inline void translate( float x, float y, float z ) { translate( Vec3f( x, y, z )
 //! Produces a scale by \a scale in the current matrix.
 void scale( const Vec3f &scl );
 //! Produces a scale by \a scl in the current matrix.
-inline void scale( const Vec2f &scl ) { scale( Vec3f( scl.x, scl.y, 0 ) ); }
+inline void scale( const Vec2f &scl ) { scale( Vec3f( scl.x, scl.y, 1 ) ); }
 //! Produces a scale by \a x and \a y in the current matrix.
-inline void scale( float x, float y ) { scale( Vec3f( x, y, 0 ) ); }
+inline void scale( float x, float y ) { scale( Vec3f( x, y, 1 ) ); }
 //! Produces a scale by \a x, \a y and \a z in the current matrix.
 inline void scale( float x, float y, float z ) { scale( Vec3f( x, y, z ) ); }
 
@@ -146,14 +147,26 @@ void rotate( const Quatf &quat );
 inline void rotate( float degrees ) { rotate( Vec3f( 0, 0, degrees ) ); }
 
 #if ! defined( CINDER_GLES )
-//! Used between calls to \c glBegin and \c glEnd, appends a vertex to the current primitive.
+//! Equivalent to glBegin() in immediate mode
+inline void begin( GLenum mode ) { glBegin( mode ); }
+//! Equivalent to glEnd() in immediate mode
+inline void end() { glEnd(); }
+//! Used between calls to gl::begin() and \c gl::end(), appends a vertex to the current primitive.
 inline void vertex( const Vec2f &v ) { glVertex2fv( &v.x ); }
-//! Used between calls to \c glBegin and \c glEnd, appends a vertex to the current primitive.
+//! Used between calls to gl::begin() and \c gl::end(), appends a vertex to the current primitive.
 inline void vertex( float x, float y ) { glVertex2f( x, y ); }
-//! Used between calls to \c glBegin and \c glEnd, appends a vertex to the current primitive.
+//! Used between calls to gl::begin() and \c gl::end(), appends a vertex to the current primitive.
 inline void vertex( const Vec3f &v ) { glVertex3fv( &v.x ); }
-//! Used between calls to \c glBegin and \c glEnd, appends a vertex to the current primitive.
+//! Used between calls to gl::begin() and \c gl::end(), appends a vertex to the current primitive.
 inline void vertex( float x, float y, float z ) { glVertex3f( x, y, z ); }
+//! Used between calls to gl::begin() and gl::end(), sets the 2D texture coordinate for the next vertex.
+inline void texCoord( float x, float y ) { glTexCoord2f( x, y ); }
+//! Used between calls to gl::begin() and gl::end(), sets the 2D texture coordinate for the next vertex.
+inline void texCoord( const Vec2f &v ) { glTexCoord2f( v.x, v.y ); }
+//! Used between calls to gl::begin() and gl::end(), sets the 3D texture coordinate for the next vertex.
+inline void texCoord( float x, float y, float z ) { glTexCoord3f( x, y, z ); }
+//! Used between calls to gl::begin() and gl::end(), sets the 3D texture coordinate for the next vertex.
+inline void texCoord( const Vec3f &v ) { glTexCoord3f( v.x, v.y, v.z ); }
 //! Sets the current color and the alpha value to 1.0
 inline void color( float r, float g, float b ) { glColor4f( r, g, b, 1.0f ); }
 //! Sets the current color and alpha value
@@ -180,13 +193,13 @@ void disableAlphaBlending();
 //! Enables alpha blending and selects a \c BlendFunc for additive blending
 void enableAdditiveBlending();
 
-/** \brief Enables alpha testing and sets the \c AlphaFunc to test for values which are \a func than \a value, which should be in the range [0, 1.0]. 
+#if ! defined( CINDER_GLES )
+/** \brief Enables alpha testing and sets the \c AlphaFunc to test for values which are \a func than \a value, which should be in the range [0, 1.0].
  *  Possible values for \a func include <tt>GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL and GL_ALWAYS</tt>. **/
 void enableAlphaTest( float value = 0.5f, int func = GL_GREATER );
 //! Disables alpha testing
 void disableAlphaTest();
 
-#if ! defined( CINDER_GLES )
 //! Enables wireframe drawing by setting the \c PolygonMode to \c GL_LINE.
 void enableWireframe();
 //! Disables wireframe drawing.
@@ -233,6 +246,15 @@ void drawStrokedRect( const Rectf &rect );
 void drawSolidRoundedRect( const Rectf &r, float cornerRadius, int numSegmentsPerCorner = 0 );
 void drawStrokedRoundedRect( const Rectf &r, float cornerRadius, int numSegmentsPerCorner = 0 );
 //! Renders a coordinate frame representation centered at the origin. Arrowheads are drawn at the end of each axis with radius \a headRadius and length \a headLength.
+//! Renders a solid triangle.
+void drawSolidTriangle( const Vec2f &pt1, const Vec2f &pt2, const Vec2f &pt3 );
+void drawSolidTriangle( const Vec2f pts[3] );
+//! Renders a textured triangle.
+void drawSolidTriangle( const Vec2f &pt1, const Vec2f &pt2, const Vec2f &pt3, const Vec2f &texPt1, const Vec2f &texPt2, const Vec2f &texPt3 );
+void drawSolidTriangle( const Vec2f pts[3], const Vec2f texCoord[3] );
+//! Renders a stroked triangle.
+void drawStrokedTriangle( const Vec2f &pt1, const Vec2f &pt2, const Vec2f &pt3 );	
+void drawStrokedTriangle( const Vec2f pts[3] );
 void drawCoordinateFrame( float axisLength = 1.0f, float headLength = 0.2f, float headRadius = 0.05f );
 //! Draws a vector starting at \a start and ending at \a end. An arrowhead is drawn at the end of radius \a headRadius and length \a headLength.
 void drawVector( const Vec3f &start, const Vec3f &end, float headLength = 0.2f, float headRadius = 0.05f );
@@ -342,6 +364,12 @@ struct SaveFramebufferBinding {
 //! Initializes the GLee library. This is generally called automatically by the application and is only necessary if you need to use GLee before your app's setup() method is called.
 void initializeGlee();
 #endif
+
+class Exception : public cinder::Exception {
+};
+
+class ExceptionUnknownTarget : public Exception {
+};
 
 } } // namespace cinder::gl 
 
