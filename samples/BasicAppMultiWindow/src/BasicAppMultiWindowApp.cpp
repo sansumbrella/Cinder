@@ -38,7 +38,8 @@ void BasicAppMultiWindow::setup()
 
 void BasicAppMultiWindow::createNewWindow()
 {
-	app::WindowRef newWindow = createWindow( Window::Format().size( 400, 400 ) );
+    /// Fully qualify the window with the appropriate namespace, otherwise there are clashes with xlib which also uses Window.
+	app::WindowRef newWindow = createWindow( cinder::app::Window::Format().size( 400, 400 ) );
 	newWindow->setUserData( new WindowData );
 	
 	// for demonstration purposes, we'll connect a lambda unique to this window which fires on close
