@@ -26,6 +26,8 @@
 
 #if defined( CINDER_COCOA )
 	#include <CoreFoundation/CoreFoundation.h>
+#elif defined( CINDER_LINUX )
+	#include <time.h>
 #endif
 
 namespace cinder {
@@ -41,7 +43,11 @@ class Timer {
 	//! Begins timing
 	void	start();
 	//! Returns the elapsed seconds if the timer is running, or the total time between calls to start() and stop() if it is stopped.
+	#ifndef CINDER_LINUX
 	double	getSeconds() const;
+	#else 
+	double getSeconds();
+	#endif
 	//! Ends timing
 	void	stop();
 
@@ -54,6 +60,9 @@ class Timer {
 	::CFAbsoluteTime	mStartTime, mEndTime;
 #elif defined( CINDER_MSW )
 	double				mStartTime, mEndTime, mInvNativeFreq;
+#elif defined( CINDER_LINUX )
+	time_t mStartTime, mEndTime;
+	struct timespec mTimeNow;
 #endif
 };
 

@@ -30,6 +30,8 @@
 	#include <Shellapi.h>
 	#include "cinder/Utilities.h"
 	#include "cinder/app/AppImplMswBasic.h"
+#elif defined( CINDER_LINUX ) 
+	#include "cinder/app/AppImplLinuxBasic.h"
 #endif
 
 namespace cinder { namespace app {
@@ -118,8 +120,11 @@ void AppBasic::launch( const char *title, int argc, char * const argv[] )
     [application run];
 
     [pool drain];
-#else
+#elif defined( CINDER_MSW )
 	mImpl = new AppImplMswBasic( this );	
+	mImpl->run();
+#elif defined( CINDER_LINUX )
+	mImpl = new AppImplLinuxBasic( this );
 	mImpl->run();
 #endif
 // NOTHING AFTER THIS LINE RUNS
@@ -138,6 +143,8 @@ WindowRef AppBasic::createWindow( const Window::Format &format )
 	return [mImpl createWindow:format];
 #elif defined( CINDER_MSW )
 	return mImpl->createWindow( format );
+#elif defined( CINDER_LINUX )
+	return mImpl->createWindow( format );
 #endif
 }
 
@@ -146,6 +153,8 @@ float AppBasic::getFrameRate() const
 #if defined( CINDER_COCOA )
 	return [mImpl getFrameRate];
 #elif defined( CINDER_MSW )
+	return mImpl->getFrameRate();
+#elif defined( CINDER_LINUX )
 	return mImpl->getFrameRate();
 #endif
 }
@@ -156,6 +165,8 @@ void AppBasic::setFrameRate( float aFrameRate )
 	[mImpl setFrameRate:aFrameRate];
 #elif defined( CINDER_MSW )
 	mImpl->setFrameRate( aFrameRate );
+#elif defined( CINDER_LINUX )
+	mImpl->setFrameRate( aFrameRate );
 #endif
 }
 
@@ -164,6 +175,8 @@ void AppBasic::disableFrameRate()
 #if defined( CINDER_COCOA )
 	[mImpl disableFrameRate];
 #elif defined( CINDER_MSW )
+	mImpl->disableFrameRate();
+#elif defined( CINDER_LINUX )
 	mImpl->disableFrameRate();
 #endif
 }
@@ -174,6 +187,8 @@ bool AppBasic::isFrameRateEnabled() const
 	return [mImpl isFrameRateEnabled];
 #elif defined( CINDER_MSW )
 	return mImpl->isFrameRateEnabled();
+#elif defined( CINDER_LINUX )
+	return mImpl->isFrameRateEnabled();
 #endif
 }
 
@@ -183,6 +198,8 @@ fs::path AppBasic::getAppPath() const
 	return [mImpl getAppPath];
 #elif defined( CINDER_MSW )
 	return AppImplMsw::getAppPath();
+#elif defined( CINDER_LINUX )
+	return AppImplLinux::getAppPath();
 #endif
 }
 
@@ -191,6 +208,8 @@ size_t AppBasic::getNumWindows() const
 #if defined( CINDER_COCOA )
 	return [mImpl getNumWindows];
 #elif defined( CINDER_MSW )
+	return mImpl->getNumWindows();
+#elif defined( CINDER_LINUX )
 	return mImpl->getNumWindows();
 #endif
 }
@@ -201,6 +220,8 @@ WindowRef AppBasic::getWindowIndex( size_t index ) const
 	return [mImpl getWindowIndex:index];
 #elif defined( CINDER_MSW )
 	return mImpl->getWindowIndex( index );
+#elif defined( CINDER_LINUX )
+	return mImpl->getWindowIndex( index );
 #endif
 }
 
@@ -209,6 +230,8 @@ WindowRef AppBasic::getWindow() const
 #if defined( CINDER_COCOA )
 	return [mImpl getWindow];
 #elif defined( CINDER_MSW )
+	return mImpl->getWindow();
+#elif defined( CINDER_LINUX )
 	return mImpl->getWindow();
 #endif
 }
@@ -219,6 +242,8 @@ WindowRef AppBasic::getForegroundWindow() const
 	return [mImpl getForegroundWindow];
 #elif defined( CINDER_MSW )
 	return mImpl->getForegroundWindow();
+#elif defined( CINDER_LINUX )
+	return mImpl->getForegroundWindow();
 #endif
 }
 
@@ -228,6 +253,8 @@ void AppBasic::hideCursor()
 	[NSCursor hide];
 #elif defined( CINDER_MSW )
 	AppImplMsw::hideCursor();
+#elif defined( CINDER_LINUX )
+	AppImplLinux::hideCursor();
 #endif
 }
 
@@ -237,6 +264,8 @@ void AppBasic::showCursor()
 	[NSCursor unhide];
 #elif defined( CINDER_MSW )
 	AppImplMsw::showCursor();
+#elif defined( CINDER_LINUX )
+	AppImplLinux::showCursor();
 #endif
 }
 

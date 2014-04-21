@@ -1,6 +1,8 @@
+
 /*
- Copyright (c) 2010, The Barbarian Group
- All rights reserved.
+ Copyright (c) 2012, The Cinder Project, All rights reserved.
+
+ This code is intended for use with the Cinder C++ library: http://libcinder.org
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that
  the following conditions are met:
@@ -20,42 +22,34 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "cinder/Rand.h"
-#if defined( CINDER_COCOA )
-#	include <mach/mach.h>
-#	include <mach/mach_time.h>
-#elif defined( CINDER_MSW ) 
-#	include <windows.h>
-#elif defined( CINDER_LINUX )
-#	include <time.h>
-#endif
+#pragma once
 
-namespace cinder {
+#include <X11/Xlib.h>
+#include <GL/glx.h>
+#include "cinder/app/Renderer.h"
+
+namespace cinder { namespace app {
+
+class App;
+class AppImplLinuxBasic;
+
+class AppImplLinuxRenderer {
+ public:
+	AppImplLinuxRenderer( App *aApp ) : mApp( aApp ) {}
 	
-std::mt19937 Rand::sBase( 310u );
-std::uniform_real_distribution<float> Rand::sFloatGen;
+	virtual bool	initialize( xwindow::_XWindow & wnd, _XDisplay *dpy, XVisualInfo *aVisinfo, RendererRef sharedRenderer ) = 0;
+	virtual void	prepareToggleFullScreen() {}
+	virtual void	finishToggleFullScreen() {}
+	virtual void	kill() = 0;
+	virtual void	defaultResize() const = 0;
+	virtual void	swapBuffers() const = 0;
+	virtual void	makeCurrentContext() = 0;
 
-void Rand::randomize()
-{
-#if defined( CINDER_COCOA ) 
-	sBase = std::mt19937( mach_absolute_time() );
-#elif defined( CINDER_MSW )
-	sBase = std::mt19937( ::GetTickCount() );
-#elif defined( CINDER_LINUX )
-	struct timespec gettime_now;
-	clock_gettime( CLOCK_MONOTONIC, &gettime_now );
-	sBase = std::mt19937( gettime_now.tv_nsec );
-#endif
-}
+ protected:
+	xwindow::_XWindow*		mWnd;
+	_XDisplay*			mDpy;
+	XVisualInfo * 			mVisInfo;
+	App				*mApp;
+};
 
-void Rand::randSeed( unsigned long seed )
-{
-	sBase = std::mt19937( seed );
-}
-
-void Rand::seed( unsigned long seedValue )
-{
-	mBase = std::mt19937( seedValue );
-}
-
-} // ci
+} } // namespace cinder::app

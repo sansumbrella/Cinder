@@ -43,12 +43,19 @@
 	#include <windows.h>
 	#undef min
 	#undef max
+#elif defined( CINDER_LINUX )
+	#include <X11/Xlib.h>
+	typedef _XDisplay* XDisplayPtr;
+	typedef Screen*	  XScreenPtr;
 #endif
 
 #include <map>
 #include <vector>
 
 namespace cinder {
+
+//forward declared here to avoid typedef redefinition clashes with Xlib Display struct
+class Display;
 
 typedef std::shared_ptr<class Display> 	DisplayRef;
 
@@ -105,6 +112,8 @@ class Display {
 	//! Finds a Display based on its HMONITOR. Returns the primary display if it's not found
 	static DisplayRef			findFromHmonitor( HMONITOR hMonitor );
 	static BOOL CALLBACK enumMonitorProc( HMONITOR hMonitor, HDC hdc, LPRECT rect, LPARAM lParam );
+#elif defined( CINDER_LINUX )
+	XDisplayPtr getXDisplay(){ return mXDisplay; }
 #endif
 
 	friend std::ostream& operator<<( std::ostream &o, const Display &display )
@@ -132,10 +141,12 @@ class Display {
 	signals::signal<void()>	mSignalDisplaysChanged;
 #elif defined( CINDER_MSW )
 	HMONITOR			mMonitor;
+#elif defined( CINDER_LINUX )
+	static	XDisplayPtr		mXDisplay;
+	XScreenPtr			mXScreen;	
 #endif
 	
 	static void		enumerateDisplays();
-	
 	static std::vector<DisplayRef>	sDisplays;
 	static bool						sDisplaysInitialized;
 };

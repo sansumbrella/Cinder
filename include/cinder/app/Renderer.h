@@ -58,6 +58,19 @@
 		class UIView;
 		class EAGLContext;
 	#endif
+#elif defined( CINDER_LINUX )
+	#include <X11/Xlib.h>
+	#include <GL/glx.h>
+	namespace xwindow {
+
+//		class Window;
+		typedef Window _XWindow;
+	} 
+	
+	namespace xscreen {
+		
+		typedef Screen _XScreen;		
+	}
 #endif
 
 
@@ -95,6 +108,9 @@ class Renderer {
 
 	virtual HWND				getHwnd() = 0;
 	virtual HDC					getDc() { return NULL; }
+#elif defined( CINDER_LINUX )
+	virtual void setup( App *aApp, xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer ) = 0; 
+	virtual void kill() {}
 #endif
 
 	virtual Surface	copyWindowSurface( const Area &area ) = 0;
@@ -142,6 +158,9 @@ class RendererGl : public Renderer {
 	virtual HWND	getHwnd() { return mWnd; }
 	virtual void	prepareToggleFullScreen();
 	virtual void	finishToggleFullScreen();
+#elif	defined( CINDER_LINUX )
+	virtual void 	setup( App *aApp, xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer );
+	virtual void 	kill();
 #endif
 
 	enum	{ AA_NONE = 0, AA_MSAA_2, AA_MSAA_4, AA_MSAA_6, AA_MSAA_8, AA_MSAA_16, AA_MSAA_32 };
@@ -167,10 +186,18 @@ class RendererGl : public Renderer {
 	class AppImplMswRendererGl	*mImpl;
 	HWND						mWnd;
 	friend class				AppImplMswRendererGl;
+#elif defined( CINDER_LINUX )
+	class AppImplLinuxRendererGlx 	*mImpl;
+	xwindow::_XWindow*				mWnd;
+	_XDisplay*			mDpy;
+	friend class			AppImplLinuxRendererGlx;
 #endif
 };
 
-typedef std::shared_ptr<class Renderer2d>	Renderer2dRef;
+#ifndef CINDER_LINUX
+	typedef std::shared_ptr<class Renderer2d>	Renderer2dRef;
+#endif
+
 #if defined( CINDER_COCOA )
 class Renderer2d : public Renderer {
   public:
@@ -238,7 +265,6 @@ class Renderer2d : public Renderer {
 	HWND			mWnd;
 	HDC				mDC;
 };
-
 #endif
 
 } } // namespace cinder::app

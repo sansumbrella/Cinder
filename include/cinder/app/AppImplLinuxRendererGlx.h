@@ -1,6 +1,7 @@
 /*
- Copyright (c) 2010, The Barbarian Group
- All rights reserved.
+ Copyright (c) 2012, The Cinder Project, All rights reserved.
+
+ This code is intended for use with the Cinder C++ library: http://libcinder.org
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that
  the following conditions are met:
@@ -20,42 +21,32 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "cinder/Rand.h"
-#if defined( CINDER_COCOA )
-#	include <mach/mach.h>
-#	include <mach/mach_time.h>
-#elif defined( CINDER_MSW ) 
-#	include <windows.h>
-#elif defined( CINDER_LINUX )
-#	include <time.h>
-#endif
+#pragma once
 
-namespace cinder {
+#include "cinder/app/App.h"
+#include "cinder/app/AppImplLinuxRenderer.h"
+#include <GL/glx.h>
+
+namespace cinder { namespace app {
+
+class AppImplLinuxRendererGlx : public AppImplLinuxRenderer {
+ public:
+	AppImplLinuxRendererGlx( App *aApp, RendererGl *aRenderer );
 	
-std::mt19937 Rand::sBase( 310u );
-std::uniform_real_distribution<float> Rand::sFloatGen;
+	virtual bool	initialize( xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer );
+	virtual void	kill();
+	virtual void	defaultResize() const;
+	virtual void	swapBuffers() const;
+	virtual void	makeCurrentContext();
 
-void Rand::randomize()
-{
-#if defined( CINDER_COCOA ) 
-	sBase = std::mt19937( mach_absolute_time() );
-#elif defined( CINDER_MSW )
-	sBase = std::mt19937( ::GetTickCount() );
-#elif defined( CINDER_LINUX )
-	struct timespec gettime_now;
-	clock_gettime( CLOCK_MONOTONIC, &gettime_now );
-	sBase = std::mt19937( gettime_now.tv_nsec );
-#endif
-}
+ protected:
+	bool	initializeInternal( xwindow::_XWindow *wnd, _XDisplay *dpy, XVisualInfo *aVisInfo );
+	int		initMultisample( );
+	
+	RendererGl	*mRenderer;
+	bool		mWasFullScreen;
+	bool		mWasVerticalSynced;
+	GLXContext	mGlc;
+};
 
-void Rand::randSeed( unsigned long seed )
-{
-	sBase = std::mt19937( seed );
-}
-
-void Rand::seed( unsigned long seedValue )
-{
-	mBase = std::mt19937( seedValue );
-}
-
-} // ci
+} }

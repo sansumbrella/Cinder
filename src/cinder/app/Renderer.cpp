@@ -41,6 +41,9 @@
 	#include "cinder/app/AppImplMsw.h"
 	#include "cinder/app/AppImplMswRendererGl.h"
 	#include "cinder/app/AppImplMswRendererGdi.h"
+#elif defined( CINDER_LINUX )
+	#include "cinder/app/AppImplLinux.h"
+	#include "cinder/app/AppImplLinuxRendererGlx.h"
 #endif
 #include "cinder/ip/Flip.h"
 
@@ -70,6 +73,10 @@ RendererGl::RendererGl( const RendererGl &renderer )
 #elif defined( CINDER_MSW )
 	mImpl = 0;
 	mWnd = renderer.mWnd;
+#elif defined( CINDER_LINUX )
+	mImpl = 0;
+	mWnd = renderer.mWnd;
+	mDpy = renderer.mDpy;
 #endif
 }
 
@@ -268,10 +275,63 @@ Surface	RendererGl::copyWindowSurface( const Area &area )
 	return s;
 }
 
+#elif defined( CINDER_LINUX )
+RendererGl::~RendererGl()
+{
+	delete mImpl;
+}
+
+void RendererGl::setup( App *aApp, xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisinfo, RendererRef sharedRenderer )
+{
+	mApp = aApp;
+	if( ! mImpl )
+		mImpl = new AppImplLinuxRendererGlx( mApp, this );
+
+	mImpl->initialize( wnd, dpy, aVisinfo, sharedRenderer );
+}
+
+void RendererGl::kill()
+{
+	mImpl->kill();
+}
+
+void RendererGl::startDraw()
+{
+	mImpl->makeCurrentContext();
+}
+
+void RendererGl::makeCurrentContext()
+{
+	mImpl->makeCurrentContext();
+}
+
+void RendererGl::finishDraw()
+{
+	mImpl->swapBuffers();
+}
+
+void RendererGl::defaultResize()
+{
+	mImpl->defaultResize();
+}
+
+Surface	RendererGl::copyWindowSurface( const Area &area )
+{
+	Surface s( area.getWidth(), area.getHeight(), false );
+	glFlush(); // there is some disagreement about whether this is necessary, but ideally performance-conscious users will use FBOs anyway
+	GLint oldPackAlignment;
+	glGetIntegerv( GL_PACK_ALIGNMENT, &oldPackAlignment ); 
+	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
+	glReadPixels( area.x1, mApp->getWindow()->toPixels( mApp->getWindowHeight() ) - area.y2, area.getWidth(), area.getHeight(), GL_RGB, GL_UNSIGNED_BYTE, s.getData() );
+	glPixelStorei( GL_PACK_ALIGNMENT, oldPackAlignment );	
+	ip::flipVertical( &s );
+	return s;
+}
 #endif // 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Renderer2d
+#ifndef CINDER_LINUX
 Renderer2d::Renderer2d( const Renderer2d &renderer )
 	: Renderer( renderer )
 {
@@ -416,7 +476,7 @@ Surface	Renderer2d::copyWindowSurface( const Area &area )
 {
 	return mImpl->copyWindowContents( area );
 }
+#endif
 
-#endif // defined( CINDER_MSW )
-
+#endif //CINDER_LINUX
 } } // namespace cinder::app

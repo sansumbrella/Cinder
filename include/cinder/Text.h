@@ -164,6 +164,8 @@ class TextBox {
 **/
 #if defined( CINDER_COCOA_TOUCH )
 Surface renderStringPow2( const std::string &str, const Font &font, const ColorA &color, Vec2i *actualSize, float *baselineOffset = 0 );
+#elif defined( CINDER_LINUX )
+Surface renderString( const std::string &str, const Font &font, const ColorA &color, float *baselineOffset = 0 ){ return Surface(); }
 #else
 Surface renderString( const std::string &str, const Font &font, const ColorA &color, float *baselineOffset = 0 );
 #endif

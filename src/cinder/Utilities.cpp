@@ -41,11 +41,15 @@
 	#import <Foundation/NSFileManager.h>
 	#include <cxxabi.h>
 	#include <execinfo.h>
-#else
+#elif defined( CINDER_MSW )
 	#include <windows.h>
 	#include <Shlwapi.h>
 	#include <shlobj.h>
 	#include "cinder/msw/StackWalker.h"
+#else
+	#include <execinfo.h>
+	#include <cxxabi.h>
+	// Linux stuff
 #endif
 
 #include <vector>
@@ -66,10 +70,12 @@ fs::path expandPath( const fs::path &path )
 	NSString *pathNS = [NSString stringWithCString:path.c_str() encoding:NSUTF8StringEncoding];
 	NSString *resultPath = [pathNS stringByStandardizingPath];
 	result = string( [resultPath cStringUsingEncoding:NSUTF8StringEncoding] );
-#else
+#elif defined( CINDER_MSW )
 	char buffer[MAX_PATH];
 	::PathCanonicalizeA( buffer, path.string().c_str() );
 	result = buffer; 
+#else
+// Linux stuff here
 #endif
 
 	return fs::path( result );
@@ -83,11 +89,14 @@ fs::path getHomeDirectory()
 	NSString *home = ::NSHomeDirectory();
 	result = [home cStringUsingEncoding:NSUTF8StringEncoding];
 	result += "/";
-#else
+#elif defined( CINDER_MSW )
 	char buffer[MAX_PATH];
 	::SHGetFolderPathA( 0, CSIDL_PROFILE, NULL, SHGFP_TYPE_CURRENT, buffer );
 	result = buffer;
 	result += "\\";
+#else
+
+// Linux stuff here
 #endif
 
 	return result;
@@ -101,11 +110,14 @@ fs::path getDocumentsDirectory()
 	NSArray *arrayPaths = ::NSSearchPathForDirectoriesInDomains( NSDocumentDirectory, NSUserDomainMask, YES );
 	NSString *docDir = [arrayPaths objectAtIndex:0];
 	return cocoa::convertNsString( docDir ) + "/";
-#else
+#elif defined ( CINDER_MSW )
 	char buffer[MAX_PATH];
 	::SHGetFolderPathA( 0, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, buffer );
 	result = buffer;
 	result += "\\";
+#else
+
+// Linux stuff here
 #endif
 
 	return result;
@@ -116,7 +128,7 @@ fs::path getTemporaryDirectory()
 #if defined( CINDER_COCOA )
 	NSString *docDir = ::NSTemporaryDirectory();
 	return cocoa::convertNsString( docDir );
-#else
+#elif defined( CINDER_MSW )
 	DWORD result = ::GetTempPathW( 0, L"" );
 	if( ! result )
 		throw std::runtime_error("Could not get system temp path");
@@ -128,6 +140,10 @@ fs::path getTemporaryDirectory()
 
 	std::wstring wideResult( tempPath.begin(), tempPath.begin() + static_cast<std::size_t>(result) );
 	return toUtf8( wideResult );
+#else 
+
+// Linux stuff here
+	return fs::path ("");
 #endif
 }
 
@@ -137,7 +153,7 @@ fs::path getTemporaryFilePath( const std::string &prefix )
 	char path[2048];
 	sprintf( path, "%s%sXXXXXX", getTemporaryDirectory().c_str(), prefix.c_str() );
 	return string( mktemp( path ) );
-#else
+#elif defined( CINDER_MSW )
 	TCHAR tempFileName[MAX_PATH]; 
 	DWORD result = ::GetTempPathW( 0, L"" );
 	if( ! result )
@@ -153,6 +169,10 @@ fs::path getTemporaryFilePath( const std::string &prefix )
 		throw std::runtime_error( "Could not create temporary file path" );
 
 	return toUtf8( tempFileName );
+#else 
+
+// Linux stuff here
+	return fs::path ("");
 #endif
 }
 
@@ -198,8 +218,12 @@ bool createDirectories( const fs::path &path, bool createParents )
 #if defined( CINDER_COCOA )
 	NSString *pathNS = [NSString stringWithCString:dirPath.c_str() encoding:NSUTF8StringEncoding];
 	return static_cast<bool>( [[NSFileManager defaultManager] createDirectoryAtPath:pathNS withIntermediateDirectories:YES attributes:nil error:nil] );
-#else
+#elif defined( CINDER_MSW )
 	return ::SHCreateDirectoryExA( NULL, dirPath.string().c_str(), NULL ) == ERROR_SUCCESS;
+#else
+
+// Linux stuff here
+	return false;
 #endif
 }
 
@@ -225,10 +249,13 @@ void deleteFile( const fs::path &path )
 {
 #if defined( CINDER_COCOA )
 	unlink( path.c_str() );
-#else
+#elif defined( CINDER_MSW )
 	if( ! ::DeleteFileW( path.wstring().c_str() ) ) {
 		DWORD err = GetLastError();
 	}
+#else
+
+// Linux stuff here
 #endif
 }
 
@@ -275,6 +302,8 @@ wstring toUtf16( const string &utf8 )
 	}
 
 	return wstring( &resultString[0] );
+#elif defined( CINDER_LINUX )
+	return wstring();
 #else
 	NSString *utf8NS = [NSString stringWithCString:utf8.c_str() encoding:NSUTF8StringEncoding];
 	return wstring( reinterpret_cast<const wchar_t*>( [utf8NS cStringUsingEncoding:NSUTF16LittleEndianStringEncoding] ) );
@@ -298,6 +327,8 @@ string toUtf8( const wstring &utf16 )
 	}
 
 	return string( &resultString[0] );
+#elif defined( CINDER_LINUX )
+	return string();
 #else
 	NSString *utf16NS = [NSString stringWithCString:reinterpret_cast<const char*>( utf16.c_str() ) encoding:NSUTF16LittleEndianStringEncoding];
 	return string( [utf16NS cStringUsingEncoding:NSUTF8StringEncoding] );	

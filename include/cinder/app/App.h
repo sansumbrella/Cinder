@@ -347,7 +347,11 @@ class App {
 	void				setFullScreen( bool aFullScreen, const FullScreenOptions &options = FullScreenOptions() ) { getWindow()->setFullScreen( aFullScreen, options ); }
 
 	//! Returns the number of seconds which have elapsed since application launch
+#ifndef CINDER_LINUX
 	double				getElapsedSeconds() const { return mTimer.getSeconds(); }
+#else
+	double				getElapsedSeconds(){ return mTimer.getSeconds(); }
+#endif
 	//! Returns the number of animation frames which have elapsed since application launch
 	uint32_t			getElapsedFrames() const { return mFrameCount; }
 
@@ -473,6 +477,8 @@ class App {
 #if defined( CINDER_MSW )
 	friend class AppImplMsw;
 	std::shared_ptr<std::ostream>	mOutputStream;
+#elif defined( CINDER_LINUX )
+	friend class AppImplLinux;
 #endif
 
   private:

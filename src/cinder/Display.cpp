@@ -35,12 +35,22 @@ namespace cinder {
 std::vector<DisplayRef >	Display::sDisplays;
 bool						Display::sDisplaysInitialized = false;
 
+#if defined( CINDER_LINUX )
+	XDisplayPtr Display::mXDisplay = NULL;
+#endif
+
 Display::~Display()
 {
 #if defined( CINDER_MAC )
 	[mScreen release];
 #elif defined( CINDER_COCOA_TOUCH )
 	[mUiScreen release];
+#elif defined( CINDER_LINUX )
+	if( mXDisplay != NULL )
+	{
+		XCloseDisplay( mXDisplay );
+		mXDisplay = NULL;
+	}
 #endif
 }
 
@@ -247,7 +257,45 @@ void Display::enumerateDisplays()
 	
 	sDisplaysInitialized = true;
 }
-#endif // defined( CINDER_MSW )
+#elif defined( CINDER_LINUX )
+
+void Display::enumerateDisplays()
+{
+	if( sDisplaysInitialized )
+		return;
+	
+	mXDisplay = XOpenDisplay( NULL );
+	
+	if( mXDisplay == NULL )
+	{
+		// Throw an exception here
+		std::cout << " Everything is fucked the returned DISPLAY = NULL !! " << std::endl;	
+	}
+	
+	int _screenCount = ScreenCount( mXDisplay );
+	for( int i = 0; i < _screenCount; ++i )
+	{
+		DisplayRef newDisplay( new Display );
+		Screen* _screen = XScreenOfDisplay( mXDisplay, i );
+		newDisplay->mXScreen = _screen;
+		newDisplay->mArea = Area( 0, 0, WidthOfScreen( _screen ), HeightOfScreen( _screen ) );
+		newDisplay->mBitsPerPixel = PlanesOfScreen( _screen );
+		sDisplays.push_back( newDisplay );
+
+		size_t m = DefaultScreen( mXDisplay );
+		if( ( m != 0 ) && ( m < sDisplays.size() ) )
+		{
+			std::swap( sDisplays[0], sDisplays[m] );
+		}
+		
+		sDisplaysInitialized = true;
+	}
+	std::cout << " Am i getting here ??? < " << std::endl;
+//	XCloseDisplay(mXDisplay);
+//	mXDisplay = NULL;
+		
+}
+#endif // defined( CINDER_LINUX )
 
 Vec2i Display::getSystemCoordinate( const Vec2i &displayRelativeCoordinate ) const
 {

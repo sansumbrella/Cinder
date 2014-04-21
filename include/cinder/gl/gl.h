@@ -29,6 +29,8 @@
 	#include <OpenGL/glext.h>
 #elif defined( CINDER_MSW )
 	#include "cinder/gl/GLee.h"
+#elif defined( CINDER_LINUX )
+	#include <GL/glew.h>
 #else
 	#define CINDER_GLES
 	#define CINDER_GLES1
@@ -54,6 +56,8 @@
 	#include <OpenGLES/ES1/glext.h>
 #elif defined( CINDER_MAC )
 	#include <OpenGL/gl.h>
+#elif defined( CINDER_LINUX )
+	#include <GL/gl.h>
 #endif
 
 // forward declarations

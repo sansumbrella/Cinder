@@ -25,13 +25,13 @@
 #if defined( CINDER_MSW )
 	#include <windows.h>
 #endif
-
+#include <iostream>
 namespace cinder {
 
 Timer::Timer()
 	: mIsStopped( true )
 {
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 	mEndTime = mStartTime = -1;
 #elif defined( CINDER_MSW )
 	::LARGE_INTEGER nativeFreq;
@@ -44,7 +44,7 @@ Timer::Timer()
 Timer::Timer( bool startOnConstruction )
 	: mIsStopped( true )
 {
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 		mEndTime = mStartTime = -1;
 #elif defined( CINDER_MSW )
 	::LARGE_INTEGER nativeFreq;
@@ -65,12 +65,19 @@ void Timer::start()
 	::LARGE_INTEGER rawTime;
 	::QueryPerformanceCounter( &rawTime );
 	mStartTime = rawTime.QuadPart * mInvNativeFreq;
+#elif defined( CINDER_LINUX)
+	clock_gettime( CLOCK_REALTIME, &mTimeNow );
+	mStartTime = mTimeNow.tv_sec + mTimeNow.tv_nsec / 1E9;
 #endif
 
 	mIsStopped = false;
 }
 
+#ifndef CINDER_LINUX
 double Timer::getSeconds() const
+#else
+double Timer::getSeconds()
+#endif
 {
 	if( mIsStopped )
 		return mEndTime - mStartTime;
@@ -81,6 +88,9 @@ double Timer::getSeconds() const
 	::LARGE_INTEGER rawTime;
 	::QueryPerformanceCounter( &rawTime );
 	return (rawTime.QuadPart * mInvNativeFreq) - mStartTime;
+#elif defined( CINDER_LINUX )
+	clock_gettime( CLOCK_REALTIME, &mTimeNow );
+	return mTimeNow.tv_sec + mTimeNow.tv_nsec / 1E9 - mStartTime;
 #endif
 	}
 }
@@ -94,6 +104,9 @@ void Timer::stop()
 		::LARGE_INTEGER rawTime;
 		::QueryPerformanceCounter( &rawTime );
 		mEndTime = rawTime.QuadPart * mInvNativeFreq;
+#elif defined( CINDER_LINUX )
+		clock_gettime( CLOCK_REALTIME, &mTimeNow );
+		mEndTime = mTimeNow.tv_sec;
 #endif
 		mIsStopped = true;
 	}

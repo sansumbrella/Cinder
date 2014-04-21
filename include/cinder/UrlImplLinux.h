@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2010, The Barbarian Group
+ Copyright (c) 2010, The Cinder Project (http://libcinder.org)
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that
@@ -20,42 +20,40 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "cinder/Rand.h"
-#if defined( CINDER_COCOA )
-#	include <mach/mach.h>
-#	include <mach/mach_time.h>
-#elif defined( CINDER_MSW ) 
-#	include <windows.h>
-#elif defined( CINDER_LINUX )
-#	include <time.h>
-#endif
+#pragma once
+
+#include "cinder/Url.h"
 
 namespace cinder {
+
+class IStreamUrlImplLinux : public IStreamUrlImpl {
+  public:
+	IStreamUrlImplLinux( const std::string &url, const std::string &user, const std::string &password, const UrlOptions &options )
+		:IStreamUrlImpl( user, password, options )
+{}
+	~IStreamUrlImplLinux(){}
+
+	virtual size_t		readDataAvailable( void *dest, size_t maxSize ){};
+	virtual void		seekAbsolute( off_t absoluteOffset ){};
+	virtual void		seekRelative( off_t relativeOffset ){};
+	virtual off_t		tell() const{};
+	virtual off_t		size() const{};
 	
-std::mt19937 Rand::sBase( 310u );
-std::uniform_real_distribution<float> Rand::sFloatGen;
+	virtual bool		isEof() const{};
+	virtual void		IORead( void *t, size_t size ){};
 
-void Rand::randomize()
-{
-#if defined( CINDER_COCOA ) 
-	sBase = std::mt19937( mach_absolute_time() );
-#elif defined( CINDER_MSW )
-	sBase = std::mt19937( ::GetTickCount() );
-#elif defined( CINDER_LINUX )
-	struct timespec gettime_now;
-	clock_gettime( CLOCK_MONOTONIC, &gettime_now );
-	sBase = std::mt19937( gettime_now.tv_nsec );
-#endif
-}
+  private:
+	int					bufferDataRemaining() const { return mBufferedBytes - mBufferOffset; }
+	void				fillBuffer( int wantBytes ) const{}; 
+  
+	std::shared_ptr<void>		mSession, mConnection, mRequest;
+	
+	mutable bool			mIsFinished;
+	mutable uint8_t			*mBuffer; // todo - consider an exception-safe version of this
+	mutable int				mBufferSize;
+	mutable int				mBufferOffset, mBufferedBytes;
+	mutable off_t			mBufferFileOffset;	// where in the file the buffer starts
+	static const int		DEFAULT_BUFFER_SIZE = 4096;
+};
 
-void Rand::randSeed( unsigned long seed )
-{
-	sBase = std::mt19937( seed );
-}
-
-void Rand::seed( unsigned long seedValue )
-{
-	mBase = std::mt19937( seedValue );
-}
-
-} // ci
+} // namespace cinder
