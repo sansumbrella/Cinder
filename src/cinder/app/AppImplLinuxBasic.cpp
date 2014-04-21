@@ -103,7 +103,6 @@ void AppImplLinuxBasic::run()
 
 void AppImplLinuxBasic::handleXEvents()
 {
-	int _pendingEvents = XPending( cinder::Display::getMainDisplay()->getXDisplay() );
 	while( XPending( cinder::Display::getMainDisplay()->getXDisplay() ) > 0 )
 	{
 		//std::cout << " Pending events " << _pendingEvents << std::endl;
