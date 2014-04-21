@@ -105,14 +105,12 @@ void AppImplLinuxBasic::handleXEvents()
 {
 	while( XPending( cinder::Display::getMainDisplay()->getXDisplay() ) > 0 )
 	{
-		//std::cout << " Pending events " << _pendingEvents << std::endl;
 		XEvent report;
 		XNextEvent( cinder::Display::getMainDisplay()->getXDisplay(), &report );
-        WindowImplLinuxBasic* impl;
+        WindowImplLinuxBasic* impl = NULL;
 
         for( auto windowIt = mWindows.begin(); windowIt != mWindows.end(); ++windowIt )
         {
-            // TODO: Check here if we actually found a valid window..
             if( report.xany.window == (*windowIt)->getXWindow() )
             {
                 impl = (*windowIt);
@@ -121,6 +119,8 @@ void AppImplLinuxBasic::handleXEvents()
             }
         }
 
+        /// Return if the window was not found.
+        if( !impl ) return;
 
 		switch( report.type )
 		{
