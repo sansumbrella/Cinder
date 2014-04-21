@@ -290,10 +290,6 @@ void Display::enumerateDisplays()
 		
 		sDisplaysInitialized = true;
 	}
-	std::cout << " Am i getting here ??? < " << std::endl;
-//	XCloseDisplay(mXDisplay);
-//	mXDisplay = NULL;
-		
 }
 #endif // defined( CINDER_LINUX )
 
