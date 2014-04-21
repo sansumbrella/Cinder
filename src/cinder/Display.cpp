@@ -269,7 +269,7 @@ void Display::enumerateDisplays()
 	if( mXDisplay == NULL )
 	{
 		// Throw an exception here
-		std::cout << " Everything is fucked the returned DISPLAY = NULL !! " << std::endl;	
+		std::cout << "The returned DISPLAY = NULL !! Something is seriously off ! " << std::endl;	
 	}
 	
 	int _screenCount = ScreenCount( mXDisplay );
