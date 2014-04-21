@@ -12,7 +12,7 @@ An error message will appear if you forget to do this reminding you to export th
 
 You will need the following libraries GLEW, GL, X11, boost_system, boost_filesystem, z .
 
-I m using libglew-1.8, libboost_system1.54, libboost_filesystem1.54.
+Tested with libglew-1.8, libboost-system1.54, libboost-filesystem1.54 .
 
 In order to build the library :
 
