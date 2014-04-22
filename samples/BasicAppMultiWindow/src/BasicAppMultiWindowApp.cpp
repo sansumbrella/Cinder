@@ -33,6 +33,8 @@ void BasicAppMultiWindow::setup()
 	// for the default window we need to provide an instance of WindowData
 	getWindow()->setUserData( new WindowData );
 	
+    getWindow()->setPos(400, 400);
+    getWindow()->setSize(200, 400);
 	createNewWindow();
 }
 
@@ -59,10 +61,14 @@ void BasicAppMultiWindow::mouseDrag( MouseEvent event )
 
 void BasicAppMultiWindow::keyDown( KeyEvent event )
 {
+    std::cout << " KEY DOWN" << std::endl;
 	if( event.getChar() == 'f' )
 		setFullScreen( ! isFullScreen() );
-	else if( event.getChar() == 'w' )
+	else if( event.getCode() == KeyEvent::KEY_a )
+    {
+        std::cout << "About to go FULL SCREEN ! @@@@@" << std::endl;
 		createNewWindow();
+    }
 }
 
 void BasicAppMultiWindow::draw()

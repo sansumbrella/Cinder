@@ -28,6 +28,8 @@
 #include "cinder/app/Renderer.h"
 #include "cinder/Utilities.h"
 
+#include <X11/XKBlib.h>
+
 using std::vector;
 using std::string;
 
@@ -188,7 +190,8 @@ void AppImplLinuxBasic::handleXEvents()
 			
 			case KeyPress:
             {
-                KeyEvent event( impl->getWindow(),0,0,0,0,KeyEvent::translateNativeKeyCode( report.xkey.keycode ) );
+                KeySym _key = XkbKeycodeToKeysym( cinder::Display::getMainDisplay()->getXDisplay(), report.xkey.keycode, 0, 0 );
+                KeyEvent event( impl->getWindow(),KeyEvent::translateNativeKeyCode( _key ) ,0,0,0,0);
                 impl->getWindow()->emitKeyDown( &event );
 				//quit();
             }

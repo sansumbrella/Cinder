@@ -351,7 +351,7 @@ static void initKeyTable()
      sKeyTable[XK_b] = KeyEvent::KEY_b;
      sKeyTable[XK_c] = KeyEvent::KEY_c;
      sKeyTable[XK_d] = KeyEvent::KEY_d;
-     //XK_e = KeyEvent::KEY_e;
+     sKeyTable[XK_e] = KeyEvent::KEY_e;
      //XK_f = KeyEvent::KEY_f;
      //XK_F1 = KeyEvent::KEY_F1;
      //XK_F2 = KeyEvent::KEY_F2;
