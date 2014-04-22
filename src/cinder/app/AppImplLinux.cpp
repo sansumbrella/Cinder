@@ -120,7 +120,7 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 	unsigned long background, border;
 	
 	XEvent ev;
-	_XDisplay *dpy = display->getXDisplay();
+	mDpy = display->getXDisplay();
 
     // Most parts from here: www.opengl.org/wiki/Tutorial:_OpenGL_3.0_Context_Creation_(GLX)#The_Code
 	int visual_attribs[] = 
@@ -142,12 +142,12 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 	int glx_major, glx_minor;
     int fbcount;
 
-    if( !glXQueryVersion( dpy, &glx_major, &glx_minor ) ||  ( ( glx_major == 1 ) && ( glx_minor < 3 ) ) || ( glx_major < 1 ) )
+    if( !glXQueryVersion( mDpy, &glx_major, &glx_minor ) ||  ( ( glx_major == 1 ) && ( glx_minor < 3 ) ) || ( glx_major < 1 ) )
     {
         std::cout << "Invalid GLX version " << std::endl;
     }
 
-	GLXFBConfig* fbc = glXChooseFBConfig( dpy, DefaultScreen(dpy), visual_attribs, &fbcount );
+	GLXFBConfig* fbc = glXChooseFBConfig( mDpy, DefaultScreen(mDpy), visual_attribs, &fbcount );
 	
 	if( !fbc )
 	{
@@ -160,12 +160,12 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 	
 	for( int i = 0; i < fbcount; ++i )
 	{
-		XVisualInfo *vi = glXGetVisualFromFBConfig( dpy, fbc[i] );	
+		XVisualInfo *vi = glXGetVisualFromFBConfig( mDpy, fbc[i] );	
 		if( vi )
 		{
 			int samp_buf = 0, samples = 0;
-			glXGetFBConfigAttrib( dpy, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
-			glXGetFBConfigAttrib( dpy, fbc[i], GLX_SAMPLES, &samples );	
+			glXGetFBConfigAttrib( mDpy, fbc[i], GLX_SAMPLE_BUFFERS, &samp_buf );
+			glXGetFBConfigAttrib( mDpy, fbc[i], GLX_SAMPLES, &samples );	
 			std::cout << " Matching fbconfig " << i << " with visual id " << vi->visualid << " SAMPLE_BUFFERS "<< samp_buf << " SAMPLES "<< samples << std::endl;
 			if( best_fbc < 0 || samp_buf && samples > best_num_samp )
 			{
@@ -184,7 +184,7 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 	
 	XFree( fbc );
 
-	XVisualInfo *visinfo = glXGetVisualFromFBConfig( dpy, bestFbc );
+	XVisualInfo *visinfo = glXGetVisualFromFBConfig( mDpy, bestFbc );
 
 	std::cout << "Chosen visual "<<visinfo->visualid << std::endl;
 
@@ -193,22 +193,22 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 		return ;
 	}
 
-	if( !dpy )
+	if( !mDpy )
 	{
 		std::cout << "Unable to connect to display ! " << std::endl;
         return ;
 	}
 	
-	screen_num = DefaultScreen(dpy);
+	screen_num = DefaultScreen(mDpy);
 	
 	XSetWindowAttributes winattr;
 	winattr.background_pixel = 0;
 	winattr.border_pixel = 0;
-	winattr.colormap = XCreateColormap( dpy, RootWindow (dpy, screen_num ), visinfo->visual, AllocNone ); 
+	winattr.colormap = XCreateColormap( mDpy, RootWindow (mDpy, screen_num ), visinfo->visual, AllocNone ); 
 	winattr.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask  | KeyReleaseMask | LeaveWindowMask | FocusChangeMask | VisibilityChangeMask | EnterWindowMask | LeaveWindowMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask ;
 	unsigned long mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
-	mWnd = XCreateWindow( dpy, RootWindow (dpy, screen_num ), 0, 0, windowSize.x, windowSize.y, 0, visinfo->depth, InputOutput, visinfo->visual, mask, &winattr );
+	mWnd = XCreateWindow( mDpy, RootWindow (mDpy, screen_num ), 0, 0, windowSize.x, windowSize.y, 0, visinfo->depth, InputOutput, visinfo->visual, mask, &winattr );
 	
     if( !mWnd ) std::cout << "Failed to create XWindow ! " << std::endl;
     else std::cout << "Created window " << " X " << windowSize.x << " Y " << windowSize.y << " ADDRESS " << &mWnd <<  std::endl;
@@ -216,15 +216,15 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 	char windowTitle[1024];
 	std::strncpy( windowTitle, title.c_str(), sizeof(windowTitle) );
 	windowTitle[sizeof(windowTitle) - 1] = 0;
-	XStoreName( dpy, mWnd, windowTitle );
+	XStoreName( mDpy, mWnd, windowTitle );
 
-	XMapRaised( dpy, mWnd );
-	XMapWindow( dpy, mWnd );
+	XMapRaised( mDpy, mWnd );
+	XMapWindow( mDpy, mWnd );
 	
-	mAtomDeleteWindow = XInternAtom( dpy, "WM_DELETE_WINDOW", False );
-	XSetWMProtocols( dpy, mWnd, &mAtomDeleteWindow, 1 );	
+	mAtomDeleteWindow = XInternAtom( mDpy, "WM_DELETE_WINDOW", False );
+	XSetWMProtocols( mDpy, mWnd, &mAtomDeleteWindow, 1 );	
 	
-	mRenderer->setup( mAppImpl->getApp(), mWnd, dpy, visinfo, sharedRenderer );
+	mRenderer->setup( mAppImpl->getApp(), mWnd, mDpy, visinfo, sharedRenderer );
 }
 
 
@@ -244,14 +244,28 @@ void WindowImplLinux::getScreenSize( int clientWidth, int clientHeight, int *res
 
 void WindowImplLinux::setPos( const Vec2i &windowPos )
 {
+    if( mDpy )
+    {
+        XMoveWindow( mDpy, mWnd, windowPos.x, windowPos.y );
+    }
 }
 
 void WindowImplLinux::hide()
 {
+    if( mDpy )
+    {
+        XUnmapWindow( mDpy, mWnd ); 
+        mHidden = true;
+    }
 }
 
 void WindowImplLinux::show()
 {
+    if( mDpy )
+    {
+        XMapWindow( mDpy, mWnd );
+        mHidden = false;
+    }
 }
 
 bool WindowImplLinux::isHidden() const
@@ -273,6 +287,7 @@ void WindowImplLinux::setSize( const Vec2i &windowSize )
 {
 	int screenWidth, screenHeight;
 	getScreenSize( windowSize.x, windowSize.y, &screenWidth, &screenHeight );
+    XResizeWindow( mDpy, mWnd, windowSize.x, windowSize.y );
 }
 
 void WindowImplLinux::close()

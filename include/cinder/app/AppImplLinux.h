@@ -110,23 +110,24 @@ class WindowImplLinux {
 	virtual void		privateClose();
     virtual xwindow::_XWindow        getXWindow(){ return mWnd; }
   protected:
-	void			createWindow( const Vec2i &windowSize, const std::string &title, DisplayRef display, RendererRef sharedRenderer );
-	void			getScreenSize( int clientWidth, int clientHeight, int *resultWidth, int *resultHeight );
+	void			    createWindow( const Vec2i &windowSize, const std::string &title, DisplayRef display, RendererRef sharedRenderer );
+	void			    getScreenSize( int clientWidth, int clientHeight, int *resultWidth, int *resultHeight );
 	virtual void		toggleFullScreen( const app::FullScreenOptions &options );
 
 	AppImplLinux		*mAppImpl;
-	WindowRef		mWindowRef;
-	Vec2i			mWindowOffset;
-	bool			mHidden;
-    bool            mIsDragging;
-    int				mWindowWidth, mWindowHeight;
-	bool			mFullScreen, mBorderless, mAlwaysOnTop, mResizable;
-	Vec2i			mWindowedPos, mWindowedSize;
-	DisplayRef		mDisplay;
-	RendererRef		mRenderer;
+	WindowRef		    mWindowRef;
+	Vec2i			    mWindowOffset;
+	bool			    mHidden;
+    bool                mIsDragging;
+    int				    mWindowWidth, mWindowHeight;
+	bool			    mFullScreen, mBorderless, mAlwaysOnTop, mResizable;
+	Vec2i			    mWindowedPos, mWindowedSize;
+	DisplayRef		    mDisplay;
+	RendererRef		    mRenderer;
 
+    _XDisplay*          mDpy;
 	xwindow::_XWindow	mWnd;
-	Atom			mAtomDeleteWindow;
+	Atom			    mAtomDeleteWindow;
 
 	friend AppImplLinux;
 };
