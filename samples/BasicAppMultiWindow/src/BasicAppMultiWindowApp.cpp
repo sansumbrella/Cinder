@@ -35,6 +35,7 @@ void BasicAppMultiWindow::setup()
 	
     getWindow()->setPos(400, 400);
     getWindow()->setSize(200, 400);
+
 	createNewWindow();
 }
 
@@ -63,10 +64,11 @@ void BasicAppMultiWindow::keyDown( KeyEvent event )
 {
     std::cout << " KEY DOWN" << std::endl;
 	if( event.getChar() == 'f' )
+    {
 		setFullScreen( ! isFullScreen() );
+    }
 	else if( event.getCode() == KeyEvent::KEY_a )
     {
-        std::cout << "About to go FULL SCREEN ! @@@@@" << std::endl;
 		createNewWindow();
     }
 }
