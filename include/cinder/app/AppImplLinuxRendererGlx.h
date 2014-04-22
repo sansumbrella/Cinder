@@ -33,14 +33,14 @@ class AppImplLinuxRendererGlx : public AppImplLinuxRenderer {
  public:
 	AppImplLinuxRendererGlx( App *aApp, RendererGl *aRenderer );
 	
-	virtual bool	initialize( xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer );
+	virtual bool	initialize( xwindow::_XWindow  wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer );
 	virtual void	kill();
 	virtual void	defaultResize() const;
 	virtual void	swapBuffers() const;
 	virtual void	makeCurrentContext();
 
  protected:
-	bool	initializeInternal( xwindow::_XWindow *wnd, _XDisplay *dpy, XVisualInfo *aVisInfo );
+	bool	initializeInternal( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisInfo );
 	int		initMultisample( );
 	
 	RendererGl	*mRenderer;

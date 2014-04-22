@@ -37,7 +37,7 @@ class AppImplLinuxRenderer {
  public:
 	AppImplLinuxRenderer( App *aApp ) : mApp( aApp ) {}
 	
-	virtual bool	initialize( xwindow::_XWindow & wnd, _XDisplay *dpy, XVisualInfo *aVisinfo, RendererRef sharedRenderer ) = 0;
+	virtual bool	initialize( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisinfo, RendererRef sharedRenderer ) = 0;
 	virtual void	prepareToggleFullScreen() {}
 	virtual void	finishToggleFullScreen() {}
 	virtual void	kill() = 0;
@@ -46,10 +46,10 @@ class AppImplLinuxRenderer {
 	virtual void	makeCurrentContext() = 0;
 
  protected:
-	xwindow::_XWindow*		mWnd;
-	_XDisplay*			mDpy;
+	xwindow::_XWindow		mWnd;
+	_XDisplay*			    mDpy;
 	XVisualInfo * 			mVisInfo;
-	App				*mApp;
+	App				        *mApp;
 };
 
 } } // namespace cinder::app

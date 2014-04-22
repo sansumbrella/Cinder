@@ -54,24 +54,24 @@ void AppImplLinuxRendererGlx::defaultResize() const
 
 void AppImplLinuxRendererGlx::swapBuffers() const
 {
-	glXSwapBuffers( mDpy, *mWnd );
+	glXSwapBuffers( mDpy, mWnd );
 }
 
 void AppImplLinuxRendererGlx::makeCurrentContext()
 {
-	glXMakeCurrent( mDpy, *mWnd, mGlc );
+	glXMakeCurrent( mDpy, mWnd, mGlc );
 }
 
-bool AppImplLinuxRendererGlx::initialize( xwindow::_XWindow & wnd, _XDisplay *dpy, XVisualInfo *aVisInfo, RendererRef sharedRenderer )
+bool AppImplLinuxRendererGlx::initialize( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisInfo, RendererRef sharedRenderer )
 {
 	std::cout << "INIT GLX " << std::endl;
-	mWnd = &wnd;
+	mWnd = wnd;
 	mDpy = dpy;
 	mVisInfo = aVisInfo;
 	return initializeInternal( mWnd, mDpy, mVisInfo );
 }
 
-bool AppImplLinuxRendererGlx::initializeInternal( xwindow::_XWindow *wnd, _XDisplay *dpy, XVisualInfo *aVisInfo )
+bool AppImplLinuxRendererGlx::initializeInternal( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisInfo )
 {
 	if( ! mVisInfo )
 	{
