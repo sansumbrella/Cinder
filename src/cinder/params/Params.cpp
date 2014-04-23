@@ -28,6 +28,11 @@
 
 #include <boost/assign/list_of.hpp>
 
+#if defined( USE_DIRECTX )
+#include "cinder/dx/dx.h"
+#include "cinder/app/AppImplMswRendererDx.h"
+#endif
+
 using namespace std;
 
 namespace cinder { namespace params {
@@ -153,9 +158,14 @@ class AntMgr {
 		// we have to do a fontscale set *before* TwInit:
 		if( fontScale > 1 )
 			TwDefine( (string(" GLOBAL fontscaling= ") + toString( fontScale )).c_str() );
+#if defined( USE_DIRECTX )
+		if( ! TwInit( TW_DIRECT3D11, dx::getDxRenderer()->md3dDevice ) )
+			throw Exception();
+#else
 		if( ! TwInit( TW_OPENGL, NULL ) ) {
 			throw Exception();
 		}		
+#endif
 	}
 	
 	~AntMgr() {
@@ -175,10 +185,15 @@ int initAntGl( weak_ptr<app::Window> winWeak )
 {
 	static std::shared_ptr<AntMgr> sMgr;
 	static int sWindowId = 0;
+	static std::map<app::Window *, int> sWindowIds;
 	auto win = winWeak.lock();
 	if( ! sMgr )
 		sMgr = std::shared_ptr<AntMgr>( new AntMgr( (int)win->getContentScale() ) );
-	return sWindowId++;
+	app::Window *winPtr = win.get();
+	auto it = sWindowIds.find( winPtr );
+	if( it == sWindowIds.end() )
+		sWindowIds[ winPtr ] = sWindowId++;
+	return sWindowIds[ winPtr ];
 }
 
 InterfaceGl::InterfaceGl( const std::string &title, const Vec2i &size, const ColorA &color )

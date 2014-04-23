@@ -26,9 +26,14 @@
 #include "cinder/ImageIo.h"
 #include "cinder/Exception.h"
 
+/// Here it breaks since libpng1.2 is installed by default on my xubuntu 13.10
+/// and there have been some changes that break compilation,
+/// so we would have to manually compile and include with libpng1.6 for linux versions.
+/// Disable it for now.
+#ifndef CINDER_LINUX
 struct png_struct_def;
-struct png_info_struct;
-
+typedef struct png_info_def png_info;
+#endif
 namespace cinder {
 
 struct ci_png_info;
@@ -49,14 +54,18 @@ class ImageSourcePng : public ImageSource {
 	ImageSourcePng( DataSourceRef dataSourceRef, ImageSource::Options options );
 	bool loadHeader();
 	
+#ifndef CINDER_LINUX
 	std::shared_ptr<ci_png_info>	mCiInfoPtr;
 	png_struct_def					*mPngPtr;
-	png_info_struct					*mInfoPtr;
+	png_info						*mInfoPtr;
+#endif
 };
 
 REGISTER_IMAGE_IO_FILE_HANDLER( ImageSourcePng )
 
 class ImageSourcePngException : public ImageIoException {
+  public:
+	ImageSourcePngException( const std::string &description ) : ImageIoException( description ) {}
 };
 
 } // namespace cinder
