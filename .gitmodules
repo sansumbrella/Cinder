@@ -7,3 +7,6 @@
 [submodule "boost"]
 	path = boost
 	url = git://github.com/cinder/Cinder-Boost.git
+[submodule "lib/linux/glfw"]
+	path = lib/linux/glfw
+	url = https://github.com/glfw/glfw.git
