@@ -35,6 +35,8 @@ using namespace std;
 	using namespace cinder::winrt;
 	using namespace Windows::UI::Core;
 	using namespace Windows::Graphics::Display;
+#elif defined( CINDER_LINUX )
+    #include <GLFW/glfw3.h>
 #endif
 
 namespace cinder {
@@ -284,35 +286,39 @@ void Display::enumerateDisplays()
 
 void Display::enumerateDisplays()
 {
+    if( !glfwInit() )
+    {
+        exit(EXIT_FAILURE);
+    }
 	if( sDisplaysInitialized )
 		return;
 	
-	mXDisplay = XOpenDisplay( NULL );
-	
-	if( mXDisplay == NULL )
-	{
-		// Throw an exception here
-		std::cout << "The returned DISPLAY = NULL !! Something is seriously off ! " << std::endl;	
-	}
-	
-	int _screenCount = ScreenCount( mXDisplay );
-	for( int i = 0; i < _screenCount; ++i )
-	{
-		DisplayRef newDisplay( new Display );
-		Screen* _screen = XScreenOfDisplay( mXDisplay, i );
-		newDisplay->mXScreen = _screen;
-		newDisplay->mArea = Area( 0, 0, WidthOfScreen( _screen ), HeightOfScreen( _screen ) );
-		newDisplay->mBitsPerPixel = PlanesOfScreen( _screen );
-		sDisplays.push_back( newDisplay );
-
-		size_t m = DefaultScreen( mXDisplay );
-		if( ( m != 0 ) && ( m < sDisplays.size() ) )
-		{
-			std::swap( sDisplays[0], sDisplays[m] );
-		}
-		
-		sDisplaysInitialized = true;
-	}
+//	mXDisplay = XOpenDisplay( NULL );
+//	
+//	if( mXDisplay == NULL )
+//	{
+//		// Throw an exception here
+//		std::cout << "The returned DISPLAY = NULL !! Something is seriously off ! " << std::endl;	
+//	}
+//	
+//	int _screenCount = ScreenCount( mXDisplay );
+//	for( int i = 0; i < _screenCount; ++i )
+//	{
+//		DisplayRef newDisplay( new Display );
+//		Screen* _screen = XScreenOfDisplay( mXDisplay, i );
+//		newDisplay->mXScreen = _screen;
+//		newDisplay->mArea = Area( 0, 0, WidthOfScreen( _screen ), HeightOfScreen( _screen ) );
+//		newDisplay->mBitsPerPixel = PlanesOfScreen( _screen );
+//		sDisplays.push_back( newDisplay );
+//
+//		size_t m = DefaultScreen( mXDisplay );
+//		if( ( m != 0 ) && ( m < sDisplays.size() ) )
+//		{
+//			std::swap( sDisplays[0], sDisplays[m] );
+//		}
+//		
+//		sDisplaysInitialized = true;
+//	}
 }
 #endif // defined( CINDER_LINUX )
 

@@ -83,4 +83,5 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 ### Add source subdirectory so that cmake propagates through the source tree and can find the various CMakeLists.txt files included in the src subdirs.
+add_subdirectory ( lib/linux/glfw )
 add_subdirectory ( src )
