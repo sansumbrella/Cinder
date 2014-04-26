@@ -24,8 +24,7 @@
 
 #pragma once
 
-#include <X11/Xlib.h>
-#include <GL/glx.h>
+#include <GLFW/glfw3.h>
 #include "cinder/app/Renderer.h"
 
 namespace cinder { namespace app {
@@ -37,7 +36,7 @@ class AppImplLinuxRenderer {
  public:
 	AppImplLinuxRenderer( App *aApp ) : mApp( aApp ) {}
 	
-	virtual bool	initialize( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisinfo, RendererRef sharedRenderer ) = 0;
+    virtual bool    initialize( GLFWwindow* aGLFWwindow, RendererRef sharedRenderer ) = 0;
 	virtual void	prepareToggleFullScreen() {}
 	virtual void	finishToggleFullScreen() {}
 	virtual void	kill() = 0;
@@ -46,9 +45,7 @@ class AppImplLinuxRenderer {
 	virtual void	makeCurrentContext() = 0;
 
  protected:
-	xwindow::_XWindow		mWnd;
-	_XDisplay*			    mDpy;
-	XVisualInfo * 			mVisInfo;
+    GLFWwindow*             mGLFWwindow;
 	App				        *mApp;
 };
 

@@ -28,7 +28,7 @@
 #include "cinder/app/Renderer.h"
 #include "cinder/Utilities.h"
 
-#include <X11/XKBlib.h>
+#include <GLFW/glfw3.h>
 
 using std::vector;
 using std::string;
@@ -44,10 +44,6 @@ AppImplLinuxBasic::AppImplLinuxBasic( AppBasic *aApp )
 unsigned int AppImplLinuxBasic::prepModifiers( unsigned int aState )
 {
     unsigned int result = 0;
-
-    if( aState & Button1Mask ) result |= MouseEvent::LEFT_DOWN;
-    if( aState & Button2Mask ) result |= MouseEvent::MIDDLE_DOWN;
-    if( aState & Button3Mask ) result |= MouseEvent::RIGHT_DOWN;
 
     return result;
 }
@@ -95,123 +91,16 @@ void AppImplLinuxBasic::run()
 			usleep(1);
 		}
 		
-		handleXEvents();
+        glfwPollEvents();
 	}
 
 //	killWindow( mFullScreen );
 	mApp->emitShutdown();
 	delete mApp;
+
+    glfwTerminate();
 }
 
-void AppImplLinuxBasic::handleXEvents()
-{
-	while( XPending( cinder::Display::getMainDisplay()->getXDisplay() ) > 0 )
-	{
-		XEvent report;
-		XNextEvent( cinder::Display::getMainDisplay()->getXDisplay(), &report );
-        WindowImplLinuxBasic* impl = NULL;
-
-        for( auto windowIt = mWindows.begin(); windowIt != mWindows.end(); ++windowIt )
-        {
-            if( report.xany.window == (*windowIt)->getXWindow() )
-            {
-                impl = (*windowIt);
-                impl->mAppImpl->setWindow( impl->getWindow() );
-                setWindow((*windowIt)->getWindow() );
-            }
-        }
-
-        /// Return if the window was not found.
-        if( !impl ) return;
-
-		switch( report.type )
-		{
-            case MapNotify:
-
-            break;
-            
-			case Expose:
-
-			break;
-
-            case ConfigureNotify:
-            {
-                        std::cout << " WIN " << report.xconfigure.window <<" RECEIVED CONFIGURE AKA RESIZE EVENT " << std::endl;
-                        impl->mWindowWidth = report.xconfigure.width;
-                        impl->mWindowHeight = report.xconfigure.height;
-                        impl->mWindowOffset.y = report.xconfigure.x;
-                        impl->mWindowOffset.y = report.xconfigure.y;
-                        impl->getWindow()->emitResize();
-            }
-            break; 
-
-			case ButtonPress:
-            {
-                    if( report.xbutton.button == Button1 )
-                    {
-                            MouseEvent event( impl->getWindow(), MouseEvent::LEFT_DOWN, report.xbutton.x, report.xbutton.y, prepModifiers(  report.xbutton.state ), 0.0f, report.xbutton.state );
-                            impl->mIsDragging = true;
-                            impl->getWindow()->emitMouseDown( &event );
-                            std::cout << " Button 1 Press " << report.xbutton.window << " RECEIVED " << impl->getWindow() << std::endl;
-                    }
-                    else if( report.xbutton.button == Button2 )
-                    {
-                            MouseEvent event( impl->getWindow(), MouseEvent::MIDDLE_DOWN, report.xbutton.x, report.xbutton.y, prepModifiers(  report.xbutton.state ), 0.0f, report.xbutton.state );
-                            impl->mIsDragging = true;
-                            impl->getWindow()->emitMouseDown( &event );
-                            std::cout << " Button 2 Press " << report.xbutton.window << " RECEIVED " <<  impl->getWindow() << std::endl;
-                    }
-                    else if( report.xbutton.button == Button3 )
-                    {
-                            MouseEvent event( impl->getWindow(), MouseEvent::RIGHT_DOWN, report.xbutton.x, report.xbutton.y, prepModifiers(  report.xbutton.state ), 0.0f, report.xbutton.state );
-                            impl->mIsDragging = true;
-                            impl->getWindow()->emitMouseDown( &event );
-                            std::cout << " Button 3 Press " << report.xbutton.window << " RECEIVED " << impl->getWindow() << std::endl;
-                    }
-            }
-			break;
-
-            case ButtonRelease:
-            {
-                    impl->mIsDragging = false;
-            }
-            break;
-
-            case MotionNotify:
-            {
-                    MouseEvent event( impl->getWindow(), 0, report.xmotion.x, report.xmotion.y, prepModifiers( report.xmotion.state ), 0.0f, report.xmotion.state );
-                    if( impl->mIsDragging )
-                    {
-                      impl->getWindow()->emitMouseDrag( &event );
-                      std::cout << " DRAGGING X "<< report.xmotion.x << " Y " << report.xmotion.y <<" WINDOW : " << impl->getWindow()<< std::endl;
-                    } 
-            }
-            break;
-			
-			case KeyPress:
-            {
-                KeySym _key = XkbKeycodeToKeysym( cinder::Display::getMainDisplay()->getXDisplay(), report.xkey.keycode, 0, 0 );
-                KeyEvent event( impl->getWindow(),KeyEvent::translateNativeKeyCode( _key ) ,0,0,0,0);
-                impl->getWindow()->emitKeyDown( &event );
-				//quit();
-            }
-			break;
-			
-			case ClientMessage:
-            {
-				if( report.xclient.data.l[0] == impl->mAtomDeleteWindow )
-				{
-                    XDestroyWindow( cinder::Display::getMainDisplay()->getXDisplay(), impl->getXWindow() );
-                    closeWindow( impl );
-				}
-            }
-			break;
-
-			default:
-			break;
-		}
-	} 	
-}
 
 void AppImplLinuxBasic::sleep( double seconds )
 {

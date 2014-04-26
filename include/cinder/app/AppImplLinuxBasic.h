@@ -41,35 +41,32 @@ class AppImplLinuxBasic : public AppImplLinux {
 
 	class AppBasic*		getApp() { return mApp; }
 	
-	void	quit() { std::cout << " ABOUT TO QUIT !! " << std::endl; mShouldQuit = true; }
+	void	            quit() { std::cout << " ABOUT TO QUIT !! " << std::endl; mShouldQuit = true; }
 
-	float	setFrameRate( float aFrameRate );
-	void	disableFrameRate();
-	bool	isFrameRateEnabled() const;
+	float	            setFrameRate( float aFrameRate );
+	void	            disableFrameRate();
+	bool	            isFrameRateEnabled() const;
 
-	size_t		getNumWindows() const;
-	WindowRef	getWindowIndex( size_t index );
-	WindowRef	getForegroundWindow() const;
-	fs::path	getAppPath() const;
+	size_t		        getNumWindows() const;
+	WindowRef   	    getWindowIndex( size_t index );
+	WindowRef	        getForegroundWindow() const;
+	fs::path	        getAppPath() const;
 	
-
   private:
-	void		sleep( double seconds );
+	void		        sleep( double seconds );
 
-    void        handleXEvents();
-
-	WindowRef	createWindow( Window::Format format );
-	virtual void	closeWindow( class WindowImplLinux *windowImpl ) override;
-	virtual void	setForegroundWindow( WindowRef window ) override;
+	WindowRef	        createWindow( Window::Format format );
+	virtual void	    closeWindow( class WindowImplLinux *windowImpl ) override;
+	virtual void	    setForegroundWindow( WindowRef window ) override;
 	
-	bool		mShouldQuit;
-	class AppBasic	*mApp;
+	bool		        mShouldQuit;
+	class AppBasic	    *mApp;
 	
-	double		mNextFrameTime;
-	bool		mFrameRateEnabled;
+	double		        mNextFrameTime;
+	bool		        mFrameRateEnabled;
 
-    unsigned int prepModifiers( unsigned int state );
-	WindowRef	mForegroundWindow;
+    unsigned int        prepModifiers( unsigned int state );
+	WindowRef	        mForegroundWindow;
 	std::list<class WindowImplLinuxBasic*> mWindows;
 
 	friend class AppBasic;

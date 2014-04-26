@@ -34,7 +34,7 @@ int sArbMultisampleFormat;
 AppImplLinuxRendererGlx::AppImplLinuxRendererGlx( App *aApp, RendererGl *aRenderer )
 	: AppImplLinuxRenderer( aApp ), mRenderer( aRenderer )
 {
-	std::cout << " Creating LINUX Renderer" << this << " GL CONTEXT " << &mGlc <<std::endl;
+	std::cout << " Creating LINUX Renderer" << this  <<std::endl;
 }
 
 void AppImplLinuxRendererGlx::defaultResize() const
@@ -54,45 +54,34 @@ void AppImplLinuxRendererGlx::defaultResize() const
 
 void AppImplLinuxRendererGlx::swapBuffers() const
 {
-	glXSwapBuffers( mDpy, mWnd );
+    glfwSwapBuffers( mGLFWwindow );
 }
 
 void AppImplLinuxRendererGlx::makeCurrentContext()
 {
-	glXMakeCurrent( mDpy, mWnd, mGlc );
+    glfwMakeContextCurrent( mGLFWwindow );
 }
 
-bool AppImplLinuxRendererGlx::initialize( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisInfo, RendererRef sharedRenderer )
+bool AppImplLinuxRendererGlx::initialize( GLFWwindow* aGLFWwindow, RendererRef sharedRenderer )
 {
-	std::cout << "INIT GLX " << std::endl;
-	mWnd = wnd;
-	mDpy = dpy;
-	mVisInfo = aVisInfo;
-	return initializeInternal( mWnd, mDpy, mVisInfo );
+    mGLFWwindow = aGLFWwindow;
+    return initializeInternal( mGLFWwindow );
 }
 
-bool AppImplLinuxRendererGlx::initializeInternal( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisInfo )
+bool AppImplLinuxRendererGlx::initializeInternal( GLFWwindow* aGLFWwindow )
 {
-	if( ! mVisInfo )
-	{
-        std::cout << " The XVisualInfo is empty ! Window will not be initialized... " << std::endl;
-		return false;
-	}
-
-	if( ! ( mGlc = glXCreateContext( mDpy, mVisInfo, 0, GL_TRUE ) ) )
-	{
-        std::cout << " Failed to create glXContext ! Window will not be initialized... " << std::endl;
-		return false;
-	}
+    if( aGLFWwindow )
+    {
+        std::cout << " We have a valide window during internal initialization.. " << std::endl;
+        return true;
+    }
     else
     {
-        std::cout << " Created context --> " << &mGlc << std::endl;
+        std::cout << " No valid window during internal initialization ! " << std::endl;
+        return false;
     }
-
-	std::cout << "INITIALIZED SUCCESSFULLY GLX" << std::endl;
-	
-    return true;
 }
+
 
 int AppImplLinuxRendererGlx::initMultisample( )
 {
@@ -100,9 +89,7 @@ int AppImplLinuxRendererGlx::initMultisample( )
 
 void AppImplLinuxRendererGlx::kill()
 {
-	std::cout << " Destroying context ! "<< &mGlc << std::endl;
-	glXMakeCurrent( mDpy, 0, 0 );
-	glXDestroyContext( mDpy, mGlc );
+    glfwDestroyWindow( mGLFWwindow );
 }
 
 } }

@@ -34,25 +34,29 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <GLFW/glfw3.h>
+
 
 namespace cinder { namespace app {
 
+
 class AppImplLinux {
  public:
+
 	AppImplLinux( class App *aApp );
 	virtual ~AppImplLinux();
 	
-	class App*		getApp() { return mApp; }
+	class App*		    getApp() { return mApp; }
 
-	float			getFrameRate() const { return mFrameRate; }
+	float			    getFrameRate() const { return mFrameRate; }
 	virtual float		setFrameRate( float aFrameRate ) { return -1.0f; }
 	virtual void		quit() = 0;
 
 	virtual WindowRef	getWindow() const { return mActiveWindow; }
-	void			setWindow( WindowRef window ) { mActiveWindow = window; }
+	void			    setWindow( WindowRef window ) { mActiveWindow = window; }
 	
-	static void		hideCursor();
-	static void		showCursor();
+	static void		    hideCursor();
+	static void		    showCursor();
 	
 	static Buffer		loadResource( int id, const std::string &type );
 	
@@ -62,21 +66,21 @@ class AppImplLinux {
 	static fs::path		getFolderPath( const fs::path &initialPath );
 	
   protected:
-	bool			setupHasBeenCalled() const { return mSetupHasBeenCalled; }
+	bool			    setupHasBeenCalled() const { return mSetupHasBeenCalled; }
 	virtual void		closeWindow( class WindowImplLinux *windowImpl ) = 0;
 	virtual void		setForegroundWindow( WindowRef window ) = 0;
-	virtual void 		handleXEvents() = 0;
 
-	class App		*mApp;
-	float			mFrameRate;
-	WindowRef		mActiveWindow;
-	bool			mSetupHasBeenCalled;
+	class App		    *mApp;
+	float		    	mFrameRate;
+	WindowRef		    mActiveWindow;
+	bool			    mSetupHasBeenCalled;
 
-	friend class WindowImplLinux;
+	friend class        WindowImplLinux;
 };
 
 class WindowImplLinux {
   public:
+
 	WindowImplLinux( const Window::Format &format, RendererRef sharedRenderer, AppImplLinux *appImpl );
 	virtual ~WindowImplLinux() {}
 
@@ -94,21 +98,21 @@ class WindowImplLinux {
 	virtual bool		isHidden() const;
 	virtual DisplayRef	getDisplay() const { return mDisplay; }
 	virtual RendererRef	getRenderer() const { return mRenderer; }
-	virtual void*		getNative() { return &mWnd; }
+    // NULL for now until I figure out how to grab the X window from GLFW.
+	virtual void*		getNative() { return NULL; }
 
-	bool			isBorderless() const { return mBorderless; }
-	void			setBorderless( bool borderless );
-	bool			isAlwaysOnTop() const { return mAlwaysOnTop; }
-	void			setAlwaysOnTop( bool alwaysOnTop );
+	bool			    isBorderless() const { return mBorderless; }
+	void			    setBorderless( bool borderless );
+	bool			    isAlwaysOnTop() const { return mAlwaysOnTop; }
+	void			    setAlwaysOnTop( bool alwaysOnTop );
 
 	AppImplLinux*		getAppImpl() { return mAppImpl; }
-	WindowRef		getWindow() { return mWindowRef; }
+	WindowRef		    getWindow() { return mWindowRef; }
 	virtual void		keyDown( const KeyEvent &event );
 	virtual void		draw();
 	virtual void		redraw();
 	virtual void		resize();
 	virtual void		privateClose();
-    virtual xwindow::_XWindow        getXWindow(){ return mWnd; }
   protected:
 	void			    createWindow( const Vec2i &windowSize, const std::string &title, DisplayRef display, RendererRef sharedRenderer );
 	void			    getScreenSize( int clientWidth, int clientHeight, int *resultWidth, int *resultHeight );
@@ -125,9 +129,16 @@ class WindowImplLinux {
 	DisplayRef		    mDisplay;
 	RendererRef		    mRenderer;
 
-    _XDisplay*          mDpy;
-	xwindow::_XWindow	mWnd;
-	Atom			    mAtomDeleteWindow;
+    inline static void window_close_callback( GLFWwindow* aGLFWwindow )
+    {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) ); 
+        _currentWindow->close();
+    }
+
+    inline static void window_pos_callback( GLFWwindow* aGLFWwindow )
+    {
+
+    }
 
 	friend AppImplLinux;
 };

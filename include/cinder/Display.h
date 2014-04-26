@@ -44,9 +44,7 @@
 	#undef min
 	#undef max
 #elif defined( CINDER_LINUX )
-	#include <X11/Xlib.h>
-	typedef _XDisplay* XDisplayPtr;
-	typedef Screen*	  XScreenPtr;
+    class GLFWmonitor;
 #endif
 
 #include <map>
@@ -113,7 +111,6 @@ class Display {
 	static DisplayRef			findFromHmonitor( HMONITOR hMonitor );
 	static BOOL CALLBACK enumMonitorProc( HMONITOR hMonitor, HDC hdc, LPRECT rect, LPARAM lParam );
 #elif defined( CINDER_LINUX )
-	XDisplayPtr getXDisplay(){ return mXDisplay; }
 #endif
 
 	friend std::ostream& operator<<( std::ostream &o, const Display &display )
@@ -142,11 +139,11 @@ class Display {
 #elif defined( CINDER_MSW )
 	HMONITOR			mMonitor;
 #elif defined( CINDER_LINUX )
-	static	XDisplayPtr		mXDisplay;
-	XScreenPtr			mXScreen;	
+    GLFWmonitor*        mMonitor;
+
 #endif
 	
-	static void		enumerateDisplays();
+    static void		                enumerateDisplays();
 	static std::vector<DisplayRef>	sDisplays;
 	static bool						sDisplaysInitialized;
 };

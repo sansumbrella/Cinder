@@ -75,18 +75,7 @@
 		class EAGLContext;
 	#endif
 #elif defined( CINDER_LINUX )
-	#include <X11/Xlib.h>
-	#include <GL/glx.h>
-	namespace xwindow {
-
-//		class Window;
-		typedef Window _XWindow;
-	} 
-	
-	namespace xscreen {
-		
-		typedef Screen _XScreen;		
-	}
+    class GLFWwindow;
 #endif
 
 
@@ -134,7 +123,8 @@ class Renderer {
 	virtual HWND				getHwnd() = 0;
 	virtual HDC					getDc() { return NULL; }
 #elif defined( CINDER_LINUX )
-	virtual void setup( App *aApp, xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer ) = 0; 
+
+    virtual void setup( App* aApp, GLFWwindow* aGLFWwindow, RendererRef sharedRenderer ) = 0;
 	virtual void kill() {}
 #elif defined( CINDER_WINRT)
 	virtual void setup( App *aApp, DX_WINDOW_TYPE wnd) = 0;
@@ -191,7 +181,7 @@ class RendererGl : public Renderer {
 	virtual void	prepareToggleFullScreen();
 	virtual void	finishToggleFullScreen();
 #elif	defined( CINDER_LINUX )
-	virtual void 	setup( App *aApp, xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer );
+    virtual void    setup( App* aApp, GLFWwindow* aGLFWwindow, RendererRef sharedRenderer );
 	virtual void 	kill();
 #endif
 
@@ -220,9 +210,8 @@ class RendererGl : public Renderer {
 	friend class				AppImplMswRendererGl;
 #elif defined( CINDER_LINUX )
 	class AppImplLinuxRendererGlx 	*mImpl;
-	xwindow::_XWindow*				mWnd;
-	_XDisplay*			mDpy;
-	friend class			AppImplLinuxRendererGlx;
+    GLFWwindow*                     mGLFWwindow;
+	friend class			        AppImplLinuxRendererGlx;
 #endif
 };
 

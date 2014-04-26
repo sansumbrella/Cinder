@@ -44,22 +44,12 @@ namespace cinder {
 std::vector<DisplayRef >	Display::sDisplays;
 bool						Display::sDisplaysInitialized = false;
 
-#if defined( CINDER_LINUX )
-	XDisplayPtr Display::mXDisplay = NULL;
-#endif
-
 Display::~Display()
 {
 #if defined( CINDER_MAC )
 	[mScreen release];
 #elif defined( CINDER_COCOA_TOUCH )
 	[mUiScreen release];
-#elif defined( CINDER_LINUX )
-	if( mXDisplay != NULL )
-	{
-		XCloseDisplay( mXDisplay );
-		mXDisplay = NULL;
-	}
 #endif
 }
 
@@ -293,32 +283,38 @@ void Display::enumerateDisplays()
 	if( sDisplaysInitialized )
 		return;
 	
-//	mXDisplay = XOpenDisplay( NULL );
-//	
-//	if( mXDisplay == NULL )
-//	{
-//		// Throw an exception here
-//		std::cout << "The returned DISPLAY = NULL !! Something is seriously off ! " << std::endl;	
-//	}
-//	
-//	int _screenCount = ScreenCount( mXDisplay );
-//	for( int i = 0; i < _screenCount; ++i )
-//	{
-//		DisplayRef newDisplay( new Display );
-//		Screen* _screen = XScreenOfDisplay( mXDisplay, i );
-//		newDisplay->mXScreen = _screen;
-//		newDisplay->mArea = Area( 0, 0, WidthOfScreen( _screen ), HeightOfScreen( _screen ) );
-//		newDisplay->mBitsPerPixel = PlanesOfScreen( _screen );
-//		sDisplays.push_back( newDisplay );
-//
-//		size_t m = DefaultScreen( mXDisplay );
-//		if( ( m != 0 ) && ( m < sDisplays.size() ) )
-//		{
-//			std::swap( sDisplays[0], sDisplays[m] );
-//		}
-//		
-//		sDisplaysInitialized = true;
-//	}
+    int monitorCount = 0;
+    GLFWmonitor** connectedMonitors = glfwGetMonitors( &monitorCount );
+
+    if( connectedMonitors == NULL )
+    {
+        std::cout << " NO CONNECTED MONITOR FOUND ! Exiting.. " << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    for( int i = 0; i < monitorCount; ++i )
+    {
+        DisplayRef newDisplay( new Display );
+        const GLFWvidmode * currentVidMode = glfwGetVideoMode( connectedMonitors[i] );
+        if( currentVidMode != NULL )
+        {
+            newDisplay->mArea = Area( 0, 0, currentVidMode->width, currentVidMode->height );
+            newDisplay->mBitsPerPixel = currentVidMode->redBits + currentVidMode->greenBits + currentVidMode->blueBits;
+            newDisplay->mMonitor = connectedMonitors[i];
+            sDisplays.push_back( newDisplay );
+        }
+    }
+        
+    GLFWmonitor* primMon = glfwGetPrimaryMonitor();
+
+    size_t m;
+    for( m = 0; m < sDisplays.size(); ++m )
+        if( sDisplays[m]->mMonitor == primMon )
+            break;
+    if( ( m != 0 ) && ( m < sDisplays.size() ) )
+        std::swap( sDisplays[0], sDisplays[m] );
+    
+    sDisplaysInitialized = true;
 }
 #endif // defined( CINDER_LINUX )
 

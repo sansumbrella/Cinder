@@ -25,7 +25,8 @@
 
 #include "cinder/app/App.h"
 #include "cinder/app/AppImplLinuxRenderer.h"
-#include <GL/glx.h>
+
+class GLFWwindow;
 
 namespace cinder { namespace app {
 
@@ -33,20 +34,19 @@ class AppImplLinuxRendererGlx : public AppImplLinuxRenderer {
  public:
 	AppImplLinuxRendererGlx( App *aApp, RendererGl *aRenderer );
 	
-	virtual bool	initialize( xwindow::_XWindow  wnd, _XDisplay* dpy, XVisualInfo * aVisInfo, RendererRef sharedRenderer );
+    virtual bool    initialize( GLFWwindow* aGLFWwindow, RendererRef sharedRenderer );
 	virtual void	kill();
 	virtual void	defaultResize() const;
 	virtual void	swapBuffers() const;
 	virtual void	makeCurrentContext();
 
  protected:
-	bool	initializeInternal( xwindow::_XWindow wnd, _XDisplay *dpy, XVisualInfo *aVisInfo );
+    bool    initializeInternal( GLFWwindow* aGLFWwindow );
 	int		initMultisample( );
 	
 	RendererGl	*mRenderer;
 	bool		mWasFullScreen;
 	bool		mWasVerticalSynced;
-	GLXContext	mGlc;
 };
 
 } }

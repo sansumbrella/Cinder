@@ -79,8 +79,6 @@ RendererGl::RendererGl( const RendererGl &renderer )
 	mWnd = renderer.mWnd;
 #elif defined( CINDER_LINUX )
 	mImpl = 0;
-	mWnd = renderer.mWnd;
-	mDpy = renderer.mDpy;
 #endif
 }
 
@@ -285,13 +283,13 @@ RendererGl::~RendererGl()
 	delete mImpl;
 }
 
-void RendererGl::setup( App *aApp, xwindow::_XWindow & wnd, _XDisplay* dpy, XVisualInfo * aVisinfo, RendererRef sharedRenderer )
+void RendererGl::setup( App *aApp, GLFWwindow * aGLFWwindow, RendererRef sharedRenderer )
 {
 	mApp = aApp;
 	if( ! mImpl )
 		mImpl = new AppImplLinuxRendererGlx( mApp, this );
 
-	mImpl->initialize( wnd, dpy, aVisinfo, sharedRenderer );
+	mImpl->initialize( aGLFWwindow, sharedRenderer );
 }
 
 void RendererGl::kill()
