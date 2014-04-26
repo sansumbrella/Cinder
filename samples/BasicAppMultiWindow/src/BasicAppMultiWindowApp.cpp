@@ -62,15 +62,7 @@ void BasicAppMultiWindow::mouseDrag( MouseEvent event )
 
 void BasicAppMultiWindow::keyDown( KeyEvent event )
 {
-    std::cout << " KEY DOWN" << std::endl;
-	if( event.getChar() == 'f' )
-    {
-		setFullScreen( ! isFullScreen() );
-    }
-	else if( event.getCode() == KeyEvent::KEY_a )
-    {
-		createNewWindow();
-    }
+    createNewWindow();
 }
 
 void BasicAppMultiWindow::draw()
