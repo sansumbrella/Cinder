@@ -112,6 +112,10 @@ class WindowImplLinux {
 	virtual void		draw();
 	virtual void		redraw();
 	virtual void		resize();
+    virtual void        mouseMove( int x, int y );
+    virtual void        mousePressed( int button, int action, int mods );
+    virtual void        keyPressed( int key, int scancode, int action, int mod );
+    virtual void        keyCharPressed( unsigned int aChar );
 	virtual void		privateClose();
   protected:
 	void			    createWindow( const Vec2i &windowSize, const std::string &title, DisplayRef display, RendererRef sharedRenderer );
@@ -135,10 +139,53 @@ class WindowImplLinux {
         _currentWindow->close();
     }
 
-    inline static void window_pos_callback( GLFWwindow* aGLFWwindow )
+    inline static void window_pos_callback( GLFWwindow* aGLFWwindow, int xpos, int ypos )
     {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) );
+        _currentWindow->mWindowOffset.x = xpos;
+        _currentWindow->mWindowOffset.y = ypos;
+    }
+
+    inline static void window_resize_callback( GLFWwindow* aGLFWwindow, int width, int height )
+    {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) );
+        _currentWindow->mWindowWidth = width;
+        _currentWindow->mWindowHeight = height;
+        _currentWindow->resize();
+    }
+
+    inline static void mouse_move_callback( GLFWwindow* aGLFWwindow, double xpos, double ypos )
+    {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) );
+        _currentWindow->mouseMove( xpos, ypos );
+    }
+
+    inline static void mouse_pressed_callback( GLFWwindow* aGLFWwindow, int button, int action, int mods )
+    {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>( glfwGetWindowUserPointer( aGLFWwindow ) );   
+        _currentWindow->mousePressed( button, action, mods );
+    }
+    
+    inline static void key_action_callback( GLFWwindow* aGLFWwindow, int key, int scancode, int action, int mods )
+    {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) );
+        if( action == GLFW_PRESS && glfwGetWindowAttrib( aGLFWwindow, GLFW_FOCUSED) )
+        {
+            _currentWindow->keyPressed( key, scancode, action, mods );
+        }
+    }
+
+    inline static void key_character_callback( GLFWwindow* aGLFWwindow, unsigned int aChar )
+    {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) );
+        if( glfwGetWindowAttrib( aGLFWwindow, GLFW_FOCUSED) )
+        {
+            _currentWindow->keyCharPressed( aChar );
+        }
 
     }
+
+    virtual unsigned int prepMouseEventModifiers( int aButton, int aMod );
 
 	friend AppImplLinux;
 };

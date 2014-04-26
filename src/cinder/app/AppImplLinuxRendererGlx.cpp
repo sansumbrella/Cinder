@@ -60,6 +60,7 @@ void AppImplLinuxRendererGlx::swapBuffers() const
 void AppImplLinuxRendererGlx::makeCurrentContext()
 {
     glfwMakeContextCurrent( mGLFWwindow );
+    glfwSwapInterval(1);
 }
 
 bool AppImplLinuxRendererGlx::initialize( GLFWwindow* aGLFWwindow, RendererRef sharedRenderer )
@@ -73,6 +74,7 @@ bool AppImplLinuxRendererGlx::initializeInternal( GLFWwindow* aGLFWwindow )
     if( aGLFWwindow )
     {
         std::cout << " We have a valide window during internal initialization.. " << std::endl;
+        glfwMakeContextCurrent( aGLFWwindow );
         return true;
     }
     else

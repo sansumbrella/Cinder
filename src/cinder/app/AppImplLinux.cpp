@@ -121,6 +121,12 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
     GLFWwindow* _GLFWwindow = glfwCreateWindow( windowSize.x, windowSize.y, windowTitle, NULL, NULL );
     glfwSetWindowUserPointer( _GLFWwindow, this );
     glfwSetWindowCloseCallback( _GLFWwindow, window_close_callback );
+    glfwSetWindowSizeCallback( _GLFWwindow, window_resize_callback );
+    glfwSetWindowPosCallback( _GLFWwindow, window_pos_callback );
+    glfwSetMouseButtonCallback( _GLFWwindow, mouse_pressed_callback );
+    glfwSetCursorPosCallback( _GLFWwindow, mouse_move_callback );
+    glfwSetKeyCallback( _GLFWwindow, key_action_callback );
+    glfwSetCharCallback( _GLFWwindow, key_character_callback );
     mRenderer->setup( mAppImpl->getApp(), _GLFWwindow, sharedRenderer );
 }
 
@@ -201,6 +207,100 @@ void WindowImplLinux::resize()
 {
 	mAppImpl->setWindow( mWindowRef );
 	mWindowRef->emitResize();
+}
+
+unsigned int WindowImplLinux::prepMouseEventModifiers( int aButton, int aMod )
+{
+    unsigned int result = 0;
+    if( aButton == GLFW_MOUSE_BUTTON_LEFT ) result = MouseEvent::LEFT_DOWN;
+    if( aButton == GLFW_MOUSE_BUTTON_MIDDLE ) result = MouseEvent::MIDDLE_DOWN;
+    if( aButton == GLFW_MOUSE_BUTTON_RIGHT ) result = MouseEvent::RIGHT_DOWN;
+
+    if( aMod & GLFW_MOD_SHIFT ) result |= MouseEvent::SHIFT_DOWN;
+    if( aMod & GLFW_MOD_ALT ) result |= MouseEvent::ALT_DOWN;
+    if( aMod & GLFW_MOD_SUPER ) result |= MouseEvent::META_DOWN;
+    if( aMod & GLFW_MOD_CONTROL ) result |= MouseEvent::CTRL_DOWN;
+    return result;
+}
+
+void WindowImplLinux::mousePressed( int button, int action, int mods )
+{
+    mAppImpl->setWindow( mWindowRef );
+    switch( button )
+    {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            if( action == GLFW_PRESS )
+            {
+                mIsDragging = true;
+                MouseEvent event( mWindowRef, MouseEvent::LEFT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                mWindowRef->emitMouseDown( &event );
+            }
+            else if( action == GLFW_RELEASE )
+            {
+                mIsDragging = false;
+                MouseEvent event( mWindowRef, MouseEvent::LEFT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                mWindowRef->emitMouseUp( &event );
+            }
+        break;
+
+        case GLFW_MOUSE_BUTTON_MIDDLE:
+            if( action == GLFW_PRESS )
+            {
+                mIsDragging = true;
+                MouseEvent event( mWindowRef, MouseEvent::MIDDLE_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                mWindowRef->emitMouseDown( &event );
+            }
+            else if( action == GLFW_RELEASE )
+            {
+                mIsDragging = false;
+                MouseEvent event( mWindowRef, MouseEvent::MIDDLE_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                mWindowRef->emitMouseUp( &event );
+            }
+        break;
+
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            if( action == GLFW_PRESS )
+            {
+                mIsDragging = true;
+                MouseEvent event( mWindowRef, MouseEvent::RIGHT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                mWindowRef->emitMouseDown( &event );
+            }
+            else if( action == GLFW_RELEASE )
+            {
+                mIsDragging = false;
+                MouseEvent event( mWindowRef, MouseEvent::RIGHT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                mWindowRef->emitMouseUp( &event );
+            }
+        break;
+
+        default:
+        break;
+    }
+}
+
+void WindowImplLinux::mouseMove( int x, int y )
+{
+    mAppImpl->setWindow( mWindowRef );
+    MouseEvent event( mWindowRef, 0, x, y, 0, 0, 0 );
+    if( mIsDragging )
+    {
+        mWindowRef->emitMouseDrag( &event );
+    }
+    else
+    {
+        mWindowRef->emitMouseMove( &event );
+    }
+}
+
+void WindowImplLinux::keyPressed( int key, int scancode, int action, int modes )
+{
+    mAppImpl->setWindow( mWindowRef );
+    KeyEvent event( mWindowRef,  key, 0, 0, 0, 0 );
+    mWindowRef->emitKeyDown( &event );
+}
+
+void WindowImplLinux::keyCharPressed( unsigned int aChar )
+{
 }
 
 void WindowImplLinux::redraw()
