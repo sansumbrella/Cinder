@@ -62,7 +62,10 @@ void BasicAppMultiWindow::mouseDrag( MouseEvent event )
 
 void BasicAppMultiWindow::keyDown( KeyEvent event )
 {
-    createNewWindow();
+    if( event.getCode() == KeyEvent::KEY_a && event.isShiftDown() )
+    {
+        createNewWindow();
+    }
 }
 
 void BasicAppMultiWindow::draw()
