@@ -42,7 +42,6 @@ class AppImplLinuxRendererGlx : public AppImplLinuxRenderer {
 
  protected:
     bool    initializeInternal( GLFWwindow* aGLFWwindow );
-	int		initMultisample( );
 	
 	RendererGl	*mRenderer;
 	bool		mWasFullScreen;

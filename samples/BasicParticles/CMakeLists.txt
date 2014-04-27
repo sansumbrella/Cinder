@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 ### Check to see if the environment is set. 
-### The path to the openFrameworks root dir is a prerequisite
+### The path to cinder's root dir is a prerequisite
 set (CINDER_ROOT $ENV{CINDER_ROOT})
 if ( "${CINDER_ROOT}" STREQUAL "" )
 	message(FATAL_ERROR "
@@ -13,9 +13,9 @@ if ( "${CINDER_ROOT}" STREQUAL "" )
 	****" )
 endif()
 
-include (/home/petroska/Software/CinderLinux/CMakeModules/CinderInclude.cmake)
-include (/home/petroska/Software/CinderLinux/CMakeModules/CinderSrcs.cmake)
-include (/home/petroska/Software/CinderLinux/CMakeModules/CinderDepends.cmake)
+include (${CINDER_ROOT}/CMakeModules/CinderInclude.cmake)
+include (${CINDER_ROOT}/CMakeModules/CinderSrcs.cmake)
+include (${CINDER_ROOT}/CMakeModules/CinderDepends.cmake)
 
 ### Project name.
 PROJECT( CinderLinuxBasicParticles ) 

@@ -13,9 +13,9 @@ if ( "${CINDER_ROOT}" STREQUAL "" )
 	****" )
 endif()
 
-include (/home/petroska/Software/CinderLinux/CMakeModules/CinderInclude.cmake)
-include (/home/petroska/Software/CinderLinux/CMakeModules/CinderSrcs.cmake)
-include (/home/petroska/Software/CinderLinux/CMakeModules/CinderDepends.cmake)
+include (${CINDER_ROOT}/CMakeModules/CinderInclude.cmake)
+include (${CINDER_ROOT}/CMakeModules/CinderSrcs.cmake)
+include (${CINDER_ROOT}/CMakeModules/CinderDepends.cmake)
 
 ### Project name.
 PROJECT( CinderLinuxEaseGalleryApp ) 
