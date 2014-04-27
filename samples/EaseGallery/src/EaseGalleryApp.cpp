@@ -16,10 +16,10 @@ struct EaseBox {
 		: mFn( fn )
 	{
 		// create label
-		TextLayout text; text.clear( Color::white() ); text.setColor( Color(0.5f, 0.5f, 0.5f) );
-		try { text.setFont( Font( "Futura-CondensedMedium", 18 ) ); } catch( ... ) { text.setFont( Font( "Arial", 18 ) ); }
-		text.addLine( name );
-		mLabelTex = gl::Texture( text.render( true ) );
+	//	TextLayout text; text.clear( Color::white() ); text.setColor( Color(0.5f, 0.5f, 0.5f) );
+	//	try { text.setFont( Font( "Futura-CondensedMedium", 18 ) ); } catch( ... ) { text.setFont( Font( "Arial", 18 ) ); }
+	//	text.addLine( name );
+	//	mLabelTex = gl::Texture( text.render( true ) );
 	}
 	
 	void draw( float t ) const
@@ -30,7 +30,7 @@ struct EaseBox {
 		gl::color( Color( 0.4f, 0.4f, 0.4f ) );
 		gl::drawStrokedRect( mDrawRect );
 		gl::color( Color::white() );
-		gl::draw( mLabelTex, mDrawRect.getCenter() - mLabelTex.getSize() / 2 );
+		//gl::draw( mLabelTex, mDrawRect.getCenter() - mLabelTex.getSize() / 2 );
 				
 		// draw graph
 		gl::color( ColorA( 0.25f, 0.5f, 1.0f, 0.5f ) );
