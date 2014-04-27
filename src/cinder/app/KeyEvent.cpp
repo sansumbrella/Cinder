@@ -335,7 +335,7 @@ int	KeyEvent::translateNativeKeyCode( int nativeKeyCode )
 }
 #elif defined( CINDER_LINUX )
 
-#include <X11/keysym.h>
+#include <GLFW/glfw3.h>
 
 static bool sTableInited = false;
 
@@ -343,17 +343,37 @@ map<int,int> sKeyTable;
 
 static void initKeyTable()
 {
-     //XK_Return = KeyEvent::KEY_RETURN;
-     //XK_Escape = KeyEvent::KEY_ESCAPE;
-     //XK_BackSpace = KeyEvent::KEY_BACKSPACE;
-     //XK_Tab = KeyEvent::KEY_TAB;
-     //XK_Caps_Lock = KeyEvent::KEY_CAPSLOCK;
-     sKeyTable[XK_a] = KeyEvent::KEY_a;
-     sKeyTable[XK_b] = KeyEvent::KEY_b;
-     sKeyTable[XK_c] = KeyEvent::KEY_c;
-     sKeyTable[XK_d] = KeyEvent::KEY_d;
-     sKeyTable[XK_e] = KeyEvent::KEY_e;
-     //XK_f = KeyEvent::KEY_f;
+     sKeyTable[GLFW_KEY_ENTER] = KeyEvent::KEY_RETURN;
+     sKeyTable[GLFW_KEY_ESCAPE] = KeyEvent::KEY_ESCAPE;
+     sKeyTable[GLFW_KEY_BACKSPACE] = KeyEvent::KEY_BACKSPACE;
+     sKeyTable[GLFW_KEY_TAB] = KeyEvent::KEY_TAB;
+     sKeyTable[GLFW_KEY_CAPS_LOCK] = KeyEvent::KEY_CAPSLOCK;
+     sKeyTable[GLFW_KEY_A] = KeyEvent::KEY_a;
+     sKeyTable[GLFW_KEY_B] = KeyEvent::KEY_b;
+     sKeyTable[GLFW_KEY_C] = KeyEvent::KEY_c;
+     sKeyTable[GLFW_KEY_D] = KeyEvent::KEY_d;
+     sKeyTable[GLFW_KEY_E] = KeyEvent::KEY_e;
+     sKeyTable[GLFW_KEY_F] = KeyEvent::KEY_f;
+     sKeyTable[GLFW_KEY_G] = KeyEvent::KEY_g;
+     sKeyTable[GLFW_KEY_H] = KeyEvent::KEY_h;
+     sKeyTable[GLFW_KEY_I] = KeyEvent::KEY_i;
+     sKeyTable[GLFW_KEY_J] = KeyEvent::KEY_j;
+     sKeyTable[GLFW_KEY_K] = KeyEvent::KEY_k;
+     sKeyTable[GLFW_KEY_L] = KeyEvent::KEY_l;
+     sKeyTable[GLFW_KEY_M] = KeyEvent::KEY_m;
+     sKeyTable[GLFW_KEY_N] = KeyEvent::KEY_n;
+     sKeyTable[GLFW_KEY_O] = KeyEvent::KEY_o;
+     sKeyTable[GLFW_KEY_P] = KeyEvent::KEY_p;
+     sKeyTable[GLFW_KEY_Q] = KeyEvent::KEY_q;
+     sKeyTable[GLFW_KEY_R] = KeyEvent::KEY_r;
+     sKeyTable[GLFW_KEY_S] = KeyEvent::KEY_s;
+     sKeyTable[GLFW_KEY_T] = KeyEvent::KEY_t;
+     sKeyTable[GLFW_KEY_U] = KeyEvent::KEY_u;
+     sKeyTable[GLFW_KEY_V] = KeyEvent::KEY_v;
+     sKeyTable[GLFW_KEY_W] = KeyEvent::KEY_w;
+     sKeyTable[GLFW_KEY_X] = KeyEvent::KEY_x;
+     sKeyTable[GLFW_KEY_Y] = KeyEvent::KEY_y;
+     sKeyTable[GLFW_KEY_Z] = KeyEvent::KEY_z;
      //XK_F1 = KeyEvent::KEY_F1;
      //XK_F2 = KeyEvent::KEY_F2;
      //XK_F3 = KeyEvent::KEY_F3;

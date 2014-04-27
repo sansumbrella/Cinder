@@ -231,6 +231,16 @@ unsigned int WindowImplLinux::prepMouseEventModifiers( int aButton, int aMod )
     return result;
 }
 
+unsigned int WindowImplLinux::prepKeyEventModifiers( int aMod )
+{
+    unsigned int result = 0;
+    if( aMod & GLFW_MOD_SHIFT ) result |= KeyEvent::SHIFT_DOWN;
+    if( aMod & GLFW_MOD_ALT ) result |= KeyEvent::ALT_DOWN;
+    if( aMod & GLFW_MOD_SUPER ) result |= KeyEvent::META_DOWN;
+    if( aMod & GLFW_MOD_CONTROL ) result |= KeyEvent::CTRL_DOWN;
+    return result;
+}
+
 void WindowImplLinux::mousePressed( int button, int action, int mods, double x, double y )
 {
     mAppImpl->setWindow( mWindowRef );
@@ -308,8 +318,9 @@ void WindowImplLinux::mouseMove( double x, double y )
 void WindowImplLinux::keyPressed( int key, int scancode, int action, int modes )
 {
     mAppImpl->setWindow( mWindowRef );
-    KeyEvent event( mWindowRef,  key, 0, 0, 0, 0 );
-    mWindowRef->emitKeyDown( &event );
+    KeyEvent event( mWindowRef, KeyEvent::translateNativeKeyCode( key ), 0, 0, prepKeyEventModifiers( modes ), key);
+    if( action == GLFW_PRESS ) mWindowRef->emitKeyDown( &event );
+    else mWindowRef->emitKeyUp( &event );
 }
 
 void WindowImplLinux::keyCharPressed( unsigned int aChar )

@@ -56,7 +56,7 @@ class AppImplLinux {
 	void			    setWindow( WindowRef window ) { mActiveWindow = window; }
 	
 	static void		    hideCursor();
-	static void		    showCursor();
+    static void		    showCursor();
 	
 	static Buffer		loadResource( int id, const std::string &type );
 	
@@ -206,6 +206,7 @@ class WindowImplLinux {
     }
 
     virtual unsigned int prepMouseEventModifiers( int aButton, int aMod );
+    virtual unsigned int prepKeyEventModifiers( int aMod );
 
 	friend AppImplLinux;
 };
