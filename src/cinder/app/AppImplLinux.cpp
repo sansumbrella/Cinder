@@ -31,6 +31,9 @@ using std::wstring;
 using std::vector;
 using std::pair;
 
+double ci::app::AppImplLinux::mGlobalMouseX = 0.0;
+double ci::app::AppImplLinux::mGlobalMouseY = 0.0;
+
 namespace cinder { namespace app {
 
 
@@ -212,9 +215,9 @@ void WindowImplLinux::resize()
 unsigned int WindowImplLinux::prepMouseEventModifiers( int aButton, int aMod )
 {
     unsigned int result = 0;
-    if( aButton == GLFW_MOUSE_BUTTON_LEFT ) result = MouseEvent::LEFT_DOWN;
-    if( aButton == GLFW_MOUSE_BUTTON_MIDDLE ) result = MouseEvent::MIDDLE_DOWN;
-    if( aButton == GLFW_MOUSE_BUTTON_RIGHT ) result = MouseEvent::RIGHT_DOWN;
+    if( aButton == GLFW_MOUSE_BUTTON_LEFT ) result |= MouseEvent::LEFT_DOWN;
+    if( aButton == GLFW_MOUSE_BUTTON_MIDDLE ) result |= MouseEvent::MIDDLE_DOWN;
+    if( aButton == GLFW_MOUSE_BUTTON_RIGHT ) result |= MouseEvent::RIGHT_DOWN;
 
     if( aMod & GLFW_MOD_SHIFT ) result |= MouseEvent::SHIFT_DOWN;
     if( aMod & GLFW_MOD_ALT ) result |= MouseEvent::ALT_DOWN;
@@ -223,22 +226,25 @@ unsigned int WindowImplLinux::prepMouseEventModifiers( int aButton, int aMod )
     return result;
 }
 
-void WindowImplLinux::mousePressed( int button, int action, int mods )
+void WindowImplLinux::mousePressed( int button, int action, int mods, double x, double y )
 {
     mAppImpl->setWindow( mWindowRef );
+    
+    getAppImpl()->setCurrentMousePos( x, y );
+
     switch( button )
     {
         case GLFW_MOUSE_BUTTON_LEFT:
             if( action == GLFW_PRESS )
             {
                 mIsDragging = true;
-                MouseEvent event( mWindowRef, MouseEvent::LEFT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                MouseEvent event( mWindowRef, MouseEvent::LEFT_DOWN, x, y, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
                 mWindowRef->emitMouseDown( &event );
             }
             else if( action == GLFW_RELEASE )
             {
                 mIsDragging = false;
-                MouseEvent event( mWindowRef, MouseEvent::LEFT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                MouseEvent event( mWindowRef, MouseEvent::LEFT_DOWN, x, y, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
                 mWindowRef->emitMouseUp( &event );
             }
         break;
@@ -247,13 +253,13 @@ void WindowImplLinux::mousePressed( int button, int action, int mods )
             if( action == GLFW_PRESS )
             {
                 mIsDragging = true;
-                MouseEvent event( mWindowRef, MouseEvent::MIDDLE_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                MouseEvent event( mWindowRef, MouseEvent::MIDDLE_DOWN, x, y, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
                 mWindowRef->emitMouseDown( &event );
             }
             else if( action == GLFW_RELEASE )
             {
                 mIsDragging = false;
-                MouseEvent event( mWindowRef, MouseEvent::MIDDLE_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                MouseEvent event( mWindowRef, MouseEvent::MIDDLE_DOWN, x, y, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
                 mWindowRef->emitMouseUp( &event );
             }
         break;
@@ -262,13 +268,13 @@ void WindowImplLinux::mousePressed( int button, int action, int mods )
             if( action == GLFW_PRESS )
             {
                 mIsDragging = true;
-                MouseEvent event( mWindowRef, MouseEvent::RIGHT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                MouseEvent event( mWindowRef, MouseEvent::RIGHT_DOWN, x, y, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
                 mWindowRef->emitMouseDown( &event );
             }
             else if( action == GLFW_RELEASE )
             {
                 mIsDragging = false;
-                MouseEvent event( mWindowRef, MouseEvent::RIGHT_DOWN, 0, 0, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
+                MouseEvent event( mWindowRef, MouseEvent::RIGHT_DOWN, x, y, prepMouseEventModifiers( button, mods ), 0.0f, 0 );
                 mWindowRef->emitMouseUp( &event );
             }
         break;
@@ -278,7 +284,7 @@ void WindowImplLinux::mousePressed( int button, int action, int mods )
     }
 }
 
-void WindowImplLinux::mouseMove( int x, int y )
+void WindowImplLinux::mouseMove( double x, double y )
 {
     mAppImpl->setWindow( mWindowRef );
     MouseEvent event( mWindowRef, 0, x, y, 0, 0, 0 );
@@ -290,6 +296,8 @@ void WindowImplLinux::mouseMove( int x, int y )
     {
         mWindowRef->emitMouseMove( &event );
     }
+
+    getAppImpl()->setCurrentMousePos( x, y );
 }
 
 void WindowImplLinux::keyPressed( int key, int scancode, int action, int modes )

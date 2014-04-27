@@ -64,6 +64,9 @@ class AppImplLinux {
 	static fs::path		getOpenFilePath( const fs::path &initialPath, std::vector<std::string> extensions );
 	static fs::path		getSaveFilePath( const fs::path &initialPath, std::vector<std::string> extensions );
 	static fs::path		getFolderPath( const fs::path &initialPath );
+
+    static void        setCurrentMousePos( double x, double y ){ mGlobalMouseX = x; mGlobalMouseY = y; }
+    static Vec2d       getCurrentMousePos(){ return Vec2d( mGlobalMouseX, mGlobalMouseY ); }
 	
   protected:
 	bool			    setupHasBeenCalled() const { return mSetupHasBeenCalled; }
@@ -74,6 +77,7 @@ class AppImplLinux {
 	float		    	mFrameRate;
 	WindowRef		    mActiveWindow;
 	bool			    mSetupHasBeenCalled;
+    static double       mGlobalMouseX, mGlobalMouseY;
 
 	friend class        WindowImplLinux;
 };
@@ -112,8 +116,8 @@ class WindowImplLinux {
 	virtual void		draw();
 	virtual void		redraw();
 	virtual void		resize();
-    virtual void        mouseMove( int x, int y );
-    virtual void        mousePressed( int button, int action, int mods );
+    virtual void        mouseMove( double x, double y );
+    virtual void        mousePressed( int button, int action, int mods, double mouse_x, double mouse_y );
     virtual void        keyPressed( int key, int scancode, int action, int mod );
     virtual void        keyCharPressed( unsigned int aChar );
 	virtual void		privateClose();
@@ -162,8 +166,13 @@ class WindowImplLinux {
 
     inline static void mouse_pressed_callback( GLFWwindow* aGLFWwindow, int button, int action, int mods )
     {
+        double mouse_x = 0;
+        double mouse_y = 0;
+        
+        glfwGetCursorPos( aGLFWwindow, &mouse_x, &mouse_y );
+
         WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>( glfwGetWindowUserPointer( aGLFWwindow ) );   
-        _currentWindow->mousePressed( button, action, mods );
+        _currentWindow->mousePressed( button, action, mods, mouse_x, mouse_y );
     }
     
     inline static void key_action_callback( GLFWwindow* aGLFWwindow, int key, int scancode, int action, int mods )

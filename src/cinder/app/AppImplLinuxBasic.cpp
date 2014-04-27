@@ -82,15 +82,23 @@ void AppImplLinuxBasic::run()
 		// get current time in seconds
 		double currentSeconds = mApp->getElapsedSeconds();
 
-		if( ( currentSeconds >= mNextFrameTime ) )
-		{
-			mNextFrameTime = currentSeconds + 1.0f / mFrameRate;
-		}
-		else 
-		{
-			usleep(1);
-		}
-		
+        double secondsPerFrame = 1.0f / mFrameRate;
+
+        double elapsedSeconds = currentSeconds - mNextFrameTime;
+
+        if( elapsedSeconds > 1.0 )
+        {
+            int numSkipFrames = (int)( elapsedSeconds / secondsPerFrame );
+            mNextFrameTime += ( numSkipFrames * secondsPerFrame );
+        }
+
+        mNextFrameTime += secondsPerFrame;
+
+        if( ( mFrameRateEnabled ) && ( mNextFrameTime > currentSeconds ) )
+        {
+            usleep( ( mNextFrameTime - currentSeconds ) * 1E6 );
+        }
+
         glfwPollEvents();
 	}
 

@@ -44,6 +44,7 @@
 	#include "cinder/app/AppImplMsw.h"
 #elif defined( CINDER_LINUX )
 	#include "cinder/app/AppImplLinux.h"
+    #include <GLFW/glfw3.h>
 #endif
 
 #if !defined ( CINDER_WINRT )
@@ -573,8 +574,8 @@ Vec2i App::getMousePos()
 	POINT point;
 	::GetCursorPos( &point );
 	return Vec2i( point.x, point.y );
-#else
-	return Vec2i( -1, -1 );
+#elif defined( CINDER_LINUX )
+	return AppImplLinux::getCurrentMousePos();
 #endif
 }
 
