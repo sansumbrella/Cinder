@@ -50,6 +50,12 @@ find_library(   CINDER_RELEASE
                 PATHS $ENV{CINDER_ROOT}
             )
 
+find_library(   GLFW3 
+                NAMES glfw3
+                PATH_SUFFIXES CMake/libs libs
+                PATHS $ENV{CINDER_ROOT}
+            )
+
 if( CINDER_DEBUG AND NOT CINDER_RELEASE )
     set( CINDER_RELEASE ${CINDER_DEBUG} )
 elseif( CINDER_RELEASE AND NOT CINDER_DEBUG)
@@ -69,4 +75,4 @@ add_executable( ${bin} ${source_files} )
 
 set( CINDER debug ${CINDER_DEBUG} optimized ${CINDER_RELEASE} )
 
-target_link_libraries( ${bin} ${CINDER} ${CINDER_DEPENDS} ) 
+target_link_libraries( ${bin} ${CINDER} ${GLFW3}  Xxf86vm pthread Xrandr Xi Xcursor ${CINDER_DEPENDS}) 
