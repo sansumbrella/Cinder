@@ -122,6 +122,7 @@ class WindowImplLinux {
     virtual void        keyCharPressed( unsigned int aChar );
 	virtual void		privateClose();
   protected:
+    void                setAntiAliasing( int& aAntiAliasing );
 	void			    createWindow( const Vec2i &windowSize, const std::string &title, DisplayRef display, RendererRef sharedRenderer );
 	void			    getScreenSize( int clientWidth, int clientHeight, int *resultWidth, int *resultHeight );
 	virtual void		toggleFullScreen( const app::FullScreenOptions &options );
@@ -134,9 +135,11 @@ class WindowImplLinux {
     int				    mWindowWidth, mWindowHeight;
 	bool			    mFullScreen, mBorderless, mAlwaysOnTop, mResizable;
 	Vec2i			    mWindowedPos, mWindowedSize;
+    int                 mAntiAliasing;
 	DisplayRef		    mDisplay;
 	RendererRef		    mRenderer;
     GLFWwindow*         mGLFWwindow;
+
     inline static void window_close_callback( GLFWwindow* aGLFWwindow )
     {
         WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) ); 

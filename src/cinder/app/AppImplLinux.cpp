@@ -97,11 +97,16 @@ WindowImplLinux::WindowImplLinux( const Window::Format &format, RendererRef shar
 	mResizable = format.isResizable();
 	mAlwaysOnTop = format.isAlwaysOnTop();
 	mBorderless = format.isBorderless();
+    
+    mAntiAliasing = std::static_pointer_cast<RendererGl>(mRenderer)->getAntiAliasing();
+
+    setAntiAliasing( mAntiAliasing );
 
 	mWindowedSize = format.getSize();
 	mWindowWidth = mWindowedSize.x;
 	mWindowHeight = mWindowedSize.y;
-	if( format.isPosSpecified() )
+	
+    if( format.isPosSpecified() )
 		mWindowOffset = mWindowedPos = format.getPos();
 	else {
 		Vec2i displaySize = mDisplay->getSize();
@@ -115,22 +120,65 @@ WindowImplLinux::WindowImplLinux( const Window::Format &format, RendererRef shar
 	
 }
 
+void WindowImplLinux::setAntiAliasing( int& aAntiAliasing )
+{
+    switch( aAntiAliasing )
+    {
+        case RendererGl::AA_NONE:
+            aAntiAliasing = 0;
+        break;
+
+        case RendererGl::AA_MSAA_2:
+            aAntiAliasing = 2;
+        break;
+
+        case RendererGl::AA_MSAA_4:
+            aAntiAliasing = 4;
+        break;
+
+        case RendererGl::AA_MSAA_8:
+            aAntiAliasing = 8;
+        break;
+
+        case RendererGl::AA_MSAA_16:
+            aAntiAliasing = 16;
+        break;
+
+        case RendererGl::AA_MSAA_32:
+            aAntiAliasing = 32;
+        break;
+
+        default:
+            aAntiAliasing = 16;
+        break;
+    }
+
+}
 
 void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &title, const DisplayRef display, RendererRef sharedRenderer )
 {
-	char windowTitle[1024];
-	std::strncpy( windowTitle, title.c_str(), sizeof(windowTitle) );
-	windowTitle[sizeof(windowTitle) - 1] = 0;
+    const char* windowTitle = title.c_str();
+
+    if( mBorderless ) glfwWindowHint( GLFW_DECORATED, GL_FALSE );
+    if( !mResizable ) glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+
+    glfwWindowHint( GLFW_SAMPLES, mAntiAliasing );
+
     mGLFWwindow = glfwCreateWindow( windowSize.x, windowSize.y, windowTitle, NULL, NULL );
+    
     glfwSetWindowUserPointer( mGLFWwindow, this );
     glfwSetWindowCloseCallback( mGLFWwindow, window_close_callback );
     glfwSetWindowSizeCallback( mGLFWwindow, window_resize_callback );
     glfwSetWindowPosCallback( mGLFWwindow, window_pos_callback );
+    glfwSetWindowFocusCallback( mGLFWwindow, window_focus_callback );
+    
     glfwSetMouseButtonCallback( mGLFWwindow, mouse_pressed_callback );
+    
     glfwSetCursorPosCallback( mGLFWwindow, mouse_move_callback );
+    
     glfwSetKeyCallback( mGLFWwindow, key_action_callback );
     glfwSetCharCallback( mGLFWwindow, key_character_callback );
-    glfwSetWindowFocusCallback( mGLFWwindow, window_focus_callback );
+
     mRenderer->setup( mAppImpl->getApp(), mGLFWwindow, sharedRenderer );
 }
 
@@ -185,8 +233,6 @@ void WindowImplLinux::setTitle( const std::string &title )
 void WindowImplLinux::setSize( const Vec2i &windowSize )
 {
     glfwSetWindowSize( mGLFWwindow, windowSize.x, windowSize.y );
-	int screenWidth, screenHeight;
-	getScreenSize( windowSize.x, windowSize.y, &screenWidth, &screenHeight );
 }
 
 void WindowImplLinux::close()
@@ -197,10 +243,12 @@ void WindowImplLinux::close()
 
 void WindowImplLinux::setBorderless( bool borderless )
 {
+    mBorderless = borderless;
 }
  
 void WindowImplLinux::setAlwaysOnTop( bool alwaysOnTop )
 {
+    mAlwaysOnTop = alwaysOnTop;
 }
 
 void WindowImplLinux::draw()
@@ -318,9 +366,15 @@ void WindowImplLinux::mouseMove( double x, double y )
 void WindowImplLinux::keyPressed( int key, int scancode, int action, int modes )
 {
     mAppImpl->setWindow( mWindowRef );
+    
     KeyEvent event( mWindowRef, KeyEvent::translateNativeKeyCode( key ), 0, 0, prepKeyEventModifiers( modes ), key);
-    if( action == GLFW_PRESS ) mWindowRef->emitKeyDown( &event );
-    else mWindowRef->emitKeyUp( &event );
+    
+    if( action == GLFW_PRESS ){
+        mWindowRef->emitKeyDown( &event );
+    }
+    else if( action == GLFW_RELEASE ){
+        mWindowRef->emitKeyUp( &event );
+    }
 }
 
 void WindowImplLinux::keyCharPressed( unsigned int aChar )
