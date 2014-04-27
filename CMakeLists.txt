@@ -31,7 +31,7 @@ macro (add_sources)
 endmacro()
 
 ### Check to see if the environment is set. 
-### The path to the openFrameworks root dir is a prerequisite
+### The path to cinder's root dir is a prerequisite
 set (CINDER_ROOT $ENV{CINDER_ROOT})
 if ( "${CINDER_ROOT}" STREQUAL "" )
 	message(FATAL_ERROR "
