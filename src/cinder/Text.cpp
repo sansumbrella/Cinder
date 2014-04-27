@@ -512,7 +512,7 @@ Surface renderStringPow2( const string &str, const Font &font, const ColorA &col
 	::CGContextRelease( cgContext );
 	return result;
 }
-#elif defined( CINDER_MAC) || defined( CINDER_MSW ) || defined( CINDER_WINRT )
+#elif defined( CINDER_MAC) || defined( CINDER_LINUX ) || defined( CINDER_MSW ) || defined( CINDER_WINRT )
 Surface renderString( const string &str, const Font &font, const ColorA &color, float *baselineOffset )
 {
 	Line line;
@@ -568,7 +568,7 @@ Surface renderString( const string &str, const Font &font, const ColorA &color, 
 
 	delete offscreenBitmap;
 	delete offscreenGraphics;
-#elif defined( CINDER_WINRT )
+#elif defined( CINDER_WINRT ) 
 	Channel channel( pixelWidth, pixelHeight );
 	ip::fill<uint8_t>( &channel, 0 );
 	FT_Face face = font.getFace();
@@ -585,6 +585,10 @@ Surface renderString( const string &str, const Font &font, const ColorA &color, 
 	}
 	Surface result(channel, SurfaceConstraintsDefault(), true);
 	result.getChannelAlpha().copyFrom( channel, channel.getBounds() );
+
+#elif defined( CINDER_LINUX )
+
+    Surface result = Surface();
 #endif	
 
 	if( baselineOffset )
