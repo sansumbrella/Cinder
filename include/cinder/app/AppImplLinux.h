@@ -136,7 +136,7 @@ class WindowImplLinux {
 	Vec2i			    mWindowedPos, mWindowedSize;
 	DisplayRef		    mDisplay;
 	RendererRef		    mRenderer;
-
+    GLFWwindow*         mGLFWwindow;
     inline static void window_close_callback( GLFWwindow* aGLFWwindow )
     {
         WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) ); 
@@ -192,6 +192,17 @@ class WindowImplLinux {
             _currentWindow->keyCharPressed( aChar );
         }
 
+    }
+
+    inline static void window_focus_callback( GLFWwindow* aGLFWwindow, int aIsFocused )
+    {
+        WindowImplLinux* _currentWindow = static_cast<WindowImplLinux*>(glfwGetWindowUserPointer( aGLFWwindow ) );
+
+        if( aIsFocused )
+        {
+            _currentWindow->getAppImpl()->setWindow( _currentWindow->getWindow() );
+            _currentWindow->getAppImpl()->setForegroundWindow( _currentWindow->getWindow() );
+        }
     }
 
     virtual unsigned int prepMouseEventModifiers( int aButton, int aMod );

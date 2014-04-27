@@ -121,16 +121,17 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 	char windowTitle[1024];
 	std::strncpy( windowTitle, title.c_str(), sizeof(windowTitle) );
 	windowTitle[sizeof(windowTitle) - 1] = 0;
-    GLFWwindow* _GLFWwindow = glfwCreateWindow( windowSize.x, windowSize.y, windowTitle, NULL, NULL );
-    glfwSetWindowUserPointer( _GLFWwindow, this );
-    glfwSetWindowCloseCallback( _GLFWwindow, window_close_callback );
-    glfwSetWindowSizeCallback( _GLFWwindow, window_resize_callback );
-    glfwSetWindowPosCallback( _GLFWwindow, window_pos_callback );
-    glfwSetMouseButtonCallback( _GLFWwindow, mouse_pressed_callback );
-    glfwSetCursorPosCallback( _GLFWwindow, mouse_move_callback );
-    glfwSetKeyCallback( _GLFWwindow, key_action_callback );
-    glfwSetCharCallback( _GLFWwindow, key_character_callback );
-    mRenderer->setup( mAppImpl->getApp(), _GLFWwindow, sharedRenderer );
+    mGLFWwindow = glfwCreateWindow( windowSize.x, windowSize.y, windowTitle, NULL, NULL );
+    glfwSetWindowUserPointer( mGLFWwindow, this );
+    glfwSetWindowCloseCallback( mGLFWwindow, window_close_callback );
+    glfwSetWindowSizeCallback( mGLFWwindow, window_resize_callback );
+    glfwSetWindowPosCallback( mGLFWwindow, window_pos_callback );
+    glfwSetMouseButtonCallback( mGLFWwindow, mouse_pressed_callback );
+    glfwSetCursorPosCallback( mGLFWwindow, mouse_move_callback );
+    glfwSetKeyCallback( mGLFWwindow, key_action_callback );
+    glfwSetCharCallback( mGLFWwindow, key_character_callback );
+    glfwSetWindowFocusCallback( mGLFWwindow, window_focus_callback );
+    mRenderer->setup( mAppImpl->getApp(), mGLFWwindow, sharedRenderer );
 }
 
 
@@ -151,16 +152,19 @@ void WindowImplLinux::getScreenSize( int clientWidth, int clientHeight, int *res
 
 void WindowImplLinux::setPos( const Vec2i &windowPos )
 {
+    glfwSetWindowPos( mGLFWwindow, windowPos.x, windowPos.y ); 
 }
 
 void WindowImplLinux::hide()
 {
-        mHidden = true;
+    glfwHideWindow( mGLFWwindow );
+    mHidden = true;
 }
 
 void WindowImplLinux::show()
 {
-        mHidden = false;
+    glfwShowWindow( mGLFWwindow );
+    mHidden = false;
 }
 
 bool WindowImplLinux::isHidden() const
@@ -180,6 +184,7 @@ void WindowImplLinux::setTitle( const std::string &title )
 
 void WindowImplLinux::setSize( const Vec2i &windowSize )
 {
+    glfwSetWindowSize( mGLFWwindow, windowSize.x, windowSize.y );
 	int screenWidth, screenHeight;
 	getScreenSize( windowSize.x, windowSize.y, &screenWidth, &screenHeight );
 }
