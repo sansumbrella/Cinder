@@ -1,37 +1,45 @@
 LINUX SPECIFIC
-==============
+--------------
 
 This version is being tested against Xubuntu 14.04 and uses glfw3 for window/context creation/manipulation etc.
 
 You should be able to build and run the following examples after compiling the library:
 
 BasicApp
+
 BasicAppMultiWindow
+
 BasicParticles
+
 ListenerBasic
+
 EasyGallery
+
 CustomLerp
+
 
 In theory you should be able to run all examples that do not require resource loading ( yes I know there are not much that is why resource loading will be the next step.. ) etc. but havent tested/added the CMake files so far.
 
-Since GLFW3 is included as a submodule you will need to run git submodule update --init from $CINDER_ROOT in order to actually fetch the source code.
+Since GLFW3 is included as a submodule you will need to run ```git submodule update --init``` from ```$CINDER_ROOT``` in order to actually fetch the source code.
 
 You shouldn not need to worry about building GLFW3 since this should be handled by the CMake configuration.
 
-The most important thing to take care of when building the cinder lib or/and the examples is to have the env variable CINDER_ROOT pointing to the root dir of your Cinder installation.
+The most important thing to take care of when building the cinder lib or/and the examples is to have the env variable ```CINDER_ROOT``` pointing to the root dir of your Cinder installation.
 
 For example:
 ```export CINDER_ROOT=~/Some/dir/Cinder```
 
+NOTE: Use absolute path to point to the directory.
+
 An error message will appear if you forget to do this reminding you to export the specific env variable before invoking any make commands.
 
-You will need the following libraries GLEW, GL, X11, boost_system, boost_filesystem, z .
+You will need the following libraries ```GLEW```, ```GL```, ```X11```, ```boost_system```, ```boost_filesystem```, ```z``` .
 
-Tested with libglew-1.10, libboost-system1.54, libboost-filesystem1.54 .
+Tested with ```libglew-1.10```, ```libboost-system1.54```, ```libboost-filesystem1.54``` .
 
 In order to build the library :
 
-```cd $CINDER_ROOT && make``` or ```cd $CINDER_ROOT && make debug```.
+`cd $CINDER_ROOT && make` or ```cd $CINDER_ROOT && make debug```.
 
 The make command should trigger the build of GLFW3 followed by Cinder.
 
