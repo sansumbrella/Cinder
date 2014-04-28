@@ -22,7 +22,7 @@ In theory you should be able to run all examples that do not require resource lo
 
 Since GLFW3 is included as a submodule you will need to run `git submodule update --init` from `$CINDER_ROOT` in order to actually fetch the source code.
 
-You shouldn not need to worry about building GLFW3 since this should be handled by the CMake configuration.
+You should not need to worry about building GLFW3 since this will be handled by CMake.
 
 The most important thing to take care of when building the cinder lib or/and the examples is to have the env variable `CINDER_ROOT` pointing to the root dir of your Cinder installation.
 
