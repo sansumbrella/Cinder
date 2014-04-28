@@ -1,7 +1,11 @@
 LINUX SPECIFIC
 --------------
 
-This version is being tested against Xubuntu 14.04 and uses glfw3 for window/context creation/manipulation etc.
+This version is being tested against Xubuntu 14.04 and uses glfw3 for window/context creation/destruction and mouse/keyboard interaction etc.
+
+Currently mouse input is relatively complete but might need to rethink in some parts.
+
+Keyboard interaction is unfinished but will be in the near future.
 
 You should be able to build and run the following examples after compiling the library:
 
