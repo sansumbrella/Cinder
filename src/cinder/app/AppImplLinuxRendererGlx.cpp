@@ -84,11 +84,6 @@ bool AppImplLinuxRendererGlx::initializeInternal( GLFWwindow* aGLFWwindow )
     }
 }
 
-
-int AppImplLinuxRendererGlx::initMultisample( )
-{
-}
-
 void AppImplLinuxRendererGlx::kill()
 {
     glfwDestroyWindow( mGLFWwindow );
