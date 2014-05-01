@@ -60,8 +60,20 @@ Buffer AppImplLinux::loadResource( int id, const std::string &type )
 
 fs::path AppImplLinux::getAppPath()
 {
+    char exePath[FILENAME_MAX];
+    ssize_t count = readlink("/proc/self/exe", exePath, sizeof(exePath)-1);
+    if( count != -1 )
+    {
+        exePath[count] = '\0';
+        fs::path absAppDir = fs::path(exePath).parent_path();
+        return absAppDir;
+    }
+    else
+    {
+        std::cout << " Could not find binary path through readlink " << std::endl;
+    }
 
-	return fs::path( std::string( "test/App/path" ) );
+	return fs::path();
 }
 
 fs::path AppImplLinux::getOpenFilePath( const fs::path &initialPath, vector<string> extensions )

@@ -1,4 +1,3 @@
-
 ### ROOT PROJECT CMakeLists.txt ###
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
@@ -8,6 +7,11 @@ PROJECT(CinderLinux)
 
 set (CMAKE_COLOR_MAKEFILE ON)
 set (CMAKE_VERBOSE_MAKEFILE OFF)
+
+set(CINDERLINUX_MAJOR_VERSION 0)
+set(CINDERLINUX_MINOR_VERSION 8)
+set(CINDERLINUX_PATCH_VERSION 6)
+set(CINDERLINUX_VERSION ${CINDERLINUX_MAJOR_VERSION}.${CINDERLINUX_MINOR_VERSION}.${CINDERLINUX_PATCH_VERSION})
 
 ### The variables that are being set here propagate along the source tree and are available to subdir CMakeLists.txt files. ###
 

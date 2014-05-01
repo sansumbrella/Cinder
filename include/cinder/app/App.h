@@ -375,7 +375,7 @@ class App {
 	// utilities
 	//! Returns a DataSourceRef to an application resource. On Mac OS X, \a macPath is a path relative to the bundle's resources folder. On Windows, \a mswID and \a mswType identify the resource as defined the application's .rc file(s). Throws ResourceLoadExc on failure. \sa \ref CinderResources
 	static DataSourceRef		loadResource( const std::string &macPath, int mswID, const std::string &mswType );
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 	//! Returns a DataSourceRef to an application resource. \a macPath is a path relative to the bundle's resources folder. Throws ResourceLoadExc on failure. \sa \ref CinderResources
 	static DataSourceRef		loadResource( const std::string &macPath );
 	//! Returns the absolute file path to a resource located at \a rsrcRelativePath inside the bundle's resources folder. Throws ResourceLoadExc on failure. \sa \ref CinderResources
@@ -640,7 +640,7 @@ inline uint32_t	getElapsedFrames() { return App::get()->getElapsedFrames(); }
 
 //! Returns a DataSource to an application resource. On Mac OS X, \a macPath is a path relative to the bundle's resources folder. On Windows, \a mswID and \a mswType identify the resource as defined the application's .rc file(s). \sa \ref CinderResources
 inline DataSourceRef		loadResource( const std::string &macPath, int mswID, const std::string &mswType ) { return App::loadResource( macPath, mswID, mswType ); }
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 	//! Returns a DataSource to an application resource. \a macPath is a path relative to the bundle's resources folder. \sa \ref CinderResources
 	inline DataSourceRef	loadResource( const std::string &macPath ) { return App::loadResource( macPath ); }
 #elif defined( CINDER_WINRT )
@@ -707,7 +707,7 @@ inline ::CGContextRef	createWindowCgContext() { return (std::dynamic_pointer_cas
 //! Exception for failed resource loading
 class ResourceLoadExc : public Exception {
   public:
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 	ResourceLoadExc( const std::string &macPath );
 #elif defined( CINDER_MSW )
 	ResourceLoadExc( int mswID, const std::string &mswType );

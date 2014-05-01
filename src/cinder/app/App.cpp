@@ -43,6 +43,7 @@
 	#include "cinder/msw/OutputDebugStringStream.h"
 	#include "cinder/app/AppImplMsw.h"
 #elif defined( CINDER_LINUX )
+    #include <stdlib.h>
 	#include "cinder/app/AppImplLinux.h"
     #include <GLFW/glfw3.h>
 #endif
@@ -181,18 +182,16 @@ void App::emitDidBecomeActive()
 
 DataSourceRef App::loadResource( const string &macPath, int mswID, const string &mswType )
 {
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 	return loadResource( macPath );
 #elif defined( CINDER_MSW )
 	return DataSourceBuffer::create( AppImplMsw::loadResource( mswID, mswType ), macPath );
 #elif defined( CINDER_WINRT )
 	return DataSourceBuffer::create( AppImplWinRT::loadResource( mswID, mswType ), macPath );
-#elif defined( CINDER_LINUX )
-	return DataSourceBuffer::create( AppImplLinux::loadResource( mswID, mswType ), macPath );
 #endif
 }
 
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 DataSourceRef App::loadResource( const string &macPath )
 {
 	fs::path resourcePath = App::get()->getResourcePath( macPath );
@@ -217,7 +216,7 @@ void App::prepareAssetLoading()
 		fs::path appPath = getAppPath();
 
 		// if this is Mac OS or iOS, search inside the bundle's resources, and then the bundle's root
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 		if( fs::exists( getResourcePath() / "assets" ) && fs::is_directory( getResourcePath() / "assets" ) ) {
 			mAssetDirectories.push_back( getResourcePath() / "assets" );
 			mAssetDirectoriesInitialized = true;
@@ -330,6 +329,74 @@ fs::path App::getResourcePath()
 	return fs::path([resultPath cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
+#elif defined( CINDER_LINUX )
+fs::path App::getResourcePath( const fs::path &rsrcRelativePath )
+{
+	fs::path path = rsrcRelativePath.parent_path();
+	
+    fs::path fileName = rsrcRelativePath.filename();
+
+    fs::path appPath = AppImplLinux::getAppPath();
+
+	if( fileName.empty() )
+		return string();
+
+	int parentCt = 0;
+	for( fs::path curPath = appPath; 
+		curPath.has_parent_path() || ( curPath == appPath ); //check at least the app path, even if it has no parent directory
+		curPath = curPath.parent_path(), ++parentCt ) 
+	{   
+		if( parentCt >= 5 )
+			break;
+    
+		const fs::path curResourcePath = curPath / "resources";
+		if( fs::exists( curResourcePath ) && fs::is_directory( curResourcePath ) ) {
+            if( fs::exists( curResourcePath / rsrcRelativePath ) )
+                return fs::path( curResourcePath / rsrcRelativePath );
+		}
+	}
+
+    ///  TODO: If we are here it means that we have our binary outside the build tree
+    ///  so we should do a last check on the default installation dir which will be
+    ///  set from CMake through the CMAKE_INSTALL_PREFIX variable in case that
+    ///  that we have executed make install.
+    ///
+    ///
+    ///
+    ///
+
+    return fs::path();
+}
+
+fs::path App::getResourcePath()
+{
+    fs::path appPath = AppImplLinux::getAppPath();
+
+	int parentCt = 0;
+	for( fs::path curPath = appPath; 
+		curPath.has_parent_path() || ( curPath == appPath ); //check at least the app path, even if it has no parent directory
+		curPath = curPath.parent_path(), ++parentCt ) 
+	{   
+		if( parentCt >= 5 )
+			break;
+    
+		const fs::path curResourcePath = curPath / "resources";
+		if( fs::exists( curResourcePath ) && fs::is_directory( curResourcePath ) ) {
+            return fs::path( curResourcePath );
+		}
+	}
+
+    ///  If we are here it means that we have our binary outside the build tree
+    ///  so we should do a last check on the default installation dir which will be
+    ///  set from CMake through the CMAKE_INSTALL_PREFIX variable in case that
+    ///  that we have executed make install.
+    ///  This is left as a TODO for now.
+    ///
+    ///
+    ///
+    ///
+    return  fs::path();
+}
 #endif
 
 #if defined CINDER_WINRT
@@ -579,7 +646,7 @@ Vec2i App::getMousePos()
 #endif
 }
 
-#if defined( CINDER_COCOA )
+#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
 ResourceLoadExc::ResourceLoadExc( const string &macPath )
 {
 	sprintf( mMessage, "Failed to load resource: %s", macPath.c_str() );
