@@ -60,6 +60,10 @@ namespace cinder { namespace app {
 	void*	App::sAutoReleasePool = 0;
 #endif
 
+#if defined( CINDER_LINUX )
+    const fs::path dataInstallPath = "/usr/local/share/cinderapps";
+#endif
+
 // Static instance of App, effectively a singleton
 App*	App::sInstance;
 static std::thread::id	sPrimaryThreadId = std::this_thread::get_id();
@@ -258,6 +262,19 @@ void App::prepareAssetLoading()
 				break;
 			}
 		}
+#if defined( CINDER_LINUX )
+        
+        fs::path dataInstallPath = "/usr/local/share/cinderapps";
+        if( fs::exists( dataInstallPath ) )
+        {
+            fs::path installAssetPath = dataInstallPath / "assets";
+            if( fs::exists( installAssetPath ) )
+            {
+               mAssetDirectories.push_back( installAssetPath );  
+            }
+        }
+#endif
+
 #endif
 				
 		mAssetDirectoriesInitialized = true;
@@ -333,9 +350,7 @@ fs::path App::getResourcePath()
 fs::path App::getResourcePath( const fs::path &rsrcRelativePath )
 {
 	fs::path path = rsrcRelativePath.parent_path();
-	
     fs::path fileName = rsrcRelativePath.filename();
-
     fs::path appPath = AppImplLinux::getAppPath();
 
 	if( fileName.empty() )
@@ -356,14 +371,13 @@ fs::path App::getResourcePath( const fs::path &rsrcRelativePath )
 		}
 	}
 
-    ///  TODO: If we are here it means that we have our binary outside the build tree
-    ///  so we should do a last check on the default installation dir which will be
-    ///  set from CMake through the CMAKE_INSTALL_PREFIX variable in case that
-    ///  that we have executed make install.
-    ///
-    ///
-    ///
-    ///
+    if( fs::exists( dataInstallPath ) )
+    {
+        if( fs::exists( dataInstallPath / "resources" / rsrcRelativePath ) )
+        {
+            return fs::path( dataInstallPath / "resources" / rsrcRelativePath  );
+        }
+    }
 
     return fs::path();
 }
@@ -386,15 +400,14 @@ fs::path App::getResourcePath()
 		}
 	}
 
-    ///  If we are here it means that we have our binary outside the build tree
-    ///  so we should do a last check on the default installation dir which will be
-    ///  set from CMake through the CMAKE_INSTALL_PREFIX variable in case that
-    ///  that we have executed make install.
-    ///  This is left as a TODO for now.
-    ///
-    ///
-    ///
-    ///
+    if( fs::exists( dataInstallPath ) )
+    {
+        if( fs::exists( dataInstallPath / "resources" ) )
+        {
+            return fs::path( dataInstallPath / "resources" );
+        }
+    }
+
     return  fs::path();
 }
 #endif
