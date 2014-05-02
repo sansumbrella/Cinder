@@ -27,7 +27,7 @@ In theory you should be able to run all examples that do not require resource lo
 UPDATE: The resource / asset loading handlers now are implemented and should work in most cases but it definitely needs more testing. 
 This is demonstrated on the BasicApp example.
 
-Big thanks to safetydank for his work on the [android port][https://github.com/safetydank/Cinder/blob/android-dev/]. The ImageSourceFileFreeImage implementation for loading images through FreeImage comes directly from there. 
+Big thanks to safetydank for his work on the [android port](https://github.com/safetydank/Cinder/blob/android-dev/). The ImageSourceFileFreeImage implementation for loading images through FreeImage comes directly from there. 
 
 Since GLFW3 is included as a submodule you will need to run `git submodule update --init` from `$CINDER_ROOT` in order to actually fetch the source code.
 
