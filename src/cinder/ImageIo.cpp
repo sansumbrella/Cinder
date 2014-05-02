@@ -34,6 +34,8 @@
 	#include "cinder/ImageTargetFileWic.h" // this is necessary to force the instantiation of the IMAGEIO_REGISTER macro
 #elif defined( CINDER_COCOA )
 	#include "cinder/cocoa/CinderCocoa.h"
+#elif defined( CINDER_LINUX )
+    #include "cinder/ImageSourceFileFreeImage.h" // this is necessary to force the instantiation of the IMAGEIO_REGISTER macro
 #elif defined( CINDER_WINRT )
 	#include "cinder/ImageSourceFileWic.h" // this is necessary to force the instantiation of the IMAGEIO_REGISTER macro
 	#include "cinder/ImageTargetFileWic.h" // this is necessary to force the instantiation of the IMAGEIO_REGISTER macro
@@ -512,7 +514,6 @@ ImageSourceRef ImageIoRegistrar::Inst::createSource( DataSourceRef dataSource, I
 				throw;
 		}
 	}
-
 	assert( 0 && "unreachable" );
 }
 

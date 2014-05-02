@@ -22,7 +22,12 @@ EasyGallery
 CustomLerp
 
 
-In theory you should be able to run all examples that do not require resource loading ( yes I know there are not much that is why resource loading will be the next step.. ) etc. but havent tested/added the CMake files so far.
+In theory you should be able to run all examples that do not require resource loading.. 
+
+UPDATE: The resource / asset loading handlers now are implemented and should work in most cases but it definitely needs more testing. 
+This is demonstrated on the BasicApp example.
+
+Big thanks to safetydank for his work on the [android port][https://github.com/safetydank/Cinder/blob/android-dev/]. The ImageSourceFileFreeImage implementation for loading images through FreeImage comes directly from there. 
 
 Since GLFW3 is included as a submodule you will need to run `git submodule update --init` from `$CINDER_ROOT` in order to actually fetch the source code.
 
@@ -37,7 +42,7 @@ NOTE: Use absolute path to point to the directory.
 
 An error message will appear if you forget to do this reminding you to export the specific env variable before invoking any make commands.
 
-You will need the following libraries `GLEW`, `GL`, `X11`, `Xxf86vm`, `pthread`, `Xrandr`, `Xi`, `Xcursor`, `boost_system`, `boost_filesystem`, `z` .
+You will need the following libraries `GLEW`, `GL`, `X11`, `Xxf86vm`, `pthread`, `Xrandr`, `Xi`, `Xcursor`, `boost_system`, `boost_filesystem`, `z`, `freeimage` .
 
 Tested with `libglew-1.10`, `libboost-system1.54`, `libboost-filesystem1.54` .
 

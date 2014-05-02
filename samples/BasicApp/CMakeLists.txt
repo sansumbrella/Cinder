@@ -20,6 +20,10 @@ include (${CINDER_ROOT}/CMakeModules/CinderDepends.cmake)
 ### Project name.
 PROJECT( CinderLinuxBasicApp ) 
 
+### The directory where your bin will be installed when running : make install 
+### Defaults to '/usr/local/bin'
+set(CMAKE_INSTALL_PREFIX "/usr/local")
+
 set ( CMAKE_COLOR_MAKEFILE ON )
 set ( CMAKE_VERBOSE_MAKEFILE ON )
 
@@ -32,11 +36,19 @@ if( CMAKE_COMPILER_IS_GNUCXX )
     set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wuninitialized" )
 endif( CMAKE_COMPILER_IS_GNUCXX )
 
+
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include ${CINDER_INCLUDE})
 
 
 list (APPEND source_files src/basicApp.cpp)
 
+###======================================================================================================
+### You shouldn't ( need to ) modify anything below this line.
+###======================================================================================================
+
+#set ( APP_ROOT_DIR ${SOURCE_CODE_DIRECTORY} )
+
+#configure_file( "CinderLinuxConfig.h.in" "${SOURCE_CODE_DIRECTORY}/include/CinderLinuxConfig.h" )
 
 find_library(   CINDER_DEBUG 
                 NAMES cinderDebug
@@ -75,4 +87,8 @@ add_executable( ${bin} ${source_files} )
 
 set( CINDER debug ${CINDER_DEBUG} optimized ${CINDER_RELEASE} )
 
-target_link_libraries( ${bin} ${CINDER} ${GLFW3}  Xxf86vm pthread Xrandr Xi Xcursor ${CINDER_DEPENDS}) 
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/resources DESTINATION "/usr/local/share/cinderapps" ) 
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/assets DESTINATION "/usr/local/share/cinderapps" ) 
+INSTALL(TARGETS ${bin} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin ) 
+
+target_link_libraries( ${bin} ${CINDER} ${GLFW3} ${CINDER_DEPENDS}) 

@@ -111,5 +111,6 @@ set (	srcsCinder 	${CINDER_ROOT}/src/cinder/app/AppBasic.cpp
 			${CINDER_ROOT}/src/cinder/ip/Resize.cpp
 			${CINDER_ROOT}/src/cinder/ip/Trim.cpp
 			${CINDER_ROOT}/src/cinder/svg/Svg.cpp
+            ${CINDER_ROOT}/src/cinder/ImageSourceFileFreeImage.cpp
 #			${CINDER_ROOT}/src/cinder/params/Params.cpp
    )

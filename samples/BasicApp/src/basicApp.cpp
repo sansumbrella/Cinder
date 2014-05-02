@@ -1,51 +1,58 @@
-#include "cinder/app/AppBasic.h"
+#include "basicApp.h"
+#include "cinder/Utilities.h"
 #include <list>
 
-using namespace ci;
-using namespace ci::app;
-using namespace std;
-
 // We'll create a new Cinder Application by deriving from the AppBasic class
-class BasicApp : public AppBasic {
-  public:
-	void mouseDrag( MouseEvent event );
-    void mouseUp( MouseEvent event );
-    void mouseDown( MouseEvent event );
-	void keyDown( KeyEvent event );
-	void draw();
-
-	// This will maintain a list of points which we will draw line segments between
-	list<Vec2f>		mPoints;
-};
-
 void BasicApp::mouseUp( MouseEvent event )
 {
 }
+
+void BasicApp::setup()
+{
+    DataSourceRef dataAssetRef = loadAsset("cinder.jpg");
+
+    try{
+        testImg = gl::Texture( loadImage( dataAssetRef ) );
+    }
+    catch(...){
+        console() << "Unable to load the texture file ! " << std::endl;
+    }
+
+    std::string resourceContent = loadString( loadResource("hello.txt") );
+    console() << "Resource txt content: " << resourceContent << std::endl;
+
+    fs::path resourcePath = getResourcePath("hello.txt");
+    console() << "Resource PATH " << resourcePath << std::endl;
+
+    fs::path assetPath = getAssetPath("test.png");
+    console() << "Asset PATH " << assetPath << std::endl;
+}
+
 void BasicApp::mouseDown( MouseEvent event )
 {
     if( event.isShiftDown() )
     {
-        std::cout << " Shift isPressed ! " << std::endl;
+        console() << " Shift isPressed ! " << std::endl;
     }
     if( event.isControlDown() )
     {
-        std::cout << " Control isPressed ! " <<std::endl;
+        console() << " Control isPressed ! " <<std::endl;
     }
      if( event.isLeftDown() )
     {
-        std::cout << " Mouse LEFT isPressed " << std::endl;
+        console() << " Mouse LEFT isPressed " << std::endl;
     }
     if( event.isMiddleDown() )
     {
-        std::cout << " MOUSE MIDDLE isPressed " << std::endl;
+        console() << " MOUSE MIDDLE isPressed " << std::endl;
     }
    if( event.isRightDown() )
     {
-        std::cout << " MOUSE RIGHT isPressed" << std::endl;
+        console() << " MOUSE RIGHT isPressed" << std::endl;
     }
     if( event.isAltDown() )
     {
-        std::cout << " ALT isPressed " << std::endl;
+        console() << " ALT isPressed " << std::endl;
     }
 }
 void BasicApp::mouseDrag( MouseEvent event )
@@ -55,14 +62,16 @@ void BasicApp::mouseDrag( MouseEvent event )
 
 void BasicApp::keyDown( KeyEvent event )
 {
-    std::cout << " KEY DOWN " << std::endl;
-	if( event.getChar() == 'f' )
-		setFullScreen( ! isFullScreen() );
+    //std::cout << " KEY DOWN " << std::endl;
 }
 
 void BasicApp::draw()
 {
-	gl::clear( Color( 0.1f, 0.1f, 0.15f ) );
+	gl::clear( Color( 0.0f, 0.0f, 0.0f ) );
+
+    gl::color( 1.0f, 1.0f, 1.0f );
+    if( testImg )
+        gl::draw( testImg, getWindowBounds() );
 
 	gl::color( 1.0f, 0.5f, 0.25f );	
 	gl::begin( GL_LINE_STRIP );
