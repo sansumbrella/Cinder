@@ -24,7 +24,7 @@ void BasicApp::setup()
     fs::path resourcePath = getResourcePath("hello.txt");
     console() << "Resource PATH " << resourcePath << std::endl;
 
-    fs::path assetPath = getAssetPath("test.png");
+    fs::path assetPath = getAssetPath("cinder.jpg");
     console() << "Asset PATH " << assetPath << std::endl;
 }
 
