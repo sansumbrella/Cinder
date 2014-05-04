@@ -44,7 +44,14 @@ An error message will appear if you forget to do this reminding you to export th
 
 You will need the following libraries `GLEW`, `GL`, `X11`, `Xxf86vm`, `pthread`, `Xrandr`, `Xi`, `Xcursor`, `boost_system`, `boost_filesystem`, `z`, `freeimage` .
 
-Tested with `libglew-1.10`, `libboost-system1.54`, `libboost-filesystem1.54` .
+
+You can run the following to install required dependencies using apt:
+
+`sudo apt-get update && sudo apt-get install build-essential cmake libgl1-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libfreeimage-dev libglew-dev libboost-system1.53.0 libboost-system1.53-dev libboost-filesystem1.53.0 libboost-filesystem1.53-dev libpthread-stubs0-dev zlib1g-dev` 
+
+You can optionally install codeblocks also if you wish to use it as an IDE since the cmake configuration generates C::B project files along with the standard Makefiles. 
+
+`sudo apt-get install codeblocks`
 
 In order to build the library :
 
