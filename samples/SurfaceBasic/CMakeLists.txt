@@ -27,7 +27,7 @@ include (${CINDER_ROOT}/CMakeModules/CinderDepends.cmake)
 ### =====================================================================================================
 ### Project name.
 ### =====================================================================================================
-PROJECT( CinderLinuxBasicAppMultiWindow ) 
+PROJECT( CinderLinuxSurfaceBasicApp ) 
 
 ### =====================================================================================================
 ### Turn ON to install the data under /usr/local/share/cinderapps.
@@ -82,7 +82,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/inc
 ### =====================================================================================================
 ### SOURCE FILES 
 ### =====================================================================================================
-list (APPEND source_files src/BasicAppMultiWindowApp.cpp)
+list (APPEND source_files src/SurfaceBasicApp.cpp)
 
 
 

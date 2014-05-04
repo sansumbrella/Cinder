@@ -220,7 +220,7 @@ void App::prepareAssetLoading()
 		fs::path appPath = getAppPath();
 
 		// if this is Mac OS or iOS, search inside the bundle's resources, and then the bundle's root
-#if defined( CINDER_COCOA ) || defined( CINDER_LINUX )
+#if defined( CINDER_COCOA ) 
 		if( fs::exists( getResourcePath() / "assets" ) && fs::is_directory( getResourcePath() / "assets" ) ) {
 			mAssetDirectories.push_back( getResourcePath() / "assets" );
 			mAssetDirectoriesInitialized = true;
@@ -263,8 +263,6 @@ void App::prepareAssetLoading()
 			}
 		}
 #if defined( CINDER_LINUX )
-        
-        fs::path dataInstallPath = "/usr/local/share/cinderapps";
         if( fs::exists( dataInstallPath ) )
         {
             fs::path installAssetPath = dataInstallPath / "assets";
@@ -273,7 +271,7 @@ void App::prepareAssetLoading()
                mAssetDirectories.push_back( installAssetPath );  
             }
         }
-#endif
+#endif // CINDER_LINUX 
 
 #endif
 				
