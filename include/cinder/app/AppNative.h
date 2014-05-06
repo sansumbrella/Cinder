@@ -25,7 +25,7 @@
 
 #include "cinder/Cinder.h"
 
-#if defined( CINDER_MAC )
+#if defined( CINDER_MAC ) || defined( CINDER_LINUX )
 	#include "cinder/app/AppBasic.h"
 	namespace cinder { namespace app {
 		typedef AppBasic		AppNative;

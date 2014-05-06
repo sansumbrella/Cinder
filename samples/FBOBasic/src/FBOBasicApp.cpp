@@ -1,5 +1,5 @@
 #include "cinder/Cinder.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/AppNative.h"
 #include "cinder/Camera.h"
 #include "cinder/gl/Fbo.h"
 
@@ -9,7 +9,7 @@ using namespace std;
 
 // This sample shows a very basic use case for FBOs - it renders a spinning torus
 // into an FBO, and uses that as a Texture onto the sides of a cube.
-class FBOBasicApp : public AppBasic {
+class FBOBasicApp : public AppNative {
   public:
 	virtual void	setup();
 	virtual void	update();
@@ -107,4 +107,4 @@ void FBOBasicApp::draw()
 #endif
 }
 
-CINDER_APP_BASIC( FBOBasicApp, RendererGl )
+CINDER_APP_NATIVE( FBOBasicApp, RendererGl )
