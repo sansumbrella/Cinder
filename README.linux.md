@@ -9,7 +9,7 @@ Keyboard interaction is unfinished but will be in the near future.
 
 You should be able to build and run the following examples after compiling the library:
 
-*BasicApp, BasicAppMultiWindow, BasicParticles, ListenerBasic, EasyGallery, CustomLerp, BezierPath, SurfaceBasic.*
+*BasicApp, BasicAppMultiWindow, BasicParticles, ListenerBasic, EasyGallery, CustomLerp, BezierPath, SurfaceBasic, ShaderTest*
 
 In theory you should be able to run all examples that do not require resource loading.. 
 
