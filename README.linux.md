@@ -9,23 +9,12 @@ Keyboard interaction is unfinished but will be in the near future.
 
 You should be able to build and run the following examples after compiling the library:
 
-BasicApp
-
-BasicAppMultiWindow
-
-BasicParticles
-
-ListenerBasic
-
-EasyGallery
-
-CustomLerp
-
+*BasicApp, BasicAppMultiWindow, BasicParticles, ListenerBasic, EasyGallery, CustomLerp, BezierPath, SurfaceBasic.*
 
 In theory you should be able to run all examples that do not require resource loading.. 
 
 UPDATE: The resource / asset loading handlers now are implemented and should work in most cases but it definitely needs more testing. 
-This is demonstrated on the BasicApp example.
+This is demonstrated on the BasicApp example but also on SurfaceBasic.
 
 Big thanks to safetydank for his work on the [android port](https://github.com/safetydank/Cinder/). The ImageSourceFileFreeImage implementation for loading images through FreeImage comes directly from there. 
 
