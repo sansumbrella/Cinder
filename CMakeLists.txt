@@ -2,6 +2,8 @@
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+#set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+
 ### Project name.
 PROJECT(CinderLinux)
 
@@ -51,7 +53,7 @@ endif()
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 ### The directory where your executable will be installed when running : make install 
-#set(CMAKE_INSTALL_PREFIX "/home/petroska/Desktop/${PROJECT_NAME}")
+#set(CMAKE_INSTALL_PREFIX "/home/$ENV{USER}/Desktop/${PROJECT_NAME}")
 
 ### Where we want our executable to be placed during the build phase
 ### According to the doc cmake_archive_output_directory should be used for
@@ -81,10 +83,10 @@ endif()
 
 
 ### Set various compiler flags depending on the target
-if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Wextra -Winvalid-pch -Wnon-virtual-dtor -Wsign-promo -Wshadow -Winit-self -Wno-unknown-pragmas -Wno-unused-parameter -Wno-write-strings")
+if(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Winvalid-pch -Wnon-virtual-dtor -Wsign-promo -Wshadow -Winit-self -Wno-unknown-pragmas -Wno-unused-parameter -Wno-write-strings")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wuninitialized")
-endif(CMAKE_COMPILER_IS_GNUCXX)
+endif(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 ### Add source subdirectory so that cmake propagates through the source tree and can find the various CMakeLists.txt files included in the src subdirs.
 add_subdirectory ( lib/linux/glfw )
