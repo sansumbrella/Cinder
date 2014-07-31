@@ -43,14 +43,16 @@ class StreamBase : private boost::noncopyable {
 	
 	enum Endianness { STREAM_BIG_ENDIAN, STREAM_LITTLE_ENDIAN };
  
-	/** Returns the platform's endianness as a StreamBase::Endianness **/
+	//! Returns the platform's endianness as a StreamBase::Endianness
 	static uint8_t		getNativeEndianness()
+	{
 #ifdef CINDER_LITTLE_ENDIAN
-		{ return STREAM_LITTLE_ENDIAN; }
+		 return STREAM_LITTLE_ENDIAN;
 #else
-		{ return STREAM_BIG_ENDIAN; }
+		 return STREAM_BIG_ENDIAN;
 #endif
- 
+	}
+
 	//! Returns the file name of the path from which a Stream originated when relevant. Empty string when undefined.
   	const fs::path&		getFileName() const { return mFileName; }
 	//! Sets the file name of the path from which a Stream originated when relevant. Empty string when undefined.
@@ -83,7 +85,6 @@ class OStream : public virtual StreamBase {
 
 	//! Writes null-terminated string, including terminator
 	void		write( const std::string &s ) { writeData( s.c_str(), s.length() + 1 ); }
-	void		write( const fs::path &p ) { writeData( p.string().c_str(), p.string().length() + 1 ); }
 	template<typename T>
 	void		write( T t ) { IOWrite( &t, sizeof(T) ); }
 	template<typename T>
@@ -299,7 +300,7 @@ class OStreamMem : public OStream {
 
 	virtual void		IOWrite( const void *t, size_t size );
 
-	void			*mBuffer;
+	void*			mBuffer;
 	size_t			mDataSize;
 	size_t			mOffset;
 };
@@ -309,13 +310,14 @@ class OStreamMem : public OStream {
 class IStreamStateRestore {
  public:
 	IStreamStateRestore( IStreamCinder &aStream ) : mStream( aStream ), mOffset( aStream.tell() ) {}
-	~IStreamStateRestore() {
+	~IStreamStateRestore()
+	{
 		mStream.seekAbsolute( mOffset );
 	}
 	
  private:
-	IStreamCinder		&mStream;
-	off_t		mOffset;
+	IStreamCinder&	mStream;
+	off_t			mOffset;
 };
 
 //! Opens the file lcoated at \a path for read access as a stream.

@@ -75,12 +75,13 @@ class InterfaceGl {
 		void setPrecision( int precVal );
 		void setKeyIncr( const std::string &keyIncr );
 		void setKeyDecr( const std::string &keyDecr );
+		void setKey( const std::string &key );
 		void setGroup( const std::string &group );
 		void setOptionsStr( const std::string &optionsStr );
 
 		void reAddOptions();
 
-		std::string mName, mKeyIncr, mKeyDecr, mGroup, mOptionsStr;
+		std::string mName, mKeyIncr, mKeyDecr, mKey, mGroup, mOptionsStr;
 		void*		mVoidPtr;
 		float		mMin, mMax, mStep;
 		int			mPrecision;
@@ -113,6 +114,8 @@ class InterfaceGl {
 		Options&	keyIncr( const std::string &keyIncr )		{ setKeyIncr( keyIncr ); return *this; }
 		//! Sets a decrement shortcut key
 		Options&	keyDecr( const std::string &keyDecr )		{ setKeyDecr( keyDecr ); return *this; }
+		//! Sets a shortcut key for param types that cannot be incremented / decremented (ex. bool)
+		Options&	key( const std::string &key )				{ setKey( key ); return *this; }
 		//! Sets the param group
 		Options&	group( const std::string &group )			{ setGroup( group ); return *this; }
 		//! Sets other implementation defined options via string.
@@ -171,24 +174,42 @@ class InterfaceGl {
 	//! Removes all the variables, buttons and separators previously added.
 	void	clear();
 
-	//! \deprecated { use addParam<T>() }
+	//! \deprecated use addParam<T>() instead.
 	void	addParam( const std::string &name, bool *boolParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, bool *boolParam, const char *optionsStr, bool readOnly = false )			{ addParam( name, boolParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
 	void	addParam( const std::string &name, float *floatParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, float *floatParam, const char *optionsStr, bool readOnly = false )		{ addParam( name, floatParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
 	void	addParam( const std::string &name, double *doubleParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, double *doubleParam, const char *optionsStr, bool readOnly = false )		{ addParam( name, doubleParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
 	void	addParam( const std::string &name, int32_t *intParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, int32_t *intParam, const char *optionsStr, bool readOnly = false )		{ addParam( name, intParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
 	void	addParam( const std::string &name, Vec3f *vectorParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, Vec3f *vectorParam, const char *optionsStr, bool readOnly = false )		{ addParam( name, vectorParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
 	void	addParam( const std::string &name, Quatf *quatParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
-	void	addParam( const std::string &name, Color *quatParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
-	void	addParam( const std::string &name, ColorA *quatParam, const std::string &optionsStr, bool readOnly = false );
-	//! \deprecated { use addParam<T>() }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, Quatf *quatParam, const char *optionsStr, bool readOnly = false )		{ addParam( name, quatParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, Color *colorParam, const std::string &optionsStr, bool readOnly = false );
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, Color *colorParam, const char *optionsStr, bool readOnly = false )		{ addParam( name, colorParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, ColorA *colorParam, const std::string &optionsStr, bool readOnly = false );
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, ColorA *colorParam, const char *optionsStr, bool readOnly = false )		{ addParam( name, colorParam, std::string( optionsStr ), readOnly ); }
+	//! \deprecated use addParam<T>() instead.
 	void	addParam( const std::string &name, std::string *strParam, const std::string &optionsStr, bool readOnly = false );
+	//! \deprecated use addParam<T>() instead.
+	void	addParam( const std::string &name, std::string *strParam, const char *optionsStr, bool readOnly = false )	{ addParam( name, strParam, std::string( optionsStr ), readOnly ); }
 
   protected:
 	void	init( app::WindowRef window, const std::string &title, const Vec2i &size, const ColorA color );

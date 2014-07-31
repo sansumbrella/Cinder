@@ -29,7 +29,7 @@
 #include <climits>
 #include <cfloat>
 #include <functional>
-#if defined( CINDER_MSW )
+#if defined( CINDER_MSW ) || defined( CINDER_WINRT )
 	#undef min
 	#undef max
 #endif
@@ -178,6 +178,13 @@ T constrain( T val, T minVal, T maxVal )
 	else return val;
 }
 
+//! Returns the fractional part of \a x, calculated as `x - floor( x )`
+template<typename T>
+T fract( T x )
+{
+	return x - math<T>::floor( x );
+}
+
 // Don Hatch's version of sin(x)/x, which is accurate for very small x.
 // Returns 1 for x == 0.
 template <class T>
@@ -213,6 +220,12 @@ inline uint32_t nextPowerOf2( uint32_t x )
     x |= (x >> 8);
     x |= (x >> 16);
     return(x+1);
+}
+
+//! Returns true if \a x is a power of two, false otherwise.
+inline bool isPowerOf2( size_t x )
+{
+	return ( x & ( x - 1 ) ) == 0;
 }
 
 template<typename T>
@@ -273,9 +286,21 @@ int solveCubic( T a, T b, T c, T d, T result[3] );
 
 } // namespace cinder
 
-#if defined( _MSC_VER )
+#if defined( _MSC_VER ) && ( _MSC_VER < 1800 )
+// define math.h functions that aren't defined until vc120
 namespace std {
-	inline bool isfinite( float arg ) { return _finite( arg ) != 0; }
-	inline bool isfinite( double arg ) { return _finite( arg ) != 0; }
-}
-#endif
+
+inline bool isfinite( float arg )	{ return _finite( arg ) != 0; }
+inline bool isfinite( double arg )	{ return _finite( arg ) != 0; }
+inline bool isnan( float arg )		{ return _isnan( arg ) != 0; }
+inline bool isnan( double arg )		{ return _isnan( arg ) != 0; }
+
+// note that while these round* variants follow the basic premise of c99 implementations (numbers with fractional parts of 0.5 should be
+// rounded away from zero), they are not 100% compliable implementations since they do not cover all edge cases like NaN's, inifinite numbers, etc.
+inline double	round( double x )	{ return floor( x < 0 ? x - 0.5 : x + 0.5 ); }
+inline float	roundf( float x )	{ return floorf( x < 0 ? x - 0.5f : x + 0.5f );	}
+inline long int lround( double x )	{ return (long int)( x < 0 ? x - 0.5 : x + 0.5 ); }
+inline long int lroundf( float x )	{ return (long int)( x < 0 ? x - 0.5f : x + 0.5f );	}
+
+} // namespace std
+#endif // defined( _MSC_VER ) && ( _MSC_VER < 1800 )

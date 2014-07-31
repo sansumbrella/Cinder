@@ -42,6 +42,7 @@
 	#include <ppltasks.h>
 	#include "cinder/WinRTUtils.h"
 	#include "cinder/Utilities.h"
+	#include "cinder/msw/CinderMsw.h"
 	using namespace Windows::Storage;
 	using namespace Concurrency;
 #endif
@@ -392,7 +393,7 @@ void loadImageAsync(const fs::path path, std::function<void (ImageSourceRef)> ca
 			auto copyTask = winrt::copyFileToTempDirAsync(path);
 			copyTask.then([options, extension, callback](StorageFile^ file) 
 			{
-				fs::path temp = fs::path(toUtf8(file->Path->Data()));
+				fs::path temp = fs::path( msw::toUtf8String( file->Path->Data() ) );
 				// Image was loaded. This callback is on the main UI thread
 				callback(loadImage(temp, options, extension));
 				winrt::deleteFileAsync(temp);
@@ -415,8 +416,11 @@ ImageSourceRef loadImage( DataSourceRef dataSource, ImageSource::Options options
 #endif
 
 	if( extension.empty() )
-		extension = getPathExtension( dataSource->getFilePathHint() );
-	
+#if ! defined( CINDER_WINRT )
+		extension = dataSource->getFilePathHint().extension().string();
+#else
+		extension = dataSource->getFilePathHint().extension();
+#endif	
 	return ImageIoRegistrar::createSource( dataSource, options, extension );
 }
 
@@ -432,8 +436,12 @@ void writeImage( DataTargetRef dataTarget, const ImageSourceRef &imageSource, Im
 #endif
 
 	if( extension.empty() )
-		extension = getPathExtension( dataTarget->getFilePathHint() );
-	
+#if ! defined( CINDER_WINRT )
+		extension = getPathExtension( dataTarget->getFilePathHint().extension().string() );
+#else
+		extension = getPathExtension( dataTarget->getFilePathHint().extension() );
+#endif
+
 	ImageTargetRef imageTarget = ImageIoRegistrar::createTarget( dataTarget, imageSource, options, extension );
 	if( imageTarget ) {
 		writeImage( imageTarget, imageSource );
