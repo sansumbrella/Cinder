@@ -176,7 +176,10 @@ void WindowImplLinux::createWindow( const Vec2i &windowSize, const std::string &
 
     glfwWindowHint( GLFW_SAMPLES, mAntiAliasing );
 
-    mGLFWwindow = glfwCreateWindow( windowSize.x, windowSize.y, windowTitle, NULL, NULL );
+	if( mFullScreen )
+		mGLFWwindow = glfwCreateWindow( windowSize.x, windowSize.y, windowTitle, glfwGetPrimaryMonitor(), NULL );
+	else
+		mGLFWwindow = glfwCreateWindow( windowSize.x, windowSize.y, windowTitle, NULL, NULL );
     
     glfwSetWindowUserPointer( mGLFWwindow, this );
     glfwSetWindowCloseCallback( mGLFWwindow, window_close_callback );
