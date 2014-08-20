@@ -20,11 +20,14 @@
  POSSIBILITY OF SUCH DAMAGE.
 */
 
+#if ! defined( _WIN64 )
+
 #include "cinder/gl/gl.h"
 #include "cinder/qtime/QuickTime.h"
 #include "cinder/qtime/QuickTimeUtils.h"
 
 #if defined( CINDER_MSW )
+	#include "cinder/msw/CinderMsw.h"
 	#pragma push_macro( "__STDC_CONSTANT_MACROS" )
 	#pragma push_macro( "_STDINT_H" )
 		#undef __STDC_CONSTANT_MACROS
@@ -46,7 +49,7 @@ using namespace std;
 
 namespace cinder { namespace qtime {
 
-#if ! defined( __LP64__ )
+#if ( ! defined( __LP64__ ) )
 
 bool dictionarySetValue( CFMutableDictionaryRef dict, CFStringRef key, SInt32 value )
 {
@@ -212,7 +215,12 @@ CFMutableDictionaryRef initQTVisualContextOptions( int width, int height, bool a
 
 	moviePropCount = openMovieBaseProperties( movieProps );
 
+#if defined( CINDER_MSW )
+	std::string pathUtf8 = msw::toUtf8String( path.wstring() );
+	::CFStringRef basePathCF = ::CFStringCreateWithCString( kCFAllocatorDefault, pathUtf8.c_str(), kCFStringEncodingUTF8 );
+#else
 	::CFStringRef basePathCF = ::CFStringCreateWithCString( kCFAllocatorDefault, path.string().c_str(), kCFStringEncodingUTF8 );
+#endif
 	shared_ptr<const __CFString> pathCF = shared_ptr<const __CFString>( basePathCF, ::CFRelease );
 	// Store the movie properties in the array
 	movieProps[moviePropCount].propClass = kQTPropertyClass_DataLocation;
@@ -423,7 +431,7 @@ Surface8u convertCVPixelBufferToSurface( CVPixelBufferRef pixelBufferRef )
 	return result;
 }
 
-#endif // ! defined( __LP64__ )
+#endif // ( ! defined( __LP64__ ) )
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // ImageTargetCgImage
@@ -435,7 +443,7 @@ ImageTargetCvPixelBufferRef ImageTargetCvPixelBuffer::createRef( ImageSourceRef 
 ImageTargetCvPixelBuffer::ImageTargetCvPixelBuffer( ImageSourceRef imageSource, bool convertToYpCbCr )
 	: ImageTarget(), mPixelBufferRef( 0 ), mConvertToYpCbCr( convertToYpCbCr )
 {
-	setSize( (size_t)imageSource->getWidth(), (size_t)imageSource->getHeight() );
+	setSize( imageSource->getWidth(), imageSource->getHeight() );
 	
 	//http://developer.apple.com/mac/library/qa/qa2006/qa1501.html
 	
@@ -510,15 +518,15 @@ void ImageTargetCvPixelBuffer::finalize()
 // Assumes RGB order 8 bit unsinged input, results in Rec. 601 YpCbCr
 void ImageTargetCvPixelBuffer::convertDataToYpCbCr()
 {
-	for( uint32_t y = 0; y < mHeight; ++y ) {
+	for( int32_t y = 0; y < mHeight; ++y ) {
 		uint8_t *data = reinterpret_cast<uint8_t*>( getRowPointer( y ) );
-		for( uint32_t x = 0; x < mWidth; ++x ) {
+		for( int32_t x = 0; x < mWidth; ++x ) {
 			float r = data[x*3+0] / 255.0f;
 			float g = data[x*3+1] / 255.0f;
 			float b = data[x*3+2] / 255.0f;
-			uint8_t yp = 16 + ( 65.481f * r + 128.553f * g + 24.966f * b );
-			uint8_t cb = 128 + ( -37.797f * r + -74.203f * g + 112 * b );
-			uint8_t cr = 128 + ( 112 * r + -93.786f * g + -18.214f * b );
+			uint8_t yp = 16 + (int)( 65.481f * r + 128.553f * g + 24.966f * b );
+			uint8_t cb = 128 + (int)( -37.797f * r + -74.203f * g + 112 * b );
+			uint8_t cr = 128 + (int)( 112 * r + -93.786f * g + -18.214f * b );
 			data[x*3+0] = yp;
 			data[x*3+1] = cb;
 			data[x*3+2] = cr;
@@ -529,15 +537,15 @@ void ImageTargetCvPixelBuffer::convertDataToYpCbCr()
 // Assumes RGBA order 8 bit unsigned input, results in Rec. 601 YpCbCrA
 void ImageTargetCvPixelBuffer::convertDataToAYpCbCr()
 {
-	for( uint32_t y = 0; y < mHeight; ++y ) {
+	for( int32_t y = 0; y < mHeight; ++y ) {
 		uint8_t *data = reinterpret_cast<uint8_t*>( getRowPointer( y ) );
-		for( uint32_t x = 0; x < mWidth; ++x ) {
+		for( int32_t x = 0; x < mWidth; ++x ) {
 			float r = data[x*4+0] / 255.0f;
 			float g = data[x*4+1] / 255.0f;
 			float b = data[x*4+2] / 255.0f;
-			uint8_t yp = 16 + ( 65.481f * r + 128.553f * g + 24.966f * b );
-			uint8_t cb = 128 + ( -37.797f * r + -74.203f * g + 112 * b );
-			uint8_t cr = 128 + ( 112 * r + -93.786f * g + -18.214f * b );
+			uint8_t yp = 16 + (int)( 65.481f * r + 128.553f * g + 24.966f * b );
+			uint8_t cb = 128 + (int)( -37.797f * r + -74.203f * g + 112 * b );
+			uint8_t cr = 128 + (int)( 112 * r + -93.786f * g + -18.214f * b );
 			data[x*4+0] = cb;
 			data[x*4+1] = yp;
 			data[x*4+2] = cr;
@@ -619,3 +627,5 @@ GWorldPtr createGWorld( ImageSourceRef imageSource )
 #endif // defined( CINDER_MSW )
 
 } } // namespace cinder::qtime
+
+#endif // ! defined( _WIN64 )

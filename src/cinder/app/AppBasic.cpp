@@ -1,6 +1,8 @@
 /*
- Copyright (c) 2010, The Barbarian Group
- All rights reserved.
+ Copyright (c) 2012, The Cinder Project, All rights reserved.
+ Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
+
+ This code is intended for use with the Cinder C++ library: http://libcinder.org
 
  Redistribution and use in source and binary forms, with or without modification, are permitted provided that
  the following conditions are met:
@@ -22,9 +24,13 @@
 
 #include "cinder/app/AppBasic.h"
 #include "cinder/app/Renderer.h"
+#include "cinder/Unicode.h"
 
 #if defined( CINDER_MAC )
-	#import "AppImplCocoaBasic.h"
+	#import "cinder/app/AppImplCocoaBasic.h"
+#elif defined( CINDER_WINRT )
+	#include "cinder/app/AppImplWinRTBasic.h"
+
 #elif defined( CINDER_MSW )
 	#include <Shellapi.h>
 	#include "cinder/Utilities.h"
@@ -52,7 +58,7 @@ AppBasic::~AppBasic()
 }
 
 #if defined( CINDER_MSW )
-void AppBasic::executeLaunch( AppBasic *app, class Renderer *renderer, const char *title )
+void AppBasic::executeLaunch( AppBasic *app, RendererRef renderer, const char *title )
 {
 	sInstance = app;
 
@@ -65,7 +71,7 @@ void AppBasic::executeLaunch( AppBasic *app, class Renderer *renderer, const cha
 		std::vector<std::string> utf8Args;
 		char **utf8ArgPointers = (char **)malloc( sizeof(char*) * nArgs );
 		for( int i = 0; i < nArgs; ++i )
-			utf8Args.push_back( toUtf8( szArglist[i] ) );
+			utf8Args.push_back( toUtf8( (char16_t*)szArglist[i] ) );
 		for( int i = 0; i < nArgs; ++i )
 			utf8ArgPointers[i] = const_cast<char *>( utf8Args[i].c_str() );
 		App::executeLaunch( app, renderer, title, nArgs, utf8ArgPointers );
@@ -77,13 +83,19 @@ void AppBasic::executeLaunch( AppBasic *app, class Renderer *renderer, const cha
 	// Free memory allocated for CommandLineToArgvW arguments.
 	::LocalFree( szArglist );
 }
+#elif defined( CINDER_WINRT )
+void AppBasic::executeLaunch( AppBasic *app, RendererRef renderer, const char *title )
+{
+	sInstance = app;
+	App::executeLaunch( app, renderer, title, 0, NULL );
+}
 #endif
 
 void AppBasic::launch( const char *title, int argc, char * const argv[] )
 {
 	for( int arg = 0; arg < argc; ++arg )
 		mCommandLineArgs.push_back( std::string( argv[arg] ) );
-	
+
 	mSettings.setTitle( title );
 
 	prepareSettings( &mSettings );
@@ -91,8 +103,35 @@ void AppBasic::launch( const char *title, int argc, char * const argv[] )
 		return;
 	}
 
+#if defined( CINDER_MSW )
+	// allocate and redirect the console if requested
+	if( mSettings.isConsoleWindowEnabled() ) {
+		::AllocConsole();
+		freopen( "CONIN$", "r", stdin );
+		freopen( "CONOUT$", "w", stdout );
+		freopen( "CONOUT$", "w", stderr );
+
+		// set the app's console stream to std::cout and give its shared_ptr a null deleter
+		mOutputStream = std::shared_ptr<std::ostream>( &std::cout, [](std::ostream*){} );
+	}
+#endif
+
+	// pull out app-level variables
+	enablePowerManagement( mSettings.isPowerManagementEnabled() );
+
 #if defined( CINDER_COCOA )
-	mImpl = [[::AppImplCocoaBasic alloc] init:this];
+	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    NSApplication * application = [NSApplication sharedApplication];
+
+    mImpl = [[AppImplCocoaBasic alloc] init:this];
+
+    [application setDelegate:mImpl];
+    [application run];
+
+    [pool drain];
+#elif defined( CINDER_WINRT )
+	mImpl = new AppImplWinRTBasic( this );	
+	mImpl->run();
 #else
 	mImpl = new AppImplMswBasic( this );	
 	mImpl->run();
@@ -107,74 +146,22 @@ void AppBasic::privateSetImpl__( AppImplCocoaBasic *aImpl )
 }
 #endif
 
-int AppBasic::getWindowWidth() const
+WindowRef AppBasic::createWindow( const Window::Format &format )
 {
 #if defined( CINDER_COCOA )
-	return [mImpl getWindowWidth];
+	return [mImpl createWindow:format];
 #elif defined( CINDER_MSW )
-	return mImpl->getWindowWidth();
+	return mImpl->createWindow( format );
+#elif defined( CINDER_WINRT )
+	throw (std::string(__FUNCTION__) + " not implemented on WinRT").c_str();
 #endif
 }
 
-int AppBasic::getWindowHeight() const
-{
-#if defined( CINDER_COCOA )
-	return [mImpl getWindowHeight];
-#elif defined( CINDER_MSW )
-	return mImpl->getWindowHeight();
-#endif
-}
-
-void AppBasic::setWindowWidth( int windowWidth )
-{
-#if defined( CINDER_COCOA )
-	[mImpl setWindowWidth:windowWidth];
-#elif defined( CINDER_MSW )
-	mImpl->setWindowWidth( windowWidth );
-#endif
-}
-
-void AppBasic::setWindowHeight( int windowHeight )
-{
-#if defined( CINDER_COCOA )
-	[mImpl setWindowHeight:windowHeight];
-#elif defined( CINDER_MSW )
-	mImpl->setWindowHeight( windowHeight );
-#endif
-}
-
-void AppBasic::setWindowSize( int windowWidth, int windowHeight )
-{
-#if defined( CINDER_COCOA )
-	[mImpl setWindowSizeWithWidth:windowWidth height:windowHeight];
-#elif defined( CINDER_MSW )
-	mImpl->setWindowSize( windowWidth, windowHeight );
-#endif
-}
- 
-Vec2i AppBasic::getWindowPos() const
-{
-#if defined( CINDER_COCOA )
-    return [mImpl getWindowPos];
-#elif defined( CINDER_MSW )
-    return mImpl->getWindowPos();
-#endif
-}
-
-void AppBasic::setWindowPos( const Vec2i &windowPos )
-{
-#if defined( CINDER_COCOA )
-	[mImpl setWindowPosWithLeft: windowPos.x top:windowPos.y];
-#elif defined( CINDER_MSW )
-	mImpl->setWindowPos( windowPos );
-#endif
-}
-    
 float AppBasic::getFrameRate() const
 {
 #if defined( CINDER_COCOA )
 	return [mImpl getFrameRate];
-#elif defined( CINDER_MSW )
+#else
 	return mImpl->getFrameRate();
 #endif
 }
@@ -183,88 +170,79 @@ void AppBasic::setFrameRate( float aFrameRate )
 {
 #if defined( CINDER_COCOA )
 	[mImpl setFrameRate:aFrameRate];
-#elif defined( CINDER_MSW )
+#else
 	mImpl->setFrameRate( aFrameRate );
 #endif
 }
 
-bool AppBasic::isFullScreen() const
+void AppBasic::disableFrameRate()
 {
 #if defined( CINDER_COCOA )
-	return [mImpl isFullScreen];
-#elif defined( CINDER_MSW )
-	return mImpl->isFullScreen();
-#endif
-}
-
-void AppBasic::setFullScreen( bool aFullScreen )
-{
-	if( aFullScreen != isFullScreen() ) {
-#if defined( CINDER_COCOA )
-		if( aFullScreen )
-			[mImpl enterFullScreen];
-		else
-			[mImpl exitFullScreen];
+	[mImpl disableFrameRate];
 #else
-		mImpl->toggleFullScreen();
+	mImpl->disableFrameRate();
 #endif
-	}
 }
 
-bool AppBasic::isBorderless() const
+bool AppBasic::isFrameRateEnabled() const
 {
 #if defined( CINDER_COCOA )
-	return [mImpl isBorderless];
-#elif defined( CINDER_MSW )
-	return mImpl->isBorderless();
-#endif	
-}
-
-void AppBasic::setBorderless( bool borderless )
-{
-#if defined( CINDER_COCOA )
-	[mImpl setBorderless:borderless];
-#elif defined( CINDER_MSW )
-	mImpl->setBorderless( borderless );
-#endif	
-}
-
-bool AppBasic::isAlwaysOnTop() const
-{
-#if defined( CINDER_COCOA )
-	return [mImpl isAlwaysOnTop];
-#elif defined( CINDER_MSW )
-	return mImpl->isAlwaysOnTop();
-#endif	
-}
-
-void AppBasic::setAlwaysOnTop( bool alwaysOnTop )
-{
-#if defined( CINDER_COCOA )
-	[mImpl setAlwaysOnTop:alwaysOnTop];
-#elif defined( CINDER_MSW )
-	mImpl->setAlwaysOnTop( alwaysOnTop );
-#endif	
-}
-
-Vec2i AppBasic::getMousePos() const
-{
-#if defined( CINDER_MAC )
-	CGPoint p = [mImpl mouseLocation];
-	return Vec2i( (int)p.x, getWindowHeight() - (int)p.y );
-#elif defined( CINDER_MSW )
-	return mImpl->mouseLocation();
+	return [mImpl isFrameRateEnabled];
 #else
-	return Vec2i( -1, -1 );
+	return mImpl->isFrameRateEnabled();
 #endif
 }
 
-fs::path AppBasic::getAppPath()
+fs::path AppBasic::getAppPath() const
 {
 #if defined( CINDER_COCOA )
 	return [mImpl getAppPath];
+#elif defined( CINDER_WINRT )
+	return AppImplWinRT::getAppPath();
 #elif defined( CINDER_MSW )
 	return AppImplMsw::getAppPath();
+#endif
+}
+
+size_t AppBasic::getNumWindows() const
+{
+#if defined( CINDER_COCOA )
+	return [mImpl getNumWindows];
+#elif defined( CINDER_WINRT )
+	return 1;
+#elif defined( CINDER_MSW )
+	return mImpl->getNumWindows();
+#endif
+}
+
+WindowRef AppBasic::getWindowIndex( size_t index ) const
+{
+#if defined( CINDER_COCOA )
+	return [mImpl getWindowIndex:index];
+#elif defined( CINDER_WINRT )
+	return mImpl->getWindow();
+#elif defined( CINDER_MSW )
+	return mImpl->getWindowIndex( index );
+#endif
+}
+
+WindowRef AppBasic::getWindow() const
+{
+#if defined( CINDER_COCOA )
+	return [mImpl getWindow];
+#else
+	return mImpl->getWindow();
+#endif
+}
+
+WindowRef AppBasic::getForegroundWindow() const
+{
+#if defined( CINDER_COCOA )
+	return [mImpl getForegroundWindow];
+#elif defined( CINDER_WINRT )
+	return mImpl->getWindow();
+#elif defined( CINDER_MSW )
+	return mImpl->getForegroundWindow();
 #endif
 }
 
@@ -272,6 +250,8 @@ void AppBasic::hideCursor()
 {
 #if defined( CINDER_MAC )
 	[NSCursor hide];
+#elif defined( CINDER_WINRT )
+	AppImplWinRT::hideCursor();
 #elif defined( CINDER_MSW )
 	AppImplMsw::hideCursor();
 #endif
@@ -281,6 +261,8 @@ void AppBasic::showCursor()
 {
 #if defined( CINDER_MAC )
 	[NSCursor unhide];
+#elif defined( CINDER_WINRT )
+	AppImplWinRT::showCursor();
 #elif defined( CINDER_MSW )
 	AppImplMsw::showCursor();
 #endif
@@ -295,72 +277,18 @@ void AppBasic::quit()
 #endif
 }
 
-#if defined( CINDER_MAC )
-const Display& AppBasic::getDisplay()
+bool AppBasic::privateShouldQuit()
 {
-	if( mImpl )
-		return *[mImpl getDisplay];
-	else
-		return *(Display::getMainDisplay().get());
-}
-
-#else
-
-const Display& AppBasic::getDisplay()
-{
-	if( mImpl )
-		return *(mImpl->getDisplay());
-	else
-		return *(Display::getMainDisplay().get());
-}
-
-#endif
-
-void AppBasic::privateResize__( const ResizeEvent &event )
-{	
-#if defined( CINDER_MAC )
-	[mImpl handleResizeWithWidth:event.getWidth() height:event.getHeight()];
-#endif
-
-	App::privateResize__( event );
-}
-
-void AppBasic::privateTouchesBegan__( const TouchEvent &event )
-{
-	bool handled = false;
-	for( CallbackMgr<bool (TouchEvent)>::iterator cbIter = mCallbacksTouchesBegan.begin(); ( cbIter != mCallbacksTouchesBegan.end() ) && ( ! handled ); ++cbIter )
-		handled = (cbIter->second)( event );		
-	if( ! handled )	
-		touchesBegan( event );
-}
-
-void AppBasic::privateTouchesMoved__( const TouchEvent &event )
-{	
-	bool handled = false;
-	for( CallbackMgr<bool (TouchEvent)>::iterator cbIter = mCallbacksTouchesMoved.begin(); ( cbIter != mCallbacksTouchesMoved.end() ) && ( ! handled ); ++cbIter )
-		handled = (cbIter->second)( event );		
-	if( ! handled )	
-		touchesMoved( event );
-}
-
-void AppBasic::privateTouchesEnded__( const TouchEvent &event )
-{	
-	bool handled = false;
-	for( CallbackMgr<bool (TouchEvent)>::iterator cbIter = mCallbacksTouchesEnded.begin(); ( cbIter != mCallbacksTouchesEnded.end() ) && ( ! handled ); ++cbIter )
-		handled = (cbIter->second)( event );		
-	if( ! handled )	
-		touchesEnded( event );
+	return mSignalShouldQuit();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // AppBasic::Settings
 AppBasic::Settings::Settings()
-	: App::Settings()
+	: App::Settings(), mQuitOnLastWindowClose( true )
 {
-	mDisplay = Display::getMainDisplay().get();
-	mEnableMultiTouch = false;
-#if defined( CINDER_MAC )
-	mEnableSecondaryDisplayBlanking = true; 
+#if defined( CINDER_MSW )
+	mEnableMswConsole = false;
 #endif
 }
 
@@ -369,19 +297,7 @@ void AppBasic::Settings::setShouldQuit( bool aShouldQuit )
 	mShouldQuit = aShouldQuit;
 }
 
-void AppBasic::Settings::setFullScreen( bool aFullScreen )
-{
-	mFullScreen = aFullScreen;
-}
-
-void AppBasic::Settings::setResizable( bool aResizable )
-{
-	mResizable = aResizable;
-}
-
-void AppBasic::Settings::setDisplay( std::shared_ptr<Display> aDisplay )
-{
-	mDisplay = aDisplay.get();
-}
+////////////////////////////////////////////////////////////////////////////////////////////////
+// AppBasic::Window
 
 } } // namespace cinder::app

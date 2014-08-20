@@ -23,8 +23,12 @@
 #include "cinder/ImageSourceFileQuartz.h"
 #include "cinder/cocoa/CinderCocoa.h"
 
-#include <ApplicationServices/ApplicationServices.h>
-#import <Foundation/Foundation.h>
+#if defined( CINDER_COCOA_TOUCH )
+	#include <MobileCoreServices/MobileCoreServices.h>
+	#include <ImageIO/ImageIO.h>
+#else
+	#include <CoreServices/CoreServices.h>
+#endif
 
 namespace cinder {
 
@@ -81,7 +85,7 @@ ImageSourceFileQuartzRef ImageSourceFileQuartz::createFileQuartzRef( DataSourceR
 	
 	::CFStringRef keys[1] = { kCGImageSourceShouldAllowFloat };
 	::CFBooleanRef values[1] = { kCFBooleanTrue };
-	std::shared_ptr<const __CFDictionary> optionsDict( CFDictionaryCreate( kCFAllocatorDefault, (const void **)&keys, (const void **)&values, 1, NULL, NULL ), cocoa::safeCfRelease );
+	const std::shared_ptr<__CFDictionary> optionsDict( (__CFDictionary*)CFDictionaryCreate( kCFAllocatorDefault, (const void **)&keys, (const void **)&values, 1, NULL, NULL ), cocoa::safeCfRelease );
 
 	if( dataSourceRef->isFilePath() ) {
 		::CFStringRef pathString = cocoa::createCfString( dataSourceRef->getFilePath().string() );
@@ -93,14 +97,14 @@ ImageSourceFileQuartzRef ImageSourceFileQuartz::createFileQuartzRef( DataSourceR
 	else if( dataSourceRef->isUrl() ) {
 		::CFURLRef urlRef = cocoa::createCfUrl( dataSourceRef->getUrl() );
 		if( ! urlRef )
-			throw ImageIoExceptionFailedLoad();
+			throw ImageIoException( "Could not create CFURLRef from data source." );
 		sourceRef = std::shared_ptr<CGImageSource>( ::CGImageSourceCreateWithURL( urlRef, optionsDict.get() ), cocoa::safeCfRelease );
 		::CFRelease( urlRef );		
 	}
 	else { // last ditch, we'll use a dataref from the buffer
 		::CFDataRef dataRef = cocoa::createCfDataRef( dataSourceRef->getBuffer() );
 		if( ! dataRef )
-			throw ImageIoExceptionFailedLoad();
+			throw ImageIoExceptionFailedLoad( "Could not create CFDataRef from data source." );
 		
 		sourceRef = std::shared_ptr<CGImageSource>( ::CGImageSourceCreateWithData( dataRef, optionsDict.get() ), cocoa::safeCfRelease );
 		::CFRelease( dataRef );
@@ -109,13 +113,13 @@ ImageSourceFileQuartzRef ImageSourceFileQuartz::createFileQuartzRef( DataSourceR
 	if( sourceRef ) {
 		imageRef = std::shared_ptr<CGImage>( ::CGImageSourceCreateImageAtIndex( sourceRef.get(), options.getIndex(), optionsDict.get() ), CGImageRelease );
 		if( ! imageRef )
-			throw ImageIoExceptionFailedLoad();
+			throw ImageIoExceptionFailedLoad( "Core Graphics coult not create image data." );
 	}
 	else
-		throw ImageIoExceptionFailedLoad();
+		throw ImageIoExceptionFailedLoad( "Failed to load CGImageSource." );
 
-	std::shared_ptr<const __CFDictionary> imageProperties( ::CGImageSourceCopyProperties( sourceRef.get(), NULL ), ::CFRelease );
-	std::shared_ptr<const __CFDictionary> imageIndexProperties( ::CGImageSourceCopyPropertiesAtIndex( sourceRef.get(), options.getIndex(), NULL ), ::CFRelease );
+	const std::shared_ptr<__CFDictionary> imageProperties( (__CFDictionary*)::CGImageSourceCopyProperties( sourceRef.get(), NULL ), ::CFRelease );
+	const std::shared_ptr<__CFDictionary> imageIndexProperties( (__CFDictionary*)::CGImageSourceCopyPropertiesAtIndex( sourceRef.get(), options.getIndex(), NULL ), ::CFRelease );
 
 	return ImageSourceFileQuartzRef( new ImageSourceFileQuartz( imageRef.get(), options, imageProperties, imageIndexProperties ) );
 }

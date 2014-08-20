@@ -68,7 +68,9 @@ class RectT {
 	void		scaleCentered( T scale );
 	RectT		scaledCentered( T scale ) const;
 	void		scale( T scale );
+	void		scale( const Vec2<T> &scale );
 	RectT		scaled( T scale ) const;
+	RectT		scaled( const Vec2<T> &scale ) const;
 
 	//! Returns a copy of the Rect transformed by \a matrix. Represents the bounding box of the transformed Rect when \a matrix expresses non-scale/translate operations.
 	RectT		transformCopy( const class MatrixAffine2<T> &matrix ) const;
@@ -121,6 +123,9 @@ class RectT {
 	RectT<T>&		operator-=( const Vec2<T> &o ) { offset( -o ); return *this; }
 	RectT<T>&		operator*=( T s ) { scale( s ); return *this; }
 	RectT<T>&		operator/=( T s ) { scale( ((T)1) / s ); return *this; }	
+
+	//! Constructs a rectangle with all values initialized to zero.
+	static	RectT zero()			{ return RectT( 0, 0, 0, 0 ); }
 
 	T			x1, y1, x2, y2;
 	

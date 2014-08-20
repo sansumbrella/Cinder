@@ -22,6 +22,7 @@
 
 #include "cinder/UrlImplWinInet.h"
 #include "cinder/Utilities.h"
+#include "cinder/Unicode.h"
 
 #include <Windows.h>
 #include <Wininet.h>
@@ -39,10 +40,21 @@ void safeInternetCloseHandle( HINTERNET hInternet )
 		::InternetCloseHandle( hInternet );
 }
 
-IStreamUrlImplWinInet::IStreamUrlImplWinInet( const std::string &url, const std::string &user, const std::string &password )
-	: IStreamUrlImpl( user, password ), mIsFinished( false ), mBuffer( 0 ), mBufferFileOffset( 0 )
+void testAndThrowHttpStatus( HINTERNET hInternet )
 {
-	std::wstring wideUrl = toUtf16( url );
+	DWORD status;
+	DWORD statusSize( sizeof(status) );
+	::HttpQueryInfo( hInternet, HTTP_QUERY_FLAG_NUMBER|HTTP_QUERY_STATUS_CODE,
+					&status, &statusSize, NULL );
+	if( status >= 400 ) {
+		throw UrlLoadExc( status, "HTTP Server Error" );
+	}
+}
+
+IStreamUrlImplWinInet::IStreamUrlImplWinInet( const std::string &url, const std::string &user, const std::string &password, const UrlOptions &options )
+	: IStreamUrlImpl( user, password, options ), mIsFinished( false ), mBuffer( 0 ), mBufferFileOffset( 0 )
+{
+	std::u16string wideUrl = toUtf16( url );
 
 	// we need to break the URL up into its constituent parts so we can choose a scheme
 	URL_COMPONENTS urlComponents;
@@ -51,7 +63,7 @@ IStreamUrlImplWinInet::IStreamUrlImplWinInet( const std::string &url, const std:
 	urlComponents.dwSchemeLength = 1;
 	urlComponents.dwHostNameLength = 1;
 	urlComponents.dwUrlPathLength = 1;
-	BOOL success = ::InternetCrackUrl( wideUrl.c_str(), 0, 0, &urlComponents );
+	BOOL success = ::InternetCrackUrl( (wchar_t*)wideUrl.c_str(), 0, 0, &urlComponents );
 	if( ! success )
 		throw StreamExc();
 
@@ -72,17 +84,17 @@ IStreamUrlImplWinInet::IStreamUrlImplWinInet( const std::string &url, const std:
 	if( ! mSession )
 		throw StreamExc();
 
-	std::wstring wideUser = toUtf16( user );
-	std::wstring widePassword = toUtf16( password );
+	std::u16string wideUser = toUtf16( user );
+	std::u16string widePassword = toUtf16( password );
     
     //check for HTTP and HTTPS here because they both require the same flag in InternetConnect()
 	if( ( urlComponents.nScheme == INTERNET_SCHEME_HTTP ) ||
        ( urlComponents.nScheme == INTERNET_SCHEME_HTTPS ) ) {
-	mConnection = std::shared_ptr<void>( ::InternetConnect( mSession.get(), host, urlComponents.nPort, (wideUser.empty()) ? NULL : wideUser.c_str(), (widePassword.empty()) ? NULL : widePassword.c_str(), INTERNET_SERVICE_HTTP, 0, NULL ),
+	mConnection = std::shared_ptr<void>( ::InternetConnect( mSession.get(), host, urlComponents.nPort, (wchar_t*)((wideUser.empty()) ? NULL : wideUser.c_str()), (wchar_t*)((widePassword.empty()) ? NULL : widePassword.c_str()), INTERNET_SERVICE_HTTP, 0, NULL ),
 										safeInternetCloseHandle );
     }else{
         //otherwise we just want to take our best shot at the Scheme type.
-        mConnection = std::shared_ptr<void>( ::InternetConnect( mSession.get(), host, urlComponents.nPort, (wideUser.empty()) ? NULL : wideUser.c_str(), (widePassword.empty()) ? NULL : widePassword.c_str(), urlComponents.nScheme, 0, NULL ),
+        mConnection = std::shared_ptr<void>( ::InternetConnect( mSession.get(), host, urlComponents.nPort, (wchar_t*)((wideUser.empty()) ? NULL : wideUser.c_str()), (wchar_t*)((widePassword.empty()) ? NULL : widePassword.c_str()), urlComponents.nScheme, 0, NULL ),
                                             safeInternetCloseHandle );
     }
 	if( ! mConnection )
@@ -90,29 +102,40 @@ IStreamUrlImplWinInet::IStreamUrlImplWinInet( const std::string &url, const std:
     //http and https cases broken out incase someone wishes to modify connection based off of type.
     //it is wrong to group http with https.
     
+	unsigned long timeoutMillis = static_cast<unsigned long>( options.getTimeout() * 1000 );
+	::InternetSetOptionW( mConnection.get(), INTERNET_OPTION_RECEIVE_TIMEOUT, &timeoutMillis, sizeof(unsigned long) );
+	::InternetSetOptionW( mConnection.get(), INTERNET_OPTION_CONNECT_TIMEOUT, &timeoutMillis, sizeof(unsigned long) );
+	::InternetSetOptionW( mConnection.get(), INTERNET_OPTION_SEND_TIMEOUT, &timeoutMillis, sizeof(unsigned long) );
+
     //http
-    if(urlComponents.nScheme == INTERNET_SCHEME_HTTP ) {
-        static LPCTSTR lpszAcceptTypes[] = { L"*/*", NULL };
-        mRequest = std::shared_ptr<void>( ::HttpOpenRequest( mConnection.get(), L"GET", path, NULL, NULL, lpszAcceptTypes,
-                                                            INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_RELOAD, NULL ),
+	DWORD flags = INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES;
+	if( options.getIgnoreCache() )
+		flags |= INTERNET_FLAG_RELOAD;
+	if( urlComponents.nScheme == INTERNET_SCHEME_HTTP ) {
+		static LPCTSTR lpszAcceptTypes[] = { L"*/*", NULL };
+
+		mRequest = std::shared_ptr<void>( ::HttpOpenRequest( mConnection.get(), L"GET", path, NULL, NULL, lpszAcceptTypes,
+                                                            flags, NULL ),
                                          safeInternetCloseHandle );
-        if( ! mRequest )
-            throw StreamExc();
-        BOOL success = ::HttpSendRequest( mRequest.get(), NULL, 0, NULL, 0);
-        if( ! success )
-            throw StreamExc();
-    }
+		if( ! mRequest )
+			throw UrlLoadExc( 0, "Unknown URL load error" );
+		BOOL success = ::HttpSendRequest( mRequest.get(), NULL, 0, NULL, 0);
+		if( ! success )
+			throw UrlLoadExc( 0, "Unknown URL load error" );
+		testAndThrowHttpStatus( mRequest.get() );
+	}
     //https
 	else if(urlComponents.nScheme == INTERNET_SCHEME_HTTPS ) {
-			static LPCTSTR lpszAcceptTypes[] = { L"*/*", NULL };
-			mRequest = std::shared_ptr<void>( ::HttpOpenRequest( mConnection.get(), L"GET", path, NULL, NULL, lpszAcceptTypes,
-													INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_RELOAD | INTERNET_FLAG_SECURE, NULL ),
+		static LPCTSTR lpszAcceptTypes[] = { L"*/*", NULL };
+		mRequest = std::shared_ptr<void>( ::HttpOpenRequest( mConnection.get(), L"GET", path, NULL, NULL, lpszAcceptTypes,
+											flags | INTERNET_FLAG_SECURE, NULL ),
 											safeInternetCloseHandle );
-			if( ! mRequest )
-				throw StreamExc();
-			BOOL success = ::HttpSendRequest( mRequest.get(), NULL, 0, NULL, 0);
-			if( ! success )
-				throw StreamExc();
+		if( ! mRequest )
+			throw UrlLoadExc( 0, "Unknown URL load error" );
+		BOOL success = ::HttpSendRequest( mRequest.get(), NULL, 0, NULL, 0);
+		if( ! success )
+			throw UrlLoadExc( 0, "Unknown URL load error" );
+		testAndThrowHttpStatus( mRequest.get() );
 	}
     //ftp
 	else if( urlComponents.nScheme == INTERNET_SCHEME_FTP ) {

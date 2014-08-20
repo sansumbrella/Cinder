@@ -22,6 +22,9 @@
 
 #include "cinder/ip/Trim.h"
 
+#include <boost/preprocessor/seq.hpp>
+#include <algorithm>
+
 namespace cinder { namespace ip {
 
 template<typename T>
@@ -82,7 +85,10 @@ Area findNonTransparentArea( const SurfaceT<T> &surface, const Area &unclippedBo
 			break;
 		}
 	}
-		
+	// we add one to right and bottom because Area represents an inclusive range on top/left and exclusive range on bottom/right
+	rightColumn = std::min( bounds.getX2(), rightColumn + 1 );
+	bottomLine = std::min( bounds.getY2(), bottomLine + 1 );
+
 	return Area( leftColumn, topLine, rightColumn, bottomLine );
 }
 

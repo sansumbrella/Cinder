@@ -96,7 +96,8 @@ class Timeline : public TimelineItem {
 	
 	//! Replaces any existing tweens on the \a target with a new tween at the timeline's current time. Consider the apply( Anim<T>* ) variant unless you have an advanced use case.
 	template<typename T>
-	typename Tween<T>::Options applyPtr( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	typename Tween<T>::Options applyPtr( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	{
 		TweenRef<T> newTween( new Tween<T>( target, startValue, endValue, mCurrentTime, duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		apply( newTween );
@@ -105,7 +106,8 @@ class Timeline : public TimelineItem {
 
 	//! Creates a new tween and adds it to the end of the last tween on \a target, or if no existing tween matches the target, the current time. Consider the appendTo( Anim<T>* ) variant unless you have an advanced use case.
 	template<typename T>
-	typename Tween<T>::Options appendToPtr( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	typename Tween<T>::Options appendToPtr( T *target, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	{
 		float startTime = findEndTimeOf( target );
 		TweenRef<T> newTween( new Tween<T>( target, endValue, std::max( mCurrentTime, startTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
@@ -115,7 +117,8 @@ class Timeline : public TimelineItem {
 	
 	//! Creates a new tween and adds it to the end of the last tween on \a target, or if no existing tween matches the target, the current time. Consider the appendTo( Anim<T>* ) variant unless you have an advanced use case.
 	template<typename T>
-	typename Tween<T>::Options appendToPtr( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	typename Tween<T>::Options appendToPtr( T *target, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> )
+	{
 		float startTime = findEndTimeOf( target );
 		TweenRef<T> newTween( new Tween<T>( target, startValue, endValue, std::max( mCurrentTime, startTime ), duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
@@ -124,10 +127,11 @@ class Timeline : public TimelineItem {
 	}
 
 	//! add a cue to the Timeline add the start-time \a atTime
-	CueRef add( std::function<void ()> action, float atTime );
+	CueRef add( const std::function<void ()> &action, float atTime );
 
 	template<typename T>
-	FnTweenRef<T> applyFn( std::function<void (T)> fn, T startValue, T endValue, float duration, EaseFn easeFunction = easeNone, typename Tween<T>::LerpFn lerpFunction = &tweenLerp<T> ) {
+	FnTweenRef<T> applyFn( const std::function<void (T)> &fn, T startValue, T endValue, float duration, const EaseFn &easeFunction = easeNone, const typename Tween<T>::LerpFn &lerpFunction = &tweenLerp<T> )
+	{
 		FnTweenRef<T> newTween( new FnTween<T>( fn, startValue, endValue, mCurrentTime, duration, easeFunction, lerpFunction ) );
 		newTween->setAutoRemove( mDefaultAutoRemove );
 		apply( newTween );
@@ -149,12 +153,16 @@ class Timeline : public TimelineItem {
 
 	//! Returns the number of items in the Timeline
 	size_t				getNumItems() const { return mItems.size(); }
+	//! Returns true if there are no items in the Timeline
+	bool				empty() const { return mItems.empty(); }
 	//! Returns the first item in the timeline the target of which matches \a target
-	TimelineItemRef		find( void *target );
+	TimelineItemRef		find( void *target ) const;
 	//! Returns the latest-starting item in the timeline the target of which matches \a target
-	TimelineItemRef		findLast( void *target );
+	TimelineItemRef		findLast( void *target ) const;
+	//! Returns the latest-end item in the timeline the target of which matches \a target
+	TimelineItemRef		findLastEnd( void *target ) const;
 	//! Returns the end of the latest-ending item in the timeline the target of which matches \a target, or the current time if it's not found. \a found can store whether a related item was found.
-	float				findEndTimeOf( void *target, bool *found = NULL );
+	float				findEndTimeOf( void *target, bool *found = NULL ) const;
 	//! Removes the TimelineItem \a item from the Timeline. Safe to use from callback fn's.
 	void				remove( TimelineItemRef item );
 	//! Removes all TimelineItems whose target matches \a target
@@ -177,7 +185,8 @@ class Timeline : public TimelineItem {
 	//! Call this to notify the Timeline if the \a item's start-time or duration has changed. Advanced use cases only.
 	void	itemTimeChanged( TimelineItem *item );
 
-	TimelineRef	thisRef() { 
+	TimelineRef	thisRef()
+	{
 		TimelineItemRef thisTimelineItem = TimelineItem::thisRef();
 		TimelineRef result = std::static_pointer_cast<Timeline>( thisTimelineItem );
 		return result;
@@ -213,11 +222,11 @@ class Timeline : public TimelineItem {
 
 class Cue : public TimelineItem {
   public:
-	Cue( std::function<void ()> fn, float atTime = 0 );
+	Cue( const std::function<void ()> &fn, float atTime = 0 );
 
-	CueRef	create( std::function<void ()> fn, float atTime = 0 ) { return CueRef( new Cue( fn, atTime ) ); }
+	CueRef	create( const std::function<void ()> &fn, float atTime = 0 ) { return CueRef( new Cue( fn, atTime ) ); }
 
-	void					setFn( std::function<void ()> fn ) { mFunction = fn; }
+	void					setFn( const std::function<void ()> &fn ) { mFunction = fn; }
 	std::function<void ()>	getFn() const { return mFunction; }
 	
   protected:

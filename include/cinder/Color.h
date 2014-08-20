@@ -40,7 +40,7 @@ typedef	enum {
 template<typename T>
 class ColorT 
 {
- public:
+  public:
 	T r,g,b;
 
 	ColorT() : r( 0 ), g( 0 ), b( 0 ) {}
@@ -50,6 +50,7 @@ class ColorT
 	ColorT( const ColorT<T> &src ) 
 		: r( src.r ), g( src.g ), b( src.b )
 	{}
+	ColorT( const char *svgColorName );
 
 	ColorT( ColorModel cm, const Vec3f &v );
 	ColorT( ColorModel cm, float x, float y, float z );
@@ -58,6 +59,16 @@ class ColorT
 	ColorT( const ColorT<FromT> &src ) 
 		: r( CHANTRAIT<T>::convert( src.r ) ), g( CHANTRAIT<T>::convert( src.g ) ), b( CHANTRAIT<T>::convert( src.b ) ) 
 	{}
+	
+	void set( T ar, T ag, T ab )
+	{
+		r = ar; g = ag; b = ab;
+	}
+	
+	void set( const ColorT<T> &rhs )
+	{
+		r = rhs.r; g = rhs.g; b = rhs.b;
+	}
 
 	void	set( ColorModel cm, const Vec3f &v );
 
@@ -216,6 +227,7 @@ class ColorAT {
 	ColorAT( const ColorT<T> &col, T aA = CHANTRAIT<T>::convert( 1.0f ) )
 		: r( col.r ), g( col.g ), b( col.b ), a( aA )
 	{}
+	ColorAT( const char *svgColorName, T aA = CHANTRAIT<T>::convert( 1.0f ) );
 
 	ColorAT( ColorModel cm, float c1, float c2, float c3, float aA = CHANTRAIT<T>::convert( 1.0f ) );
 
@@ -230,6 +242,16 @@ class ColorAT {
 		: r( CHANTRAIT<T>::convert( src.r ) ), g( CHANTRAIT<T>::convert( src.g ) ), b( CHANTRAIT<T>::convert( src.b ) ), a( CHANTRAIT<T>::convert( src.a ) )
 	{}
 
+	void set( T ar, T ag, T ab , T aa )
+	{
+		r = ar; g = ag; b = ab; a = aa;
+	}
+	
+	void set( const ColorAT<T> &rhs )
+	{
+		r = rhs.r; g = rhs.g; b = rhs.b; a = rhs.a;
+	}
+	
 	ColorAT<T> operator=( const ColorAT<T>& rhs ) 
 	{
 		r = rhs.r;
@@ -353,7 +375,7 @@ class ColorAT {
 	//! Returns a ColorA from a hexadecimal-encoded ARGB ordering. For example, 50% transparent red is 0x80FF0000
 	static ColorAT<T> hexA( uint32_t hexValue )
 	{
-		uint8_t alpha = ( hexValue >> 24 ) & 255;;
+		uint8_t alpha = ( hexValue >> 24 ) & 255;
 		uint8_t red = ( hexValue >> 16 ) & 255;
 		uint8_t green = ( hexValue >> 8 ) & 255;
 		uint8_t blue = hexValue & 255;
@@ -372,6 +394,8 @@ template <typename T, typename Y> inline ColorAT<T> operator*( Y s, const ColorA
 // Free Functions
 extern ColorT<float> hsvToRGB( const Vec3f &hsv );
 extern Vec3f rgbToHSV( const ColorT<float> &c );
+//! Converts the named colors of the SVG spec http://en.wikipedia.org/wiki/Web_colors#X11_color_names to sRGB Color8u. If \a found is non-NULL, it's set to whether the name was located. Returns black on failure.
+extern ColorT<uint8_t> svgNameToRgb( const char *svgName, bool *found = NULL );
 
 extern std::ostream& operator<<( std::ostream &lhs, const ColorT<float> &rhs );
 extern std::ostream& operator<<( std::ostream &lhs, const ColorAT<float> &rhs );

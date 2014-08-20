@@ -21,17 +21,22 @@
 */
 
 // None of this works in 64 bit on the mac or Windows. We'll need to move to QTKit on the mac.
-#if ! defined( __LP64__ )
+#if ( ! defined( __LP64__ ) ) && ( ! defined( _WIN64 ) )
 
 #include "cinder/qtime/QuickTime.h"
 #include "cinder/qtime/QuickTimeUtils.h"
 #include "cinder/Cinder.h"
-#include "cinder/Utilities.h"
+#include "cinder/app/App.h"
 
 #include <sstream>
 
+// this has a conflict with Boost 1.53, so instead just declare the symbol extern
+// #include "cinder/Utilities.h"
+namespace cinder {
+	extern void sleep( float milliseconds );
+}
+
 #if defined( CINDER_MAC )
-	#include "cinder/app/App.h"
 	#include <QTKit/QTKit.h>
 	#include <QTKit/QTMovie.h>
 	#include <CoreVideo/CoreVideo.h>
@@ -42,6 +47,7 @@
 		#undef __STDC_CONSTANT_MACROS
 		#if _MSC_VER >= 1600 // VC10 or greater
 			#define _STDINT_H
+			#define __FP__
 		#endif
 		#include <QTML.h>
 		#include <CVPixelBuffer.h>
@@ -157,7 +163,7 @@ void MovieBase::initFromDataSource( DataSourceRef dataSourceRef, const std::stri
 	}
 	else { // we'll need to load from memory; and we'll rer to the data source to make sure it doesn't go away before the movie does
 		Buffer buffer( dataSourceRef->getBuffer() );
-		getObj()->mMovie = openMovieFromMemory( buffer.getData(), buffer.getDataSize(), dataSourceRef->getFilePathHint(), mimeTypeHint );	
+		getObj()->mMovie = openMovieFromMemory( buffer.getData(), buffer.getDataSize(), dataSourceRef->getFilePathHint().string(), mimeTypeHint );	
 		getObj()->mDataSource = dataSourceRef; // retain a reference to the dataSource so that it doesn't go away before we do
 	}
 	init();
@@ -685,6 +691,8 @@ void MovieSurface::allocateVisualContext()
 	CFMutableDictionaryRef visualContextOptions = initQTVisualContextOptions( getObj()->mWidth, getObj()->mHeight, hasAlpha() );
 	OSStatus status = ::QTPixelBufferContextCreate( kCFAllocatorDefault, visualContextOptions, &(getObj()->mVisualContext) );
 
+	::CFRelease( visualContextOptions );
+
 	if( status == noErr )
 		::SetMovieVisualContext( getObj()->mMovie, getObj()->mVisualContext );
 	else
@@ -719,6 +727,11 @@ Surface MovieSurface::getSurface()
 
 /////////////////////////////////////////////////////////////////////////////////
 // MovieGl
+MovieGlRef MovieGl::create( const MovieLoaderRef &loader )
+{
+	return std::shared_ptr<MovieGl>( new MovieGl( *loader ) );
+}
+
 MovieGl::Obj::Obj()
 	: MovieBase::Obj()
 {
@@ -770,6 +783,7 @@ void MovieGl::allocateVisualContext()
 #else
 	CFMutableDictionaryRef visualContextOptions = initQTVisualContextOptions( getObj()->mWidth, getObj()->mHeight, hasAlpha() );
 	::QTPixelBufferContextCreate( kCFAllocatorDefault, visualContextOptions, &(getObj()->mVisualContext) );
+	::CFRelease( visualContextOptions );
 
 	::SetMovieVisualContext( getObj()->mMovie, getObj()->mVisualContext );
 #endif
@@ -969,4 +983,4 @@ void quickTimeTask()
 
 } /* namespace qtime */ } /* namespace cinder */
 
-#endif // ! defined( __LP64__ )
+#endif // ( ! defined( __LP64__ ) ) && ( ! defined( _WIN64 ) )

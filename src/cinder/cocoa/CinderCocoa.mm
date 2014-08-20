@@ -29,6 +29,7 @@
 	#import <Cocoa/Cocoa.h>
 	#import <CoreVideo/CVPixelBuffer.h>
 	#import <AppKit/AppKit.h>
+	#include <objc/objc-auto.h>
 #else
 	#import <UIKit/UIKit.h>
 	#import <CoreText/CoreText.h>
@@ -81,6 +82,9 @@ void SafeNsData::safeRelease( const NSData *ptr )
 
 SafeNsAutoreleasePool::SafeNsAutoreleasePool()
 {
+#if defined( CINDER_MAC )
+	objc_registerThreadWithCollector();
+#endif	
 	[NSThread currentThread]; // register this thread with garbage collection
 	mPool = [[NSAutoreleasePool alloc] init];
 }
@@ -134,6 +138,15 @@ CGContextRef createCgBitmapContext( const Surface8u &surface )
 	return context;
 }
 
+CGContextRef getWindowContext()
+{
+#if defined( CINDER_MAC )
+	return (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+#else
+	return ::UIGraphicsGetCurrentContext();
+#endif
+}
+
 // This will get called when the Surface::Obj is destroyed
 static void NSBitmapImageRepSurfaceDeallocator( void *refcon )
 {
@@ -144,10 +157,10 @@ static void NSBitmapImageRepSurfaceDeallocator( void *refcon )
 #if defined( CINDER_MAC )
 Surface8u convertNsBitmapDataRep( const NSBitmapImageRep *rep, bool assumeOwnership )
 {
-	int bpp = [rep bitsPerPixel];
-	int rowBytes = [rep bytesPerRow];
-	int width = [rep pixelsWide];
-	int height = [rep pixelsHigh];
+	NSInteger bpp = [rep bitsPerPixel];
+	int32_t rowBytes = (int32_t)[rep bytesPerRow];
+	int32_t width = (int32_t)[rep pixelsWide];
+	int32_t height = (int32_t)[rep pixelsHigh];
 	uint8_t *data = [rep bitmapData];
 	SurfaceChannelOrder co = ( bpp == 24 ) ? SurfaceChannelOrder::RGB : SurfaceChannelOrder::RGBA;
 	Surface8u result( data, width, height, rowBytes, co );
@@ -180,7 +193,7 @@ SafeCfString createSafeCfString( const std::string &str )
 {
 	CFStringRef result = CFStringCreateWithCString( kCFAllocatorDefault, str.c_str(), kCFStringEncodingUTF8 );
 	if( result )
-		return SafeCfString( result, safeCfRelease );
+		return SafeCfString( (__CFString*)result, safeCfRelease );
 	else
 		return SafeCfString();
 }
@@ -413,7 +426,7 @@ ImageSourceCgImage::ImageSourceCgImage( ::CGImageRef imageRef, ImageSource::Opti
 	else
 		setDataType( ( bpc == 16 ) ? ImageIo::UINT16 : ImageIo::UINT8 );
 	if( isFloat && ( bpc != 32 ) )
-		throw ImageIoExceptionIllegalDataType(); // we don't know how to handle half-sized floats yet, but Quartz seems to make them 32bit anyway
+		throw ImageIoExceptionIllegalDataType( "Illegal data type (cannot handle half-precision floats)" ); // we don't know how to handle half-sized floats yet, but Quartz seems to make them 32bit anyway
 	bool hasAlpha = ( alphaInfo != kCGImageAlphaNone ) && ( alphaInfo != kCGImageAlphaNoneSkipLast ) && ( alphaInfo != kCGImageAlphaNoneSkipFirst );
 
 	bool swapEndian = false;
@@ -462,6 +475,10 @@ ImageSourceCgImage::ImageSourceCgImage( ::CGImageRef imageRef, ImageSource::Opti
 					case kCGImageAlphaNoneSkipLast:
 						setChannelOrder( (swapEndian) ? ImageIo::XBGR : ImageIo::RGBX );
 					break;
+					case kCGImageAlphaOnly:
+						setColorModel( ImageSource::CM_GRAY );
+						setChannelOrder( ImageIo::Y );							
+					break;
 				}
 			break;
 			case kCGColorSpaceModelIndexed: {
@@ -477,7 +494,7 @@ ImageSourceCgImage::ImageSourceCgImage( ::CGImageRef imageRef, ImageSource::Opti
 			}
 			break;
 			default: // we only support Gray and RGB data for now
-				throw ImageIoExceptionIllegalColorModel();
+				throw ImageIoExceptionIllegalColorModel( "Core Graphics unexpected data type" );
 			break;
 		}
 	}
@@ -486,10 +503,10 @@ ImageSourceCgImage::ImageSourceCgImage( ::CGImageRef imageRef, ImageSource::Opti
 void ImageSourceCgImage::load( ImageTargetRef target )
 {
 	int32_t rowBytes = ::CGImageGetBytesPerRow( mImageRef.get() );
-	shared_ptr<const __CFData> pixels( ::CGDataProviderCopyData( ::CGImageGetDataProvider( mImageRef.get() ) ), safeCfRelease );
+	const std::shared_ptr<__CFData> pixels( (__CFData*)::CGDataProviderCopyData( ::CGImageGetDataProvider( mImageRef.get() ) ), safeCfRelease );
 	
 	if( ! pixels )
-		throw ImageIoExceptionFailedLoad();
+		throw ImageIoExceptionFailedLoad( "Core Graphics failure copying data." );
 	
 	// get a pointer to the ImageSource function appropriate for handling our data configuration
 	ImageSource::RowFunc func = setupRowFunc( target );

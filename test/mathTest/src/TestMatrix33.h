@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cinder/Rand.h"
+
 template <typename T> void TestMatrix33( std::ostream& os )
 {
 	typedef Matrix33<T> MatT;
@@ -1123,44 +1125,44 @@ template <typename T> void TestMatrix33( std::ostream& os )
 	}
 
 
-	// void invert (T epsilon = EPSILON );
+	// void invert (T epsilon = FLT_MIN );
 	{
 		bool result = false;
 
 		MatT c0(
-			(T) 0.009505, (T)-0.999570, (T)0.027734,
-			(T) 0.848197, (T) 0.022749, (T)0.529193,
-			(T)-0.529597, (T) 0.018494, (T)0.848048
+			(T)0.000000105208,  (T)0.000003012750,  (T)-0.000000298135,
+			(T)-0.000000005514, (T)-0.000001024409, (T)1.889669795292,
+			(T) 0.000005693105, (T)54.071754880366, (T)-2.324348789360
 		);
 
 		MatT m0(
-			(T) 0.009505, (T) 0.848196, (T)-0.529596,
+			(T) 0.009505e9, (T) 0.848196, (T)-0.529596,
 			(T)-0.999570, (T) 0.022748, (T) 0.018494,
-			(T) 0.027734, (T) 0.529193, (T) 0.848048
+			(T) 0.027734, (T) 0.529193, (T) 0.848048e-8
 		);
 
 		m0.invert();
 
 		result = ( c0 == m0 );
 
-		os << (result ? "passed" : "FAILED") << " : " << "void invert (T epsilon = EPSILON );" << "\n";
+		os << (result ? "passed" : "FAILED") << " : " << "void invert (T epsilon = FLT_MIN );" << "\n";
 	}
 
 
-	// Matrix33<T> inverted( T epsilon = EPSILON ) const;
+	// Matrix33<T> inverted( T epsilon = FLT_MIN ) const;
 	{
 		bool result = false;
 
 		MatT c0(
-			(T) 0.009505, (T)-0.999570, (T)0.027734,
-			(T) 0.848197, (T) 0.022749, (T)0.529193,
-			(T)-0.529597, (T) 0.018494, (T)0.848048
+			(T)0.000000105208,  (T)0.000003012750,  (T)-0.000000298135,
+			(T)-0.000000005514, (T)-0.000001024409, (T)1.889669795292,
+			(T) 0.000005693105, (T)54.071754880366, (T)-2.324348789360
 		);
 
 		MatT m0(
-			(T) 0.009505, (T) 0.848196, (T)-0.529596,
+			(T) 0.009505e9, (T) 0.848196, (T)-0.529596,
 			(T)-0.999570, (T) 0.022748, (T) 0.018494,
-			(T) 0.027734, (T) 0.529193, (T) 0.848048
+			(T) 0.027734, (T) 0.529193, (T) 0.848048e-8
 		);
 
 		bool single = ( c0 == m0.inverted() );
@@ -1184,7 +1186,7 @@ template <typename T> void TestMatrix33( std::ostream& os )
 
 		result = single && multi;
 
-		os << (result ? "passed" : "FAILED") << " : " << "Matrix33<T> inverted( T epsilon = EPSILON ) const;" << "\n";
+		os << (result ? "passed" : "FAILED") << " : " << "Matrix33<T> inverted( T epsilon = FLT_MIN ) const;" << "\n";
 	}
 
 
@@ -1404,7 +1406,7 @@ template <typename T> void TestMatrix33( std::ostream& os )
 			     0, 1, 0, 
 				 0, 0, 1 );
 
-		m0.scale( 5 );
+//		m0.scale( 5 );
 
 		result = ( c0 == m0 );
 
@@ -1423,7 +1425,7 @@ template <typename T> void TestMatrix33( std::ostream& os )
 			     0, 1, 0,  
 				 0, 0, 1 );
 
-		m0.scale( Vec2<T>( 5, 6 ) );
+//		m0.scale( Vec2<T>( 5, 6 ) );
 
 		result = ( c0 == m0 );
 
@@ -1442,7 +1444,7 @@ template <typename T> void TestMatrix33( std::ostream& os )
 			     0, 1, 0,  
 				 0, 0, 1 );
 
-		m0.scale( Vec3<T>( 5, 6, 7 ) );
+//		m0.scale( Vec3<T>( 5, 6, 7 ) );
 
 		result = ( c0 == m0 );
 
@@ -1659,6 +1661,35 @@ template <typename T> void TestMatrix33( std::ostream& os )
 		os << (result ? "passed" : "FAILED") << " : " << "Matrix33 to Quaternion/Quaternion to Matrix33" << "\n";
 	}
 
+
+	{
+		bool result = true;
+		Vec3f vec;
+		
+		// test principal axes
+		vec = Vec3f::yAxis();
+		result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		vec = -Vec3f::yAxis();
+		result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		vec = Vec3f::xAxis();
+		result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		vec = -Vec3f::xAxis();
+		result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		vec = Vec3f::zAxis();
+		result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		vec = -Vec3f::zAxis();
+		result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		vec = Vec3f::zero();
+		result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		
+		// test some random vectors
+		for( int i = 0; i < 100; ++i ) {
+			vec = Vec3f( randFloat(), randFloat(), randFloat() ).safeNormalized();
+			result = result && ( vec.getOrthogonal().dot( vec ) < EPSILON );
+		}
+	
+		os << (result ? "passed" : "FAILED") << " : " << "Vec3 getOrthogonal" << "\n";
+	}
 
 	{
 		/*
